@@ -1,0 +1,79 @@
+{
+	"common": {
+		"name": "unifi-protect",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "Unifi Protect",
+		"titleLang": {
+			"en": "Unifi Protect",
+			"de": "Unifi Protect",
+			"ru": "Unifi Protect",
+			"pt": "Unifi Protect",
+			"nl": "Unifi Protect",
+			"fr": "Unifi Protect",
+			"it": "Unifi Protect",
+			"es": "Proteger unifi",
+			"pl": "Unifi Protect",
+			"zh-cn": "Unifi保护"
+		},
+		"desc": {
+			"en": "unifi-protect",
+			"de": "unifi-protect",
+			"ru": "Unifi защиты",
+			"pt": "proteger uniformemente",
+			"nl": "UNIFI-protect",
+			"fr": "unifi-protect",
+			"it": "Unifi-protect",
+			"es": "protección unifi",
+			"pl": "unifi-protect",
+			"zh-cn": "统一保护"
+		},
+		"authors": [
+			"Peter Baumert <peter.baumert@outlook.de>"
+		],
+		"keywords": [
+			"ioBroker",
+			"template",
+			"Smart Home",
+			"home automation"
+		],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "main.js",
+		"icon": "unifi-protect.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/peterbaumert/ioBroker.unifi-protect/master/admin/unifi-protect.png",
+		"readme": "https://github.com/peterbaumert/ioBroker.unifi-protect/blob/master/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "alarm",
+		"compact": true,
+		"connectionType": "local",
+		"dataSource": "poll",
+		"materialize": true,
+		"dependencies": [
+			{
+				"js-controller": ">=1.4.2"
+			}
+		]
+	},
+	"native": {
+		"option1": true,
+		"option2": "42"
+	},
+	"objects": [],
+	"instanceObjects": []
+}

@@ -1,0 +1,57 @@
+{
+  "name": "iobroker.unifi-protect",
+  "version": "0.0.1",
+  "description": "unifi-protect",
+  "author": {
+    "name": "Peter Baumert",
+    "email": "peter.baumert@outlook.de"
+  },
+  "homepage": "https://github.com/peterbaumert/ioBroker.unifi-protect",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "template",
+    "Smart Home",
+    "home automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peterbaumert/ioBroker.unifi-protect"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^2.2.1"
+  },
+  "devDependencies": {
+    "@iobroker/testing": "^2.0.1",
+    "@types/chai": "^4.2.8",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/gulp": "^4.0.6",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^10.17.14",
+    "@types/proxyquire": "^1.3.28",
+    "@types/sinon": "^7.5.1",
+    "@types/sinon-chai": "^3.2.3",
+    "axios": "^0.19.2",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.8.0",
+    "gulp": "^4.0.2",
+    "mocha": "^7.0.1",
+    "proxyquire": "^2.1.3",
+    "sinon": "^8.1.1",
+    "sinon-chai": "^3.4.0"
+  },
+  "main": "main.js",
+  "scripts": {
+    "test:js": "mocha --opts test/mocha.custom.opts",
+    "test:package": "mocha test/package --exit",
+    "test:unit": "mocha test/unit --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test": "npm run test:js && npm run test:package",
+    "lint": "eslint"
+  },
+  "bugs": {
+    "url": "https://github.com/peterbaumert/ioBroker.unifi-protect/issues"
+  },
+  "readmeFilename": "README.md"
+}
