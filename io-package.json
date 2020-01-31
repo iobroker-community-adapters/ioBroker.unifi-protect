@@ -16,27 +16,27 @@
 				"zh-cn": "首次出版"
 			}
 		},
-		"title": "Unifi Protect",
+		"title": "UniFi Protect",
 		"titleLang": {
-			"en": "Unifi Protect",
-			"de": "Unifi Protect",
-			"ru": "Unifi Protect",
-			"pt": "Unifi Protect",
-			"nl": "Unifi Protect",
-			"fr": "Unifi Protect",
-			"it": "Unifi Protect",
+			"en": "UniFi Protect",
+			"de": "UniFi Protect",
+			"ru": "UniFi Protect",
+			"pt": "UniFi Protect",
+			"nl": "UniFi Protect",
+			"fr": "UniFi Protect",
+			"it": "UniFi Protect",
 			"es": "Proteger unifi",
-			"pl": "Unifi Protect",
-			"zh-cn": "Unifi保护"
+			"pl": "UniFi Protect",
+			"zh-cn": "UniFi保护"
 		},
 		"desc": {
 			"en": "unifi-protect",
 			"de": "unifi-protect",
-			"ru": "Unifi защиты",
+			"ru": "UniFi защиты",
 			"pt": "proteger uniformemente",
 			"nl": "UNIFI-protect",
 			"fr": "unifi-protect",
-			"it": "Unifi-protect",
+			"it": "UniFi-protect",
 			"es": "protección unifi",
 			"pl": "unifi-protect",
 			"zh-cn": "统一保护"
@@ -71,8 +71,8 @@
 		]
 	},
 	"native": {
-		"option1": true,
-		"option2": "42"
+		"protectip": "127.0.0.1",
+		"protectport": "7773"
 	},
 	"objects": [],
 	"instanceObjects": []
