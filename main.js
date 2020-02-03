@@ -44,7 +44,8 @@ class UnifiProtect extends utils.Adapter {
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		//this.getMotionEvents();
-		setInterval(this.getCameraList.bind(this),60000);
+		this.getCameraList();
+		setInterval(() => this.getCameraList(), 60000);
 	}
 
 	/**

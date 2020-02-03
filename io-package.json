@@ -1,7 +1,7 @@
 {
 	"common": {
 		"name": "unifi-protect",
-		"version": "0.0.2",
+		"version": "0.0.3",
 		"news": {
 			"0.0.1": {
 				"en": "initial release",
