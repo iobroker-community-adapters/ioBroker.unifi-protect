@@ -43,8 +43,9 @@ class UnifiProtect extends utils.Adapter {
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		this.log.info("BEAR:"+this.apiAuthBearerToken);
+		this.log.info("BEAR:" + this.apiAuthBearerToken);
 		this.getMotionEvents();
+		this.getCameraList();
 	}
 
 	/**
@@ -134,26 +135,109 @@ class UnifiProtect extends utils.Adapter {
 
 	}
 
-	getMotionEvents() {
+
+
+	getCameraList() {
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/api/bootstrap`,
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			}
+		};
+
+		const req = https.request(options, res => {
+			let data = "";
+			res.on("data", d => {
+				data += d;
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					const cameras = JSON.parse(data);
+					cameras.forEach(camera => {
+						this.log.error(JSON.stringify(camera));
+					});
+				}
+				this.log.error(data);
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error(e.toString());
+		});
+		req.end();
 		/*
-		        event_start = datetime.datetime.now() - datetime.timedelta(86400)
-        event_end = datetime.datetime.now() + datetime.timedelta(seconds=10)
-        start_time = int(time.mktime(event_start.timetuple())) * 1000
-        end_time = int(time.mktime(event_end.timetuple())) * 1000
+	
+            for camera in cameras:
 
-        event_uri = (
-            "https://"
-            + str(self._host)
-            + ":"
-            + str(self._port)
-            + "/api/events?end="
-            + str(end_time)
-            + "&start="
-            + str(start_time)
-            + "&type=motion"
-        )
+                # Get if camera is online
+                if camera["state"] == "CONNECTED":
+                    online = True
+                else:
+                    online = False
+                # Get Recording Mode
+                recording_mode = str(camera["recordingSettings"]["mode"])
+                # Get the last time motion occured
+                lastmotion = (
+                    None
+                    if camera["lastMotion"] is None
+                    else datetime.datetime.fromtimestamp(
+                        int(camera["lastMotion"]) / 1000
+                    ).strftime("%Y-%m-%d %H:%M:%S")
+                )
+                # Get when the camera came online
+                upsince = (
+                    "Offline"
+                    if camera["upSince"] is None
+                    else datetime.datetime.fromtimestamp(
+                        int(camera["upSince"]) / 1000
+                    ).strftime("%Y-%m-%d %H:%M:%S")
+                )
 
+                if camera["id"] not in self.device_data:
+                    # Add rtsp streaming url if enabled
+                    rtsp = None
+                    channels = camera["channels"]
+                    for channel in channels:
+                        if channel["isRtspEnabled"]:
+                            rtsp = (
+                                "rtsp://"
+                                + str(camera["connectionHost"])
+                                + ":7447/"
+                                + str(channel["rtspAlias"])
+                            )
+                            break
+
+                    item = {
+                        str(camera["id"]): {
+                            "name": str(camera["name"]),
+                            "type": str(camera["type"]),
+                            "recording_mode": recording_mode,
+                            "rtsp": rtsp,
+                            "up_since": upsince,
+                            "last_motion": lastmotion,
+                            "online": online,
+                            "motion_start": None,
+                            "motion_score": 0,
+                            "motion_thumbnail": None,
+                            "motion_on": False,
+                            "motion_events_today": 0,
+                        }
+                    }
+                    self.device_data.update(item)
+                else:
+                    camera_id = camera["id"]
+                    self.device_data[camera_id]["last_motion"] = lastmotion
+                    self.device_data[camera_id]["online"] = online
+                    self.device_data[camera_id]["up_since"] = upsince
+                    self.device_data[camera_id]["recording_mode"] = recording_mode
 		*/
+	}
+
+	getMotionEvents() {
 		const now = Date.now();
 		const eventStart = now - (8640000 * 1000);
 		const eventEnd = now + (10 * 1000);
@@ -170,7 +254,6 @@ class UnifiProtect extends utils.Adapter {
 		};
 
 		const req = https.request(options, res => {
-			this.log.info(`statusCode: ${res.statusCode}`);
 			let data = "";
 			res.on("data", d => {
 				data += d;
@@ -181,9 +264,51 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.info(e.toString());
+			this.log.error(e.toString());
 		});
 		req.end();
+	}
+
+	/**
+ * Function to create a state and set its value
+ * only if it hasn't been set to this value before
+ */
+	createState(name, value, desc) {
+
+		if (typeof (desc) === "undefined")
+			desc = name;
+
+		if (Array.isArray(value))
+			value = value.toString();
+
+		this.setObjectNotExists(name, {
+			type: "state",
+			common: {
+				name: desc,
+				type: typeof (value),
+				read: true,
+				write: false
+			},
+			native: { id: name }
+		});
+
+		//if (typeof (value) !== "undefined")
+		//setStateArray.push({ name: name, val: value });
+	}
+
+	/**
+	 * Function to create a channel
+	 */
+	createChannel(name, desc) {
+
+		if (typeof (desc) === "undefined")
+			desc = name;
+
+		this.setObjectNotExists(name, {
+			type: "channel",
+			common: { name: desc },
+			native: {}
+		});
 	}
 
 	// /**
