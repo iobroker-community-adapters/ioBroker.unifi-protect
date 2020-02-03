@@ -119,7 +119,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			if (res.statusCode == 200) {
 				this.log.info(JSON.stringify(res.headers));
-				return res.headers.Authorization;
+				return res.headers["authorization"];
 			} else if (res.statusCode == 401 || res.statusCode == 403) {
 				this.log.error("Unifi Protect reported authorization failure");
 			}
