@@ -43,6 +43,7 @@ class UnifiProtect extends utils.Adapter {
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = this.getApiAuthBearerToken();
+		this.getMotionEvents();
 	}
 
 	/**
@@ -117,7 +118,7 @@ class UnifiProtect extends utils.Adapter {
 				this.log.info(data);
 			});
 			if (res.statusCode == 200) {
-				this.log.info(`statusCode: ${res.headers}`);
+				this.log.info(`statusCode: ${res.headers.Authorization}`);
 				return res.headers.Authorization;
 			} else if (res.statusCode == 401 || res.statusCode == 403) {
 				this.log.error("Unifi Protect reported authorization failure");
