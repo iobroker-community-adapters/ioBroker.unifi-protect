@@ -157,8 +157,9 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					const cameras = JSON.parse(data).cameras;
+					this.createChannel("cameras","Test");
 					cameras.forEach(camera => {
-						this.createChannel("cameras."+camera.mac,camera.name);
+						this.createChannel("cameras." + camera.mac, camera.name);
 					});
 				}
 			});
@@ -298,10 +299,14 @@ class UnifiProtect extends utils.Adapter {
 	/**
 	 * Function to create a channel
 	 */
-	createChannel(id, name) {
-		this.setObjectNotExists(id, {
+	createChannel(name, desc) {
+
+		if (typeof (desc) === "undefined")
+			desc = name;
+
+		this.setObjectNotExists(name, {
 			type: "channel",
-			common: { name: name },
+			common: { name: desc },
 			native: {}
 		});
 	}
