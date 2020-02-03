@@ -164,7 +164,7 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("cameras." + camera.mac + "." + key, value, key, stateArray);
 						});
 					});
-					this.processStateChanges(stateArray);
+					this.processStateChanges(stateArray, this);
 				}
 			});
 		});
@@ -208,7 +208,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 
-	processStateChanges(stateArray, callback) {
+	processStateChanges(stateArray, that, callback) {
 		if (!stateArray || stateArray.length === 0) {
 			if (typeof (callback) === "function")
 				callback();
@@ -218,17 +218,16 @@ class UnifiProtect extends utils.Adapter {
 		}
 		else {
 			const newState = stateArray.shift();
-			const that = this;
 			that.getState(newState.name, function (err, oldState) {
 				// @ts-ignore
 				if (oldState === null || newState.val != oldState.val) {
 					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
 					that.setState(newState.name, { ack: true, val: newState.val }, function () {
-						setTimeout(that.processStateChanges, 0, stateArray, callback);
+						setTimeout(that.processStateChanges, 0, stateArray, that, callback);
 					});
 				}
 				else
-					setTimeout(that.processStateChanges, 0, stateArray, callback);
+					setTimeout(that.processStateChanges, 0, stateArray, that, callback);
 			});
 		}
 	}
