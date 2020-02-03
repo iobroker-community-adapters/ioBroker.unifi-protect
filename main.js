@@ -290,7 +290,8 @@ class UnifiProtect extends utils.Adapter {
 				name: desc,
 				type: typeof (value),
 				read: true,
-				write: false
+				write: false,
+				value: value
 			},
 			native: { id: name }
 		});
