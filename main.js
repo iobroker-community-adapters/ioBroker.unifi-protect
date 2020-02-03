@@ -27,8 +27,6 @@ class UnifiProtect extends utils.Adapter {
 		this.on("stateChange", this.onStateChange.bind(this));
 		// this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
-
-		this.setStateArray = [];
 	}
 
 	/**
@@ -160,13 +158,14 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnChannel("cameras", "Test");
+					let stateArray = [];
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.mac, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							this.createOwnState("cameras." + camera.mac + "." + key, value, key);
+							stateArray = this.createOwnState("cameras." + camera.mac + "." + key, value, key, stateArray);
 						});
 					});
-					this.processStateChanges(this.setStateArray);
+					this.processStateChanges(stateArray);
 				}
 			});
 		});
@@ -216,21 +215,21 @@ class UnifiProtect extends utils.Adapter {
 				callback();
 
 			// clear the array
-			this.setStateArray = [];
+			stateArray = [];
 		}
 		else {
-			const newState = this.setStateArray.shift();
+			const newState = stateArray.shift();
 			const that = this;
-			that.getState(newState.name, function (err, oldState) {
+			this.getState(newState.name, function (err, oldState) {
 				// @ts-ignore
 				if (oldState === null || newState.val != oldState.val) {
 					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
 					that.setState(newState.name, { ack: true, val: newState.val }, function () {
-						setTimeout(that.processStateChanges, 0, that.setStateArray, callback);
+						setTimeout(that.processStateChanges, 0, stateArray, callback);
 					});
 				}
 				else
-					setTimeout(that.processStateChanges, 0, that.setStateArray, callback);
+					setTimeout(that.processStateChanges, 0, stateArray, callback);
 			});
 		}
 	}
@@ -239,7 +238,7 @@ class UnifiProtect extends utils.Adapter {
  	* Function to create a state and set its value
  	* only if it hasn't been set to this value before
  	*/
-	createOwnState(name, value, desc) {
+	createOwnState(name, value, desc, stateArray) {
 
 		if (typeof (desc) === "undefined")
 			desc = name;
@@ -259,8 +258,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		if (typeof (value) !== "undefined") {
-			this.setStateArray.push({ name: name, val: value });
+			stateArray.push({ name: name, val: value });
 		}
+
+		return stateArray;
 
 	}
 
