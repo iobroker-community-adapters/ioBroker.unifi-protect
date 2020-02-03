@@ -160,9 +160,9 @@ class UnifiProtect extends utils.Adapter {
 					this.createOwnChannel("cameras", "Test");
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.mac, camera.name);
-						for (const [key, value] of Object.entries(camera)) {
-							this.createOwnState(key,value, key);
-						}
+						Object.entries(camera).forEach(([key,value])=>{
+							this.createOwnState("cameras." + camera.mac+"."+key, value, key);
+						});
 					});
 				}
 			});
