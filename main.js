@@ -42,7 +42,7 @@ class UnifiProtect extends utils.Adapter {
 
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
-		this.apiAuthBearerToken = this.getApiAuthBearerToken();
+		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		this.getMotionEvents();
 	}
 
@@ -90,46 +90,43 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	getApiAuthBearerToken() {
-		this.log.info("started");
-		const data = JSON.stringify({
-			username: this.config.username,
-			password: this.config.password
-		});
-		const options = {
-			hostname: this.config.protectip,
-			port: this.config.protectport,
-			path: "/api/auth",
-			method: "POST",
-			rejectUnauthorized: false,
-			//requestCert: true,
-			headers: {
-				"Content-Type": "application/json",
-				"Content-Length": data.length
-			}
-		};
-
-		const req = https.request(options, res => {
-			this.log.info(`statusCode: ${res.statusCode}`);
-			let data = "";
-			res.on("data", d => {
-				data += d;
+		return new Promise((resolve, reject) => {
+			this.log.info("started");
+			const data = JSON.stringify({
+				username: this.config.username,
+				password: this.config.password
 			});
-			res.on("end", () => {
-				this.log.info(data);
-			});
-			if (res.statusCode == 200) {
-				this.log.info(JSON.stringify(res.headers));
-				return res.headers["authorization"];
-			} else if (res.statusCode == 401 || res.statusCode == 403) {
-				this.log.error("Unifi Protect reported authorization failure");
-			}
-		});
+			const options = {
+				hostname: this.config.protectip,
+				port: this.config.protectport,
+				path: "/api/auth",
+				method: "POST",
+				rejectUnauthorized: false,
+				//requestCert: true,
+				headers: {
+					"Content-Type": "application/json",
+					"Content-Length": data.length
+				}
+			};
 
-		req.on("error", e => {
-			this.log.info(e.toString());
+			const req = https.request(options, res => {
+				this.log.info(`statusCode: ${res.statusCode}`);
+				if (res.statusCode == 200) {
+					this.log.info(JSON.stringify(res.headers));
+					resolve(res.headers["authorization"]);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("Unifi Protect reported authorization failure");
+					reject();
+				}
+			});
+
+			req.on("error", e => {
+				this.log.error(e.toString());
+				reject();
+			});
+			req.write(data);
+			req.end();
 		});
-		req.write(data);
-		req.end();
 	}
 
 	getApiAccessKey() {
@@ -180,12 +177,6 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				this.log.error(data);
 			});
-			if (res.statusCode == 200) {
-				this.log.info(`statusCode: ${res.headers}`);
-				return res.headers.Authorization;
-			} else if (res.statusCode == 401 || res.statusCode == 403) {
-				this.log.error("Unifi Protect reported authorization failure");
-			}
 		});
 
 		req.on("error", e => {
