@@ -43,6 +43,7 @@ class UnifiProtect extends utils.Adapter {
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+		this.log.info("BEAR:"+this.apiAuthBearerToken);
 		this.getMotionEvents();
 	}
 
@@ -182,6 +183,7 @@ class UnifiProtect extends utils.Adapter {
 		req.on("error", e => {
 			this.log.info(e.toString());
 		});
+		req.end();
 	}
 
 	// /**
