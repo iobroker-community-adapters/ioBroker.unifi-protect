@@ -27,6 +27,8 @@ class UnifiProtect extends utils.Adapter {
 		this.on("stateChange", this.onStateChange.bind(this));
 		// this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
+
+		this.setStateArray = [];
 	}
 
 	/**
@@ -160,8 +162,8 @@ class UnifiProtect extends utils.Adapter {
 					this.createOwnChannel("cameras", "Test");
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.mac, camera.name);
-						Object.entries(camera).forEach(([key,value])=>{
-							this.createOwnState("cameras." + camera.mac+"."+key, value, key);
+						Object.entries(camera).forEach(([key, value]) => {
+							this.createOwnState("cameras." + camera.mac + "." + key, value, key);
 						});
 					});
 				}
@@ -172,72 +174,8 @@ class UnifiProtect extends utils.Adapter {
 			this.log.error(e.toString());
 		});
 		req.end();
-		/*
-	
-            for camera in cameras:
 
-                # Get if camera is online
-                if camera["state"] == "CONNECTED":
-                    online = True
-                else:
-                    online = False
-                # Get Recording Mode
-                recording_mode = str(camera["recordingSettings"]["mode"])
-                # Get the last time motion occured
-                lastmotion = (
-                    None
-                    if camera["lastMotion"] is None
-                    else datetime.datetime.fromtimestamp(
-                        int(camera["lastMotion"]) / 1000
-                    ).strftime("%Y-%m-%d %H:%M:%S")
-                )
-                # Get when the camera came online
-                upsince = (
-                    "Offline"
-                    if camera["upSince"] is None
-                    else datetime.datetime.fromtimestamp(
-                        int(camera["upSince"]) / 1000
-                    ).strftime("%Y-%m-%d %H:%M:%S")
-                )
-
-                if camera["id"] not in self.device_data:
-                    # Add rtsp streaming url if enabled
-                    rtsp = None
-                    channels = camera["channels"]
-                    for channel in channels:
-                        if channel["isRtspEnabled"]:
-                            rtsp = (
-                                "rtsp://"
-                                + str(camera["connectionHost"])
-                                + ":7447/"
-                                + str(channel["rtspAlias"])
-                            )
-                            break
-
-                    item = {
-                        str(camera["id"]): {
-                            "name": str(camera["name"]),
-                            "type": str(camera["type"]),
-                            "recording_mode": recording_mode,
-                            "rtsp": rtsp,
-                            "up_since": upsince,
-                            "last_motion": lastmotion,
-                            "online": online,
-                            "motion_start": None,
-                            "motion_score": 0,
-                            "motion_thumbnail": None,
-                            "motion_on": False,
-                            "motion_events_today": 0,
-                        }
-                    }
-                    self.device_data.update(item)
-                else:
-                    camera_id = camera["id"]
-                    self.device_data[camera_id]["last_motion"] = lastmotion
-                    self.device_data[camera_id]["online"] = online
-                    self.device_data[camera_id]["up_since"] = upsince
-                    self.device_data[camera_id]["recording_mode"] = recording_mode
-		*/
+		this.processStateChanges(this.setStateArray);
 	}
 
 	getMotionEvents() {
@@ -272,10 +210,36 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+
+	processStateChanges(stateArray, callback) {
+		if (!stateArray || stateArray.length === 0) {
+			if (typeof (callback) === "function")
+				callback();
+
+			// clear the array
+			this.setStateArray = [];
+		}
+		else {
+			const newState = this.setStateArray.shift();
+			const that = this;
+			that.getState(newState.name, function (err, oldState) {
+				// @ts-ignore
+				if (oldState === null || newState.val != oldState.val) {
+					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
+					that.setState(newState.name, { ack: true, val: newState.val }, function () {
+						setTimeout(that.processStateChanges, 0, that.setStateArray, callback);
+					});
+				}
+				else
+					setTimeout(that.processStateChanges, 0, that.setStateArray, callback);
+			});
+		}
+	}
+
 	/**
- * Function to create a state and set its value
- * only if it hasn't been set to this value before
- */
+ 	* Function to create a state and set its value
+ 	* only if it hasn't been set to this value before
+ 	*/
 	createOwnState(name, value, desc) {
 
 		if (typeof (desc) === "undefined")
@@ -290,14 +254,15 @@ class UnifiProtect extends utils.Adapter {
 				name: desc,
 				type: typeof (value),
 				read: true,
-				write: false,
-				value: value
+				write: false
 			},
 			native: { id: name }
 		});
 
-		//if (typeof (value) !== "undefined")
-		//setStateArray.push({ name: name, val: value });
+		if (typeof (value) !== "undefined") {
+			this.setStateArray.push({ name: name, val: value });
+		}
+
 	}
 
 	/**
