@@ -43,7 +43,6 @@ class UnifiProtect extends utils.Adapter {
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		this.log.info("BEAR:" + this.apiAuthBearerToken);
 		this.getMotionEvents();
 		this.getCameraList();
 	}
@@ -220,7 +219,7 @@ class UnifiProtect extends utils.Adapter {
 		else {
 			const newState = stateArray.shift();
 			const that = this;
-			this.getState(newState.name, function (err, oldState) {
+			that.getState(newState.name, function (err, oldState) {
 				// @ts-ignore
 				if (oldState === null || newState.val != oldState.val) {
 					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
@@ -298,34 +297,6 @@ class UnifiProtect extends utils.Adapter {
 	// 		}
 	// 	}
 	// }
-
-	/*
-
-
-def _get_api_access_key(self):
-	"""get API Access Key."""
-
-	access_key_uri = (
-		"https://"
-		+ str(self._host)
-		+ ":"
-		+ str(self._port)
-		+ "/api/auth/access-key"
-	)
-	response = self.req.post(
-		access_key_uri,
-		headers={"Authorization": "Bearer " + self._api_auth_bearer_token},
-		verify=self._verify_ssl,
-	)
-	if response.status_code == 200:
-		json_response = response.json()
-		access_key = json_response["accessKey"]
-		return access_key
-	else:
-		raise NvrError(
-			"Request failed: %s - Reason: %s" % (response.status, response.reason)
-		)
-		*/
 
 }
 
