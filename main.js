@@ -138,6 +138,8 @@ class UnifiProtect extends utils.Adapter {
 			port: this.config.protectport,
 			path: "/api/auth",
 			method: "POST",
+			rejectUnauthorized: false,
+			//requestCert: true,
 			headers: {
 				"Content-Type": "application/json",
 				"Content-Length": data.length
