@@ -166,6 +166,7 @@ class UnifiProtect extends utils.Adapter {
 							this.createOwnState("cameras." + camera.mac + "." + key, value, key);
 						});
 					});
+					this.processStateChanges(this.setStateArray);
 				}
 			});
 		});
@@ -174,8 +175,6 @@ class UnifiProtect extends utils.Adapter {
 			this.log.error(e.toString());
 		});
 		req.end();
-
-		this.processStateChanges(this.setStateArray);
 	}
 
 	getMotionEvents() {
