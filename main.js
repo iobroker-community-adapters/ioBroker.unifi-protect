@@ -156,6 +156,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					this.log.error(data);
 					const cameras = JSON.parse(data);
 					cameras.forEach(camera => {
 						this.log.error(JSON.stringify(camera));
