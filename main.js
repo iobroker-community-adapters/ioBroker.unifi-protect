@@ -128,7 +128,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	get_api_auth_bearer_token() {
-
+		this.log.info("started");
 		const data = JSON.stringify({
 			username: this.config.username,
 			password: this.config.password
@@ -158,6 +158,9 @@ class UnifiProtect extends utils.Adapter {
 			});
 		});
 
+		req.on("error", e => {
+			this.log.info(e.toString());
+		});
 		req.write(data);
 		fin = req.end();
 
