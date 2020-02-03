@@ -250,7 +250,7 @@ class UnifiProtect extends utils.Adapter {
 		if (Array.isArray(value))
 			value = value.toString();
 
-		if (typeof value == "object") {
+		if (typeof value === "object" && value !== null) {
 			this.createOwnChannel(name);
 			Object.entries(value).forEach(([key, value]) => {
 				stateArray = this.createOwnState(name + "." + key, value, key, stateArray);
