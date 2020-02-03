@@ -80,6 +80,8 @@ class UnifiProtect extends utils.Adapter {
 
 		result = await this.checkGroupAsync("admin", "admin");
 		this.log.info("check group user admin group admin: " + result);
+
+		this.get_api_auth_bearer_token();
 	}
 
 	/**
