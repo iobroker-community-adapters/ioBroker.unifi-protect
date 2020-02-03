@@ -281,7 +281,7 @@ class UnifiProtect extends utils.Adapter {
 		if (Array.isArray(value))
 			value = value.toString();
 
-		this.setObjectNotExists(name, {
+		this.setObject(name, {
 			type: "state",
 			common: {
 				name: desc,
@@ -304,7 +304,7 @@ class UnifiProtect extends utils.Adapter {
 		if (typeof (desc) === "undefined")
 			desc = name;
 
-		this.setObjectNotExists(name, {
+		this.setObject(name, {
 			type: "channel",
 			common: { name: desc },
 			native: {}
