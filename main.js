@@ -157,6 +157,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					const cameras = JSON.parse(data).cameras;
+					this.createChannel("cameras");
 					cameras.forEach(camera => {
 						this.createChannel("cameras."+camera.mac,camera.name);
 					});
