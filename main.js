@@ -44,7 +44,7 @@ class UnifiProtect extends utils.Adapter {
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		//this.getMotionEvents();
-		setInterval(this.getCameraList,60000);
+		setInterval(this.getCameraList.bind(this),60000);
 	}
 
 	/**
@@ -164,7 +164,7 @@ class UnifiProtect extends utils.Adapter {
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + camera.mac + "." + key, value, key, stateArray);
+							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray);
 						});
 					});
 					this.processStateChanges(stateArray, this);
