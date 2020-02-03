@@ -40,48 +40,9 @@ class UnifiProtect extends utils.Adapter {
 		this.log.info("config option1: " + this.config.protectip);
 		this.log.info("config option2: " + this.config.protectport);
 
-		/*
-		For every state in the system there has to be also an object of type state
-		Here a simple template for a boolean variable named "testVariable"
-		Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-		*/
-		await this.setObjectAsync("testVariable", {
-			type: "state",
-			common: {
-				name: "testVariable",
-				type: "boolean",
-				role: "indicator",
-				read: true,
-				write: true,
-			},
-			native: {},
-		});
-
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
-
-		/*
-		setState examples
-		you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-		*/
-		// the variable testVariable is set to true as command (ack=false)
-		await this.setStateAsync("testVariable", true);
-
-		// same thing, but the value is flagged "ack"
-		// ack should be always set to true if the value is received from or acknowledged from the target system
-		await this.setStateAsync("testVariable", { val: true, ack: true });
-
-		// same thing, but the state is deleted after 30s (getState will return null afterwards)
-		await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
-
-		// examples for the checkPassword/checkGroup functions
-		let result = await this.checkPasswordAsync("admin", "iobroker");
-		this.log.info("check user admin pw iobroker: " + result);
-
-		result = await this.checkGroupAsync("admin", "admin");
-		this.log.info("check group user admin group admin: " + result);
-
-		this.get_api_auth_bearer_token();
+		this.apiAuthBearerToken = this.getApiAuthBearerToken();
 	}
 
 	/**
@@ -127,7 +88,7 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
-	get_api_auth_bearer_token() {
+	getApiAuthBearerToken() {
 		this.log.info("started");
 		const data = JSON.stringify({
 			username: this.config.username,
@@ -146,7 +107,6 @@ class UnifiProtect extends utils.Adapter {
 			}
 		};
 
-		let fin;
 		const req = https.request(options, res => {
 			this.log.info(`statusCode: ${res.statusCode}`);
 			let data = "";
@@ -154,19 +114,82 @@ class UnifiProtect extends utils.Adapter {
 				data += d;
 			});
 			res.on("end", () => {
-				this.log.info(req.data);
-				this.log.info(fin.data);
 				this.log.info(data);
 			});
+			if (res.statusCode == 200) {
+				this.log.info(`statusCode: ${res.headers}`);
+				return res.headers.Authorization;
+			} else if (res.statusCode == 401 || res.statusCode == 403) {
+				this.log.error("Unifi Protect reported authorization failure");
+			}
 		});
 
 		req.on("error", e => {
 			this.log.info(e.toString());
 		});
 		req.write(data);
-		fin = req.end();
+		req.end();
+	}
 
+	getApiAccessKey() {
 
+	}
+
+	getMotionEvents() {
+		/*
+		        event_start = datetime.datetime.now() - datetime.timedelta(86400)
+        event_end = datetime.datetime.now() + datetime.timedelta(seconds=10)
+        start_time = int(time.mktime(event_start.timetuple())) * 1000
+        end_time = int(time.mktime(event_end.timetuple())) * 1000
+
+        event_uri = (
+            "https://"
+            + str(self._host)
+            + ":"
+            + str(self._port)
+            + "/api/events?end="
+            + str(end_time)
+            + "&start="
+            + str(start_time)
+            + "&type=motion"
+        )
+
+		*/
+		const now = Date.now();
+		const eventStart = now - (8640000 * 1000);
+		const eventEnd = now + (10 * 1000);
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/api/events?end=${eventEnd}&start=${eventStart}&type=motion`,
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			}
+		};
+
+		const req = https.request(options, res => {
+			this.log.info(`statusCode: ${res.statusCode}`);
+			let data = "";
+			res.on("data", d => {
+				data += d;
+			});
+			res.on("end", () => {
+				this.log.error(data);
+			});
+			if (res.statusCode == 200) {
+				this.log.info(`statusCode: ${res.headers}`);
+				return res.headers.Authorization;
+			} else if (res.statusCode == 401 || res.statusCode == 403) {
+				this.log.error("Unifi Protect reported authorization failure");
+			}
+		});
+
+		req.on("error", e => {
+			this.log.info(e.toString());
+		});
 	}
 
 	// /**
@@ -187,25 +210,7 @@ class UnifiProtect extends utils.Adapter {
 	// }
 
 	/*
-	self._api_auth_bearer_token = self._get_api_auth_bearer_token()
-	def _get_api_auth_bearer_token(self):
-	"""get bearer token using username and password of local user."""
 
-	auth_uri = "https://" + str(self._host) + ":" + str(self._port) + "/api/auth"
-	response = self.req.post(
-		auth_uri,
-		headers={"Connection": "keep-alive"},
-		json={"username": self._username, "password": self._password},
-		verify=self._verify_ssl,
-	)
-	if response.status_code == 200:
-		authorization_header = response.headers["Authorization"]
-		return authorization_header
-	else:
-		if response.status_code in (401, 403):
-			raise NotAuthorized("Unifi Protect reported authorization failure")
-		if response.status_code / 100 != 2:
-			raise NvrError("Request failed: %s" % response.status)
 
 def _get_api_access_key(self):
 	"""get API Access Key."""
