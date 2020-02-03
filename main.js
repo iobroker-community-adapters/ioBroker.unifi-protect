@@ -43,8 +43,8 @@ class UnifiProtect extends utils.Adapter {
 		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		this.getMotionEvents();
-		this.getCameraList();
+		//this.getMotionEvents();
+		setInterval(this.getCameraList,60000);
 	}
 
 	/**
@@ -68,10 +68,10 @@ class UnifiProtect extends utils.Adapter {
 	onObjectChange(id, obj) {
 		if (obj) {
 			// The object was changed
-			this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
+			this.log.silly(`object ${id} changed: ${JSON.stringify(obj)}`);
 		} else {
 			// The object was deleted
-			this.log.info(`object ${id} deleted`);
+			this.log.silly(`object ${id} deleted`);
 		}
 	}
 
@@ -83,11 +83,15 @@ class UnifiProtect extends utils.Adapter {
 	onStateChange(id, state) {
 		if (state) {
 			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 		} else {
 			// The state was deleted
-			this.log.info(`state ${id} deleted`);
+			this.log.silly(`state ${id} deleted`);
 		}
+	}
+
+	async renewToken() {
+		this.apiAuthBearerToken = this.getApiAuthBearerToken();
 	}
 
 	getApiAuthBearerToken() {
@@ -103,7 +107,7 @@ class UnifiProtect extends utils.Adapter {
 				path: "/api/auth",
 				method: "POST",
 				rejectUnauthorized: false,
-				//requestCert: true,
+				timeout: 10000,
 				headers: {
 					"Content-Type": "application/json",
 					"Content-Length": data.length
@@ -134,8 +138,6 @@ class UnifiProtect extends utils.Adapter {
 
 	}
 
-
-
 	getCameraList() {
 		const options = {
 			hostname: this.config.protectip,
@@ -143,6 +145,7 @@ class UnifiProtect extends utils.Adapter {
 			path: `/api/bootstrap`,
 			method: "GET",
 			rejectUnauthorized: false,
+			timeout: 10000,
 			headers: {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
 			}
@@ -156,15 +159,18 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					const cameras = JSON.parse(data).cameras;
-					this.createOwnChannel("cameras", "Test");
+					this.createOwnChannel("cameras", "Cameras");
 					let stateArray = [];
 					cameras.forEach(camera => {
-						this.createOwnChannel("cameras." + camera.mac, camera.name);
+						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
 							stateArray = this.createOwnState("cameras." + camera.mac + "." + key, value, key, stateArray);
 						});
 					});
 					this.processStateChanges(stateArray, this);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("Unifi Protect reported authorization failure");
+					this.renewToken();
 				}
 			});
 		});
@@ -243,6 +249,14 @@ class UnifiProtect extends utils.Adapter {
 
 		if (Array.isArray(value))
 			value = value.toString();
+
+		if (typeof value == "object") {
+			this.createOwnChannel(name);
+			Object.entries(value).forEach(([key, value]) => {
+				stateArray = this.createOwnState(name + "." + key, value, key, stateArray);
+			});
+			return stateArray;
+		}
 
 		this.setObjectNotExists(name, {
 			type: "state",
