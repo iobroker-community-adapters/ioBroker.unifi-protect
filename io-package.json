@@ -72,7 +72,9 @@
 	},
 	"native": {
 		"protectip": "127.0.0.1",
-		"protectport": "7773"
+		"protectport": "7773",
+		"username": "admin",
+		"password": ""
 	},
 	"objects": [],
 	"instanceObjects": []

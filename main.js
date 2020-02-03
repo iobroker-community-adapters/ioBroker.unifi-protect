@@ -7,6 +7,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
+const https = require("https");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -124,6 +125,43 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
+	get_api_auth_bearer_token() {
+
+		const data = JSON.stringify({
+			username: this.config.username,
+			password: this.config.password
+		});
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: "/api/auth",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Content-Length": data.length
+			}
+		};
+
+		let fin;
+		const req = https.request(options, res => {
+			this.log.info(`statusCode: ${res.statusCode}`);
+			let data = "";
+			res.on("data", d => {
+				data += d;
+			});
+			res.on("end", () => {
+				this.log.info(req.data);
+				this.log.info(fin.data);
+				this.log.info(data);
+			});
+		});
+
+		req.write(data);
+		fin = req.end();
+
+
+	}
+
 	// /**
 	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
 	//  * Using this method requires "common.message" property to be set to true in io-package.json
@@ -140,6 +178,52 @@ class UnifiProtect extends utils.Adapter {
 	// 		}
 	// 	}
 	// }
+
+	/*
+	self._api_auth_bearer_token = self._get_api_auth_bearer_token()
+	def _get_api_auth_bearer_token(self):
+	"""get bearer token using username and password of local user."""
+
+	auth_uri = "https://" + str(self._host) + ":" + str(self._port) + "/api/auth"
+	response = self.req.post(
+		auth_uri,
+		headers={"Connection": "keep-alive"},
+		json={"username": self._username, "password": self._password},
+		verify=self._verify_ssl,
+	)
+	if response.status_code == 200:
+		authorization_header = response.headers["Authorization"]
+		return authorization_header
+	else:
+		if response.status_code in (401, 403):
+			raise NotAuthorized("Unifi Protect reported authorization failure")
+		if response.status_code / 100 != 2:
+			raise NvrError("Request failed: %s" % response.status)
+
+def _get_api_access_key(self):
+	"""get API Access Key."""
+
+	access_key_uri = (
+		"https://"
+		+ str(self._host)
+		+ ":"
+		+ str(self._port)
+		+ "/api/auth/access-key"
+	)
+	response = self.req.post(
+		access_key_uri,
+		headers={"Authorization": "Bearer " + self._api_auth_bearer_token},
+		verify=self._verify_ssl,
+	)
+	if response.status_code == 200:
+		json_response = response.json()
+		access_key = json_response["accessKey"]
+		return access_key
+	else:
+		raise NvrError(
+			"Request failed: %s - Reason: %s" % (response.status, response.reason)
+		)
+		*/
 
 }
 
