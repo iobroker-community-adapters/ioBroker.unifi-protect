@@ -17,11 +17,9 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 ## Changelog
 
 ### __WORK IN PROGRESS__
+* Test
 
-### 0.0.4
-* (Peter Baumert) release-script test
-
-### 0.0.3
+### 0.0.3 (03.02.2020)
 * (Peter Baumert) first working rls on npm
 
 ### 0.0.1
