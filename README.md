@@ -13,11 +13,12 @@
 ## unifi-protect adapter for ioBroker
 
 Connects to Unifi Protect Controller and pulls all Data from added Cameras.
+!!NOT TESTED WITH NEW UDM!!
 
 ## Changelog
 
 ### __WORK IN PROGRESS__
-* Test
+* release-script test and some Readme changes
 
 ### 0.0.3 (03.02.2020)
 * (Peter Baumert) first working rls on npm

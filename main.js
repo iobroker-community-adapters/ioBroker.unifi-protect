@@ -33,14 +33,6 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		// Initialize your adapter here
-
-		// The adapters config (in the instance object everything under the attribute "native") is accessible via
-		// this.config:
-		this.log.info("config option1: " + this.config.protectip);
-		this.log.info("config option2: " + this.config.protectport);
-
-		// in this template all states changes inside the adapters namespace are subscribed
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		//this.getMotionEvents();
