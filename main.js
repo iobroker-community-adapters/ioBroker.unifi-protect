@@ -179,6 +179,8 @@ class UnifiProtect extends utils.Adapter {
 		const eventStart = now - (8640000 * 1000);
 		const eventEnd = now + (10 * 1000);
 
+		this.log.error("ich mache was 1");
+
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
@@ -211,6 +213,8 @@ class UnifiProtect extends utils.Adapter {
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
 					this.renewToken();
+				} else {
+					this.log.error("Status Code: "+res.statusCode);
 				}
 			});
 		});
