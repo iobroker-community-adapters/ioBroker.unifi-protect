@@ -197,8 +197,9 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					this.log.error("ich mache was");
 					const motionEvents = JSON.parse(data);
-					this.createOwnChannel("cameras", "Cameras");
+					this.createOwnChannel("motions", "Motion Events");
 					let stateArray = [];
 					motionEvents.forEach(motionEvent => {
 						this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
