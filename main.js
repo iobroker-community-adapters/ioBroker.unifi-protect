@@ -196,7 +196,21 @@ class UnifiProtect extends utils.Adapter {
 				data += d;
 			});
 			res.on("end", () => {
-				this.log.error(data);
+				if (res.statusCode == 200) {
+					const motionEvents = JSON.parse(data);
+					this.createOwnChannel("cameras", "Cameras");
+					let stateArray = [];
+					motionEvents.forEach(motionEvent => {
+						this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
+						Object.entries(motionEvent).forEach(([key, value]) => {
+							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
+						});
+					});
+					this.processStateChanges(stateArray, this);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("Unifi Protect reported authorization failure");
+					this.renewToken();
+				}
 			});
 		});
 
