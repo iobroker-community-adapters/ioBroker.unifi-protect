@@ -179,8 +179,6 @@ class UnifiProtect extends utils.Adapter {
 		const eventStart = now - (8640000 * 1000);
 		const eventEnd = now + (10 * 1000);
 
-		this.log.error("ich mache was 1");
-
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
@@ -199,7 +197,6 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					this.log.error("ich mache was");
 					const motionEvents = JSON.parse(data);
 					this.createOwnChannel("motions", "Motion Events");
 					let stateArray = [];
