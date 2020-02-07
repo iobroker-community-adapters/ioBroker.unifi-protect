@@ -22,6 +22,13 @@ class UnifiProtect extends utils.Adapter {
 			...options,
 			name: "unifi-protect",
 		});
+
+		this.writeables = [
+			"ledSettings.isEnabled",
+			"osdSettings.isNameEnabled",
+			"recordingSettings.mode"
+		];
+
 		this.on("ready", this.onReady.bind(this));
 		this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
@@ -77,9 +84,11 @@ class UnifiProtect extends utils.Adapter {
 		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings.mode/i);
-			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
-				this.changeSetting(id, state.val);
+			for (let i = 0; i < this.writeables.length; i++) {
+				if (id.match(this.writeables[i])) {
+					this.changeSetting(id, state.val);
+					continue;
+				}
 			}
 		} else {
 			// The state was deleted
@@ -319,9 +328,8 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		let write = false;
-		const writeables = ["ledSettings.isEnabled","osdSettings.isNameEnabled"];
-		for (let i = 0; i < writeables.length; i++) {
-			if (name.match(writeables[i])) {
+		for (let i = 0; i < this.writeables.length; i++) {
+			if (name.match(this.writeables[i])) {
 				write = true;
 				continue;
 			}
