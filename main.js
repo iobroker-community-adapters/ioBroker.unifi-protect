@@ -79,7 +79,7 @@ class UnifiProtect extends utils.Adapter {
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings.mode/i);
 			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
-				this.setRecordingMode(found.groups.cameraid, state.val);
+				this.changeSetting(id, state.val);
 			}
 		} else {
 			// The state was deleted
@@ -224,15 +224,23 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	setRecordingMode(cameraid, mode) {
+	changeSetting(state, val) {
+		const found = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<parent>[a-z]+)\.(?<setting>[a-z]+)/i);
+		let parent = "";
+		let setting ="";
+		let cameraid = "";
+
+		if (found != null && found.groups !== undefined) {
+			parent = found.groups.parent;
+			setting = found.groups.setting;
+			cameraid = found.groups.cameraid;
+		} else {
+			return;
+		}
 
 		const data = JSON.stringify({
-			recordingSettings: {
-				mode: mode,
-				prePaddingSecs: 2,
-				postPaddingSecs: 2,
-				minMotionEventTrigger: 1000,
-				enablePirTimelapse: false
+			[parent]: {
+				[setting]: val,
 			}
 		});
 
@@ -254,7 +262,7 @@ class UnifiProtect extends utils.Adapter {
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
-				this.log.debug(`Recording mode set to ${mode}`);
+				this.log.debug(`Camera setting ${parent}.${setting} set to ${val}`);
 			} else {
 				this.log.error(`Status Code: ${res.statusCode}`);
 			}
@@ -310,11 +318,20 @@ class UnifiProtect extends utils.Adapter {
 			return stateArray;
 		}
 
+		let write = false;
+		const writeables = ["ledSettings.isEnabled","osdSettings.isNameEnabled"];
+		for (let i = 0; i < writeables.length; i++) {
+			if (name.match(writeables[i])) {
+				write = true;
+				continue;
+			}
+		}
+
 		let common = {
 			name: desc,
 			type: typeof (value),
 			read: true,
-			write: false
+			write: write
 		};
 
 		if (name.match("recordingSettings.mode") != null) {
