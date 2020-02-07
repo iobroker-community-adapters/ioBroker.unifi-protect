@@ -77,6 +77,10 @@ class UnifiProtect extends utils.Adapter {
 		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings/i);
+			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
+				this.setRecordingSettings(found.groups.cameraid);
+			}
 		} else {
 			// The state was deleted
 			this.log.silly(`state ${id} deleted`);
@@ -222,7 +226,14 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	setRecordingSettings(cameraid, mode) {
+	setRecordingSettings(cameraid) {
+		const mode = "always";
+
+		this.getObject("cameras."+cameraid+".recordingSettings", function (err, obj) {
+			// @ts-ignore
+			this.log.debug(JSON.stringify(obj));
+		});
+
 		const data = JSON.stringify({
 			recordingSettings: {
 				mode: mode,
@@ -308,27 +319,34 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		let write = false;
-		let states = null;
 		if (name.match("recordingSettings") != null) {
 			write = true;
 		}
+
+		let common = {
+			name: desc,
+			type: typeof (value),
+			read: true,
+			write: write
+		};
+
 		if (name.match("recordingSettings.mode") != null) {
-			states = {
-				"always": "always",
-				"never": "never",
-				"motion": "motion"
+			common = {
+				name: desc,
+				type: typeof (value),
+				read: true,
+				write: true,
+				states : {
+					"always": "always",
+					"never": "never",
+					"motion": "motion"
+				}
 			};
 		}
 
 		this.setObjectNotExists(name, {
 			type: "state",
-			common: {
-				name: desc,
-				type: typeof (value),
-				read: true,
-				write: write,
-				states: states
-			},
+			common: common,
 			native: { id: name }
 		});
 
