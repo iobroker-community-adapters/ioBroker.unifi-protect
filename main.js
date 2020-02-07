@@ -35,8 +35,8 @@ class UnifiProtect extends utils.Adapter {
 	async onReady() {
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		//this.getMotionEvents();
 		this.getCameraList();
+		this.getMotionEvents();
 		setInterval(() => this.getCameraList(), 60000);
 	}
 
@@ -196,7 +196,23 @@ class UnifiProtect extends utils.Adapter {
 				data += d;
 			});
 			res.on("end", () => {
-				this.log.error(data);
+				if (res.statusCode == 200) {
+					const motionEvents = JSON.parse(data);
+					this.createOwnChannel("motions", "Motion Events");
+					let stateArray = [];
+					motionEvents.forEach(motionEvent => {
+						this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
+						Object.entries(motionEvent).forEach(([key, value]) => {
+							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
+						});
+					});
+					this.processStateChanges(stateArray, this);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("Unifi Protect reported authorization failure");
+					this.renewToken();
+				} else {
+					this.log.error("Status Code: "+res.statusCode);
+				}
 			});
 		});
 
