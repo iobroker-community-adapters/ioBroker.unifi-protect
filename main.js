@@ -78,7 +78,6 @@ class UnifiProtect extends utils.Adapter {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings/i);
-			this.log.error("found: " + JSON.stringify(found));
 			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
 				this.setRecordingSettings(found.groups.cameraid, id, state.val);
 			}
@@ -94,7 +93,6 @@ class UnifiProtect extends utils.Adapter {
 
 	getApiAuthBearerToken() {
 		return new Promise((resolve, reject) => {
-			this.log.info("started");
 			const data = JSON.stringify({
 				username: this.config.username,
 				password: this.config.password
@@ -113,9 +111,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 
 			const req = https.request(options, res => {
-				this.log.info(`statusCode: ${res.statusCode}`);
 				if (res.statusCode == 200) {
-					this.log.info(JSON.stringify(res.headers));
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
@@ -229,15 +225,12 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	setRecordingSettings(cameraid, setting, val) {
-		this.log.error("working");
 
 		const data = JSON.stringify({
 			recordingSettings: {
 				[setting]: val
 			}
 		});
-
-		this.log.error("working2");
 
 		const options = {
 			hostname: this.config.protectip,
@@ -253,10 +246,7 @@ class UnifiProtect extends utils.Adapter {
 			}
 		};
 
-		this.log.error("working3");
-
 		const req = https.request(options, res => {
-			this.log.error("working4");
 			if (res.statusCode == 200) {
 				this.log.debug(`Recording Setting ${setting} set to ${val}`);
 			} else {
@@ -269,7 +259,6 @@ class UnifiProtect extends utils.Adapter {
 		});
 		req.write(data);
 		req.end();
-		this.log.error("working5");
 	}
 
 	processStateChanges(stateArray, that, callback) {
@@ -285,7 +274,6 @@ class UnifiProtect extends utils.Adapter {
 			that.getState(newState.name, function (err, oldState) {
 				// @ts-ignore
 				if (oldState === null || newState.val != oldState.val) {
-					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
 					that.setState(newState.name, { ack: true, val: newState.val }, function () {
 						setTimeout(that.processStateChanges, 0, stateArray, that, callback);
 					});
