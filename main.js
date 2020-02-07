@@ -308,8 +308,16 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		let write = false;
+		let states = null;
 		if (name.match("recordingSettings") != null) {
 			write = true;
+		}
+		if (name.match("recordingSettings.mode") != null) {
+			states = {
+				"always": "always",
+				"never": "never",
+				"motion": "motion"
+			};
 		}
 
 		this.setObjectNotExists(name, {
@@ -318,7 +326,8 @@ class UnifiProtect extends utils.Adapter {
 				name: desc,
 				type: typeof (value),
 				read: true,
-				write: write
+				write: write,
+				states: states
 			},
 			native: { id: name }
 		});
