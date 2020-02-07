@@ -238,7 +238,7 @@ class UnifiProtect extends utils.Adapter {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: `/cameras/${cameraid}`,
-			method: "GET",
+			method: "POST",
 			rejectUnauthorized: false,
 			headers: {
 				"Authorization": "Bearer " + this.apiAuthBearerToken,
