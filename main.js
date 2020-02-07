@@ -222,6 +222,46 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+	setRecordingSettings(cameraid, mode) {
+		const data = JSON.stringify({
+			recordingSettings: {
+				mode: mode,
+				prePaddingSecs: 2,
+				postPaddingSecs: 2,
+				minMotionEventTrigger: 1000,
+				enablePirTimelapse: false
+			}
+		});
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/cameras/${cameraid}`,
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {
+				"Authorization": "Bearer " + this.apiAuthBearerToken,
+				"Content-Type": "application/json",
+				"Content-Length": data.length
+			}
+		};
+
+		const req = https.request(options, res => {
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					this.log.debug(`Recording mode set to ${mode}`);
+				} else {
+					this.log.error(`Status Code: ${res.statusCode}`);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error(e.toString());
+		});
+		req.write(data);
+		req.end();
+	}
 
 	processStateChanges(stateArray, that, callback) {
 		if (!stateArray || stateArray.length === 0) {
@@ -267,13 +307,18 @@ class UnifiProtect extends utils.Adapter {
 			return stateArray;
 		}
 
+		let write = false;
+		if (name.match("recordingSettings") != null) {
+			write = true;
+		}
+
 		this.setObjectNotExists(name, {
 			type: "state",
 			common: {
 				name: desc,
 				type: typeof (value),
 				read: true,
-				write: false
+				write: write
 			},
 			native: { id: name }
 		});
