@@ -190,6 +190,7 @@ class UnifiProtect extends utils.Adapter {
 			path: `/api/events?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
+			timeout: 10000,
 			headers: {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
 			}
@@ -236,12 +237,15 @@ class UnifiProtect extends utils.Adapter {
 			}
 		});
 
+		this.log.error("working2");
+
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: `/cameras/${cameraid}`,
 			method: "POST",
 			rejectUnauthorized: false,
+			timeout: 10000,
 			headers: {
 				"Authorization": "Bearer " + this.apiAuthBearerToken,
 				"Content-Type": "application/json",
@@ -249,8 +253,11 @@ class UnifiProtect extends utils.Adapter {
 			}
 		};
 
+		this.log.error("working3");
+
 		const req = https.request(options, res => {
 			res.on("end", () => {
+				this.log.error("working4");
 				if (res.statusCode == 200) {
 					this.log.debug(`Recording Setting ${setting} set to ${val}`);
 				} else {
@@ -264,6 +271,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 		req.write(data);
 		req.end();
+		this.log.error("working5");
 	}
 
 	processStateChanges(stateArray, that, callback) {
