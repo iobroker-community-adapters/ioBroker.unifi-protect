@@ -254,7 +254,9 @@ class UnifiProtect extends utils.Adapter {
 			if (res.statusCode == 200) {
 				this.log.debug(`Recording mode set to ${mode}`);
 			} else {
-				this.log.error(`Status Code: ${res.statusCode} and msg: ${res}`);
+				this.log.error(`Status Code: ${res.statusCode}`);
+				const temp = JSON.stringify(res);
+				this.log.error(temp);
 			}
 		});
 
