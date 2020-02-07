@@ -16,6 +16,8 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 !!NOT TESTED WITH NEW UDM!!
 
 ## Changelog
+* new logo
+* added motion event data points
 
 ### 0.0.4 (2020-02-05)
 * release-script test and some Readme changes
@@ -29,7 +31,7 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 ## License
 MIT License
 
-Copyright (c) 2020 Peter Baumert <peter.baumert@outlook.de>
+Copyright (c) 2020 Peter Baumert <ioBroker.unifi-protect@outlook.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
