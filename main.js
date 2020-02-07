@@ -235,7 +235,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/cameras/${cameraid}`,
+			path: `/api/cameras/${cameraid}`,
 			method: "POST",
 			rejectUnauthorized: false,
 			timeout: 10000,
