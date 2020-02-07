@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.4",
+        "version": "0.0.5",
         "news": {
+            "0.0.5": {
+                "en": "* new logo\n* added motion event data points",
+                "de": "* neues Logo\n* Bewegungsereignisdatenpunkte hinzugefügt",
+                "ru": "* новый логотип\n* добавлены точки данных о движении",
+                "pt": "* novo logotipo\n* pontos de dados de eventos de movimento adicionados",
+                "nl": "* nieuw logo\n* toegevoegde punten voor bewegingsgebeurtenissen",
+                "fr": "* nouveau logo\n* ajout de points de données d'événement de mouvement",
+                "it": "* nuovo logo\n* aggiunti punti dati degli eventi di movimento",
+                "es": "* nuevo logo\n* puntos de datos de eventos de movimiento agregados",
+                "pl": "* nowe logo\n* dodano punkty danych zdarzenia ruchu",
+                "zh-cn": "*新徽标\n*添加运动事件数据点"
+            },
             "0.0.4": {
                 "en": "* release-script test and some Readme changes",
                 "de": "* Release-Script-Test und einige Readme-Änderungen",

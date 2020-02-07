@@ -17,7 +17,7 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.0.5 (2020-02-07)
 * new logo
 * added motion event data points
 
