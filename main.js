@@ -230,7 +230,7 @@ class UnifiProtect extends utils.Adapter {
 		const mode = "always";
 		const that = this;
 
-		that.getStatesOf("cameras."+cameraid+".recordingSettings", function (err, states) {
+		that.getStatesOf(function (err, states) {
 			that.log.debug(JSON.stringify(states));
 		});
 
