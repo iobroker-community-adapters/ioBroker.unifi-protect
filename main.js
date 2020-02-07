@@ -230,8 +230,7 @@ class UnifiProtect extends utils.Adapter {
 		const mode = "always";
 		const that = this;
 
-		this.getObject("cameras."+cameraid+".recordingSettings", function (err, obj) {
-			// @ts-ignore
+		that.getObject("cameras."+cameraid+".recordingSettings", function (err, obj) {
 			that.log.debug(JSON.stringify(obj));
 		});
 
