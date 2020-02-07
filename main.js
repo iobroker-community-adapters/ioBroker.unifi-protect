@@ -78,6 +78,7 @@ class UnifiProtect extends utils.Adapter {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings/i);
+			this.log.error("found: "+JSON.stringify(found));
 			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
 				this.setRecordingSettings(found.groups.cameraid, id, state.val);
 			}
@@ -227,6 +228,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	setRecordingSettings(cameraid, setting, val) {
+		this.log.error("working");
 
 		const data = JSON.stringify({
 			recordingSettings: {
