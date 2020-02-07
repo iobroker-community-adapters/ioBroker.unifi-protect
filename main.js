@@ -240,7 +240,7 @@ class UnifiProtect extends utils.Adapter {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: `/api/cameras/${cameraid}`,
-			method: "POST",
+			method: "PATCH",
 			rejectUnauthorized: false,
 			timeout: 10000,
 			headers: {
@@ -250,13 +250,13 @@ class UnifiProtect extends utils.Adapter {
 			}
 		};
 
+		this.log.error(`/api/cameras/${cameraid}`);
+
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
 				this.log.debug(`Recording mode set to ${mode}`);
 			} else {
 				this.log.error(`Status Code: ${res.statusCode}`);
-				const temp = JSON.stringify(res);
-				this.log.error(temp);
 			}
 		});
 
