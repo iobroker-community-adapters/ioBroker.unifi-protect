@@ -79,7 +79,7 @@ class UnifiProtect extends utils.Adapter {
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings/i);
 			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
-				this.setRecordingSettings(found.groups.cameraid);
+				this.setRecordingSettings(found.groups.cameraid, id, state.val);
 			}
 		} else {
 			// The state was deleted
@@ -226,21 +226,11 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	setRecordingSettings(cameraid) {
-		const mode = "always";
-		const that = this;
-
-		that.getStatesOf(function (err, states) {
-			that.log.debug(JSON.stringify(states));
-		});
+	setRecordingSettings(cameraid, setting, val) {
 
 		const data = JSON.stringify({
 			recordingSettings: {
-				mode: mode,
-				prePaddingSecs: 2,
-				postPaddingSecs: 2,
-				minMotionEventTrigger: 1000,
-				enablePirTimelapse: false
+				[setting]: val
 			}
 		});
 
@@ -260,7 +250,7 @@ class UnifiProtect extends utils.Adapter {
 		const req = https.request(options, res => {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					this.log.debug(`Recording mode set to ${mode}`);
+					this.log.debug(`Recording Setting ${setting} set to ${val}`);
 				} else {
 					this.log.error(`Status Code: ${res.statusCode}`);
 				}
