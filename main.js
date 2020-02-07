@@ -26,6 +26,9 @@ class UnifiProtect extends utils.Adapter {
 		this.writeables = [
 			"ledSettings.isEnabled",
 			"osdSettings.isNameEnabled",
+			"osdSettings.isDebugEnabled",
+			"osdSettings.isLogoEnabled",
+			"osdSettings.isDateEnabled",
 			"recordingSettings.mode"
 		];
 
