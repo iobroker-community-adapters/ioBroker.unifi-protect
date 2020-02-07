@@ -78,7 +78,7 @@ class UnifiProtect extends utils.Adapter {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			const found = id.match(/cameras\.(?<cameraid>[a-z0-9]*)\.recordingSettings/i);
-			this.log.error("found: "+JSON.stringify(found));
+			this.log.error("found: " + JSON.stringify(found));
 			if (found != null && found.groups !== undefined && found.groups.cameraid !== undefined) {
 				this.setRecordingSettings(found.groups.cameraid, id, state.val);
 			}
@@ -217,7 +217,7 @@ class UnifiProtect extends utils.Adapter {
 					this.log.error("Unifi Protect reported authorization failure");
 					this.renewToken();
 				} else {
-					this.log.error("Status Code: "+res.statusCode);
+					this.log.error("Status Code: " + res.statusCode);
 				}
 			});
 		});
@@ -256,14 +256,12 @@ class UnifiProtect extends utils.Adapter {
 		this.log.error("working3");
 
 		const req = https.request(options, res => {
-			res.on("end", () => {
-				this.log.error("working4");
-				if (res.statusCode == 200) {
-					this.log.debug(`Recording Setting ${setting} set to ${val}`);
-				} else {
-					this.log.error(`Status Code: ${res.statusCode}`);
-				}
-			});
+			this.log.error("working4");
+			if (res.statusCode == 200) {
+				this.log.debug(`Recording Setting ${setting} set to ${val}`);
+			} else {
+				this.log.error(`Status Code: ${res.statusCode}`);
+			}
 		});
 
 		req.on("error", e => {
@@ -336,7 +334,7 @@ class UnifiProtect extends utils.Adapter {
 				type: typeof (value),
 				read: true,
 				write: true,
-				states : {
+				states: {
 					"always": "always",
 					"never": "never",
 					"motion": "motion"
