@@ -49,7 +49,7 @@ class UnifiProtect extends utils.Adapter {
 		this.getCameraList();
 		this.getMotionEvents();
 		setInterval(() => this.getCameraList(), 60000);
-		//setInterval(() => this.getMotionEvents(), 60000);
+		setInterval(() => this.getMotionEvents(), 60000);
 	}
 
 	/**
