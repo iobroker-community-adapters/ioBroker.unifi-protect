@@ -213,6 +213,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					this.deleteChannel("motions");
 					const motionEvents = JSON.parse(data);
 					this.createOwnChannel("motions", "Motion Events");
 					let stateArray = [];
@@ -222,7 +223,9 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
 						});
 					});
-					this.log.error(motionEvents.length+JSON.stringify(motionEvents[motionEvents.length -1]));
+					Object.entries(motionEvents[motionEvents.length -1]).forEach(([key, value]) => {
+						stateArray = this.createOwnState("motions." + motionEvents[motionEvents.length -1].camera + ".lastMotion." + key, value, key, stateArray);
+					});
 					this.processStateChanges(stateArray, this);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
