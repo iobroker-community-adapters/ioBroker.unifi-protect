@@ -24,6 +24,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		this.writeables = [
+			".name",
 			"ledSettings.isEnabled",
 			"osdSettings.isNameEnabled",
 			"osdSettings.isDebugEnabled",
@@ -48,6 +49,7 @@ class UnifiProtect extends utils.Adapter {
 		this.getCameraList();
 		this.getMotionEvents();
 		setInterval(() => this.getCameraList(), 60000);
+		//setInterval(() => this.getMotionEvents(), 60000);
 	}
 
 	/**
@@ -238,23 +240,31 @@ class UnifiProtect extends utils.Adapter {
 
 	changeSetting(state, val) {
 		const found = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<parent>[a-z]+)\.(?<setting>[a-z]+)/i);
+		const found_root = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<setting>[a-z]+)$/i);
 		let parent = "";
 		let setting ="";
 		let cameraid = "";
+		let data = "";
 
 		if (found != null && found.groups !== undefined) {
 			parent = found.groups.parent;
 			setting = found.groups.setting;
 			cameraid = found.groups.cameraid;
+			data = JSON.stringify({
+				[parent]: {
+					[setting]: val,
+				}
+			});
+		} else if (found_root != null && found_root.groups !== undefined) {
+			setting = found.groups.setting;
+			cameraid = found.groups.cameraid;
+			parent = cameraid;
+			data = JSON.stringify({
+				[setting]: val
+			});
 		} else {
 			return;
 		}
-
-		const data = JSON.stringify({
-			[parent]: {
-				[setting]: val,
-			}
-		});
 
 		const options = {
 			hostname: this.config.protectip,
