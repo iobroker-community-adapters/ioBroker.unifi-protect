@@ -256,8 +256,8 @@ class UnifiProtect extends utils.Adapter {
 				}
 			});
 		} else if (found_root != null && found_root.groups !== undefined) {
-			setting = found.groups.setting;
-			cameraid = found.groups.cameraid;
+			setting = found_root.groups.setting;
+			cameraid = found_root.groups.cameraid;
 			parent = cameraid;
 			data = JSON.stringify({
 				[setting]: val
