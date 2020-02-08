@@ -222,6 +222,7 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
 						});
 					});
+					this.log.error(motionEvents.length+JSON.stringify(motionEvents[motionEvents.length -1]));
 					this.processStateChanges(stateArray, this);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
