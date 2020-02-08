@@ -18,7 +18,7 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 ## Changelog
 
 ### __WORK IN PROGRESS__
-* make recording setting changeable
+* make some settings changeable (name, osdSettings.*, recordingSettings.mode, ledSettings.isEnabled)
 
 ### 0.0.5 (2020-02-07)
 * new logo
