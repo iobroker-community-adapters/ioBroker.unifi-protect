@@ -22,6 +22,17 @@ class UnifiProtect extends utils.Adapter {
 			...options,
 			name: "unifi-protect",
 		});
+
+		this.writeables = [
+			".name",
+			"ledSettings.isEnabled",
+			"osdSettings.isNameEnabled",
+			"osdSettings.isDebugEnabled",
+			"osdSettings.isLogoEnabled",
+			"osdSettings.isDateEnabled",
+			"recordingSettings.mode"
+		];
+
 		this.on("ready", this.onReady.bind(this));
 		this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
@@ -38,6 +49,7 @@ class UnifiProtect extends utils.Adapter {
 		this.getCameraList();
 		this.getMotionEvents();
 		setInterval(() => this.getCameraList(), 60000);
+		//setInterval(() => this.getMotionEvents(), 60000);
 	}
 
 	/**
@@ -77,6 +89,12 @@ class UnifiProtect extends utils.Adapter {
 		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			for (let i = 0; i < this.writeables.length; i++) {
+				if (id.match(this.writeables[i])) {
+					this.changeSetting(id, state.val);
+					continue;
+				}
+			}
 		} else {
 			// The state was deleted
 			this.log.silly(`state ${id} deleted`);
@@ -89,7 +107,6 @@ class UnifiProtect extends utils.Adapter {
 
 	getApiAuthBearerToken() {
 		return new Promise((resolve, reject) => {
-			this.log.info("started");
 			const data = JSON.stringify({
 				username: this.config.username,
 				password: this.config.password
@@ -108,9 +125,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 
 			const req = https.request(options, res => {
-				this.log.info(`statusCode: ${res.statusCode}`);
 				if (res.statusCode == 200) {
-					this.log.info(JSON.stringify(res.headers));
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
@@ -185,6 +200,7 @@ class UnifiProtect extends utils.Adapter {
 			path: `/api/events?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
+			timeout: 10000,
 			headers: {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
 			}
@@ -211,7 +227,7 @@ class UnifiProtect extends utils.Adapter {
 					this.log.error("Unifi Protect reported authorization failure");
 					this.renewToken();
 				} else {
-					this.log.error("Status Code: "+res.statusCode);
+					this.log.error("Status Code: " + res.statusCode);
 				}
 			});
 		});
@@ -222,6 +238,64 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+	changeSetting(state, val) {
+		const found = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<parent>[a-z]+)\.(?<setting>[a-z]+)/i);
+		const found_root = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<setting>[a-z]+)$/i);
+		let parent = "";
+		let setting ="";
+		let cameraid = "";
+		let data = "";
+
+		if (found != null && found.groups !== undefined) {
+			parent = found.groups.parent;
+			setting = found.groups.setting;
+			cameraid = found.groups.cameraid;
+			data = JSON.stringify({
+				[parent]: {
+					[setting]: val,
+				}
+			});
+		} else if (found_root != null && found_root.groups !== undefined) {
+			setting = found_root.groups.setting;
+			cameraid = found_root.groups.cameraid;
+			parent = cameraid;
+			data = JSON.stringify({
+				[setting]: val
+			});
+		} else {
+			return;
+		}
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/api/cameras/${cameraid}`,
+			method: "PATCH",
+			rejectUnauthorized: false,
+			timeout: 10000,
+			headers: {
+				"Authorization": "Bearer " + this.apiAuthBearerToken,
+				"Content-Type": "application/json",
+				"Content-Length": data.length
+			}
+		};
+
+		this.log.error(`/api/cameras/${cameraid}`);
+
+		const req = https.request(options, res => {
+			if (res.statusCode == 200) {
+				this.log.debug(`Camera setting ${parent}.${setting} set to ${val}`);
+			} else {
+				this.log.error(`Status Code: ${res.statusCode}`);
+			}
+		});
+
+		req.on("error", e => {
+			this.log.error(e.toString());
+		});
+		req.write(data);
+		req.end();
+	}
 
 	processStateChanges(stateArray, that, callback) {
 		if (!stateArray || stateArray.length === 0) {
@@ -236,7 +310,6 @@ class UnifiProtect extends utils.Adapter {
 			that.getState(newState.name, function (err, oldState) {
 				// @ts-ignore
 				if (oldState === null || newState.val != oldState.val) {
-					//adapter.log.info('changing state ' + newState.name + ' : ' + newState.val);
 					that.setState(newState.name, { ack: true, val: newState.val }, function () {
 						setTimeout(that.processStateChanges, 0, stateArray, that, callback);
 					});
@@ -267,14 +340,38 @@ class UnifiProtect extends utils.Adapter {
 			return stateArray;
 		}
 
-		this.setObjectNotExists(name, {
-			type: "state",
-			common: {
+		let write = false;
+		for (let i = 0; i < this.writeables.length; i++) {
+			if (name.match(this.writeables[i])) {
+				write = true;
+				continue;
+			}
+		}
+
+		let common = {
+			name: desc,
+			type: typeof (value),
+			read: true,
+			write: write
+		};
+
+		if (name.match("recordingSettings.mode") != null) {
+			common = {
 				name: desc,
 				type: typeof (value),
 				read: true,
-				write: false
-			},
+				write: true,
+				states: {
+					"always": "always",
+					"never": "never",
+					"motion": "motion"
+				}
+			};
+		}
+
+		this.setObjectNotExists(name, {
+			type: "state",
+			common: common,
 			native: { id: name }
 		});
 
