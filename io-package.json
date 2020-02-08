@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.5",
+        "version": "0.0.6",
         "news": {
+            "0.0.6": {
+                "en": "* make some settings changeable (name, osdSettings.*, recordingSettings.mode, ledSettings.isEnabled)",
+                "de": "* einige Einstellungen änderbar machen (name, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "ru": "* сделать некоторые настройки изменяемыми (name, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "pt": "* altere algumas configurações (nome, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "nl": "* maak sommige instellingen veranderlijk (naam, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "fr": "* rendre certains paramètres modifiables (nom, osdSettings. *, RecordingSettings.mode, ledSettings.isEnabled)",
+                "it": "* rendere alcune impostazioni modificabili (nome, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "es": "* hacer que algunas configuraciones cambien (nombre, osdSettings. *, grabaciónSettings.mode, ledSettings.isEnabled)",
+                "pl": "* zmien niektóre ustawienia (nazwa, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
+                "zh-cn": "*更改某些设置（名称，osdSettings。*，recordingSettings.mode，ledSettings.isEnabled）"
+            },
             "0.0.5": {
                 "en": "* new logo\n* added motion event data points",
                 "de": "* neues Logo\n* Bewegungsereignisdatenpunkte hinzugefügt",
