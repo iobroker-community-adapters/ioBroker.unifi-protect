@@ -213,11 +213,11 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					this.deleteChannel("motions");
 					const motionEvents = JSON.parse(data);
 					this.createOwnChannel("motions", "Motion Events");
 					let stateArray = [];
 					motionEvents.forEach(motionEvent => {
+						this.deleteChannel("motions","motions." + motionEvent.camera + "." + motionEvent.id);
 						this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
 						Object.entries(motionEvent).forEach(([key, value]) => {
 							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
