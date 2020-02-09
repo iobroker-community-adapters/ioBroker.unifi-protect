@@ -189,7 +189,7 @@ class UnifiProtect extends utils.Adapter {
 
 	getMotionEvents() {
 		const now = Date.now();
-		const eventStart = now - (8640000 * 1000);
+		const eventStart = now - (86400 * 1000);
 		const eventEnd = now + (10 * 1000);
 
 		const options = {
@@ -413,8 +413,25 @@ class UnifiProtect extends utils.Adapter {
 
 	deleteOldMotionEvents(currentMotionEvents) {
 		const that = this;
-		that.getChannelsOf("motions",function(err, channels) {
-			that.log.error(currentMotionEvents+JSON.stringify(channels));
+		that.getChannelsOf("motions", function (err, channels) {
+			if (channels !== undefined) {
+				channels.forEach(channel => {
+					const found = channel._id.match(/motions\.(?<cameraid>[a-z0-9]+)\.(?<motionid>[a-z0-9]+)$/i);
+					if (found != null && found.groups !== undefined) {
+						//check if in currentMotionEvents
+						let isin = false;
+						for (let i = 0; i < currentMotionEvents.length; i++) {
+							if(currentMotionEvents[i].camera == found.groups.cameraid && currentMotionEvents[i].id == found.groups.motionid) {
+								isin = true;
+								break;
+							}
+						}
+						if (!isin) {
+							that.deleteChannel("motions","motions."+found.groups.cameraid+"."+found.groups.motionid);
+						}
+					}
+				});
+			}
 		});
 	}
 
