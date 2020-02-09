@@ -17,7 +17,7 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.0.7 (2020-02-09)
 * continuosly refresh motion events
 * changed data structur
 * added lastMotion Datapoint to each camera

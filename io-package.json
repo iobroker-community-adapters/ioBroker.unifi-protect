@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.6",
+        "version": "0.0.7",
         "news": {
+            "0.0.7": {
+                "en": "* continuosly refresh motion events\r\n* changed data structur\r\n* added lastMotion Datapoint to each camera",
+                "de": "* Kontinuierliche Aktualisierung von Bewegungsereignissen\r\n* geänderte Datenstruktur\r\n* lastMotion Datenpunkt zu jeder Kamera hinzugefügt",
+                "ru": "* постоянно обновлять события движения\r\n* изменена структура данных\r\n* добавлено lastMotion Datapoint для каждой камеры",
+                "pt": "* atualizar continuamente eventos de movimento\r\n* estrutura de dados alterada\r\n* adicionou lastMotion Datapoint a cada câmera",
+                "nl": "* continu bewegingsgebeurtenissen vernieuwen\r\n* veranderde gegevensstructuur\r\n* lastMotion Datapoint toegevoegd aan elke camera",
+                "fr": "* Rafraîchissez continuellement les événements de mouvement\r\n* structure de données modifiée\r\n* ajout du point de données lastMotion à chaque caméra",
+                "it": "* aggiorna continuamente gli eventi di movimento\r\n* modifica della struttura dei dati\r\n* aggiunto lastMotion Datapoint a ciascuna telecamera",
+                "es": "* actualiza continuamente eventos de movimiento\r\n* estructura de datos modificada\r\n* agregado lastMotion Datapoint a cada cámara",
+                "pl": "* ciągłe odświeżanie zdarzeń ruchu\r\n* zmieniono strukturę danych\r\n* Dodano lastMotion Datapoint do każdej kamery",
+                "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机"
+            },
             "0.0.6": {
                 "en": "* make some settings changeable (name, osdSettings.*, recordingSettings.mode, ledSettings.isEnabled)",
                 "de": "* einige Einstellungen änderbar machen (name, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
