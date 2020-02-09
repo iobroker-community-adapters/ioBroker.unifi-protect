@@ -212,7 +212,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					const motionEvents = JSON.parse(data);
-					this.createOwnChannel("motions", "Motion Events");
+					this.createOwnDevice("motions", "Motion Events");
 					this.deleteOldMotionEvents(motionEvents);
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
@@ -397,6 +397,24 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	/**
+	 * Function to create a device
+	 */
+	createOwnDevice(name, desc) {
+
+		if (typeof (desc) === "undefined")
+			desc = name;
+
+		this.setObjectNotExists(name, {
+			type: "device",
+			common: {
+				name: desc
+			},
+			native: {}
+		});
+	}
+
+
 	addMotionEvents(motionEvents) {
 		let stateArray = [];
 		motionEvents.forEach(motionEvent => {
@@ -421,13 +439,13 @@ class UnifiProtect extends utils.Adapter {
 						//check if in currentMotionEvents
 						let isin = false;
 						for (let i = 0; i < currentMotionEvents.length; i++) {
-							if(currentMotionEvents[i].camera == found.groups.cameraid && currentMotionEvents[i].id == found.groups.motionid) {
+							if (currentMotionEvents[i].camera == found.groups.cameraid && currentMotionEvents[i].id == found.groups.motionid) {
 								isin = true;
 								break;
 							}
 						}
 						if (!isin) {
-							that.deleteChannel("motions."+found.groups.cameraid,"motions."+found.groups.cameraid+"."+found.groups.motionid);
+							that.deleteChannel("", channel._id);
 						}
 					}
 				});
