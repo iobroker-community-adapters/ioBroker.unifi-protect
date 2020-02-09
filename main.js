@@ -46,10 +46,8 @@ class UnifiProtect extends utils.Adapter {
 	async onReady() {
 		this.subscribeStates("*");
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		this.getCameraList();
-		this.getMotionEvents();
-		setInterval(() => this.getCameraList(), 60000);
-		setInterval(() => this.getMotionEvents(), 60000);
+		this.updateData();
+		setInterval(() => this.updateData(), 60000);
 	}
 
 	/**
@@ -215,18 +213,8 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					const motionEvents = JSON.parse(data);
 					this.createOwnChannel("motions", "Motion Events");
-					let stateArray = [];
-					motionEvents.forEach(motionEvent => {
-						this.deleteChannel("motions","motions." + motionEvent.camera + "." + motionEvent.id);
-						this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
-						Object.entries(motionEvent).forEach(([key, value]) => {
-							stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
-						});
-					});
-					Object.entries(motionEvents[motionEvents.length -1]).forEach(([key, value]) => {
-						stateArray = this.createOwnState("motions." + motionEvents[motionEvents.length -1].camera + ".lastMotion." + key, value, key, stateArray);
-					});
-					this.processStateChanges(stateArray, this);
+					this.deleteOldMotionEvents(motionEvents);
+					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
 					this.renewToken();
@@ -242,11 +230,16 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+	updateData() {
+		this.getCameraList();
+		this.getMotionEvents();
+	}
+
 	changeSetting(state, val) {
 		const found = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<parent>[a-z]+)\.(?<setting>[a-z]+)/i);
 		const found_root = state.match(/cameras\.(?<cameraid>[a-z0-9]+)\.(?<setting>[a-z]+)$/i);
 		let parent = "";
-		let setting ="";
+		let setting = "";
 		let cameraid = "";
 		let data = "";
 
@@ -401,6 +394,27 @@ class UnifiProtect extends utils.Adapter {
 				name: desc
 			},
 			native: {}
+		});
+	}
+
+	addMotionEvents(motionEvents) {
+		let stateArray = [];
+		motionEvents.forEach(motionEvent => {
+			this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
+			Object.entries(motionEvent).forEach(([key, value]) => {
+				stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
+			});
+		});
+		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
+			stateArray = this.createOwnState("motions." + motionEvents[motionEvents.length - 1].camera + ".lastMotion." + key, value, key, stateArray);
+		});
+		this.processStateChanges(stateArray, this);
+	}
+
+	deleteOldMotionEvents(currentMotionEvents) {
+		const that = this;
+		that.getChannelsOf("motions",function(err, channels) {
+			that.log.error(currentMotionEvents+JSON.stringify(channels));
 		});
 	}
 
