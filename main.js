@@ -427,7 +427,7 @@ class UnifiProtect extends utils.Adapter {
 							}
 						}
 						if (!isin) {
-							that.deleteChannel("motions","motions."+found.groups.cameraid+"."+found.groups.motionid);
+							that.deleteChannel("motions."+found.groups.cameraid,"motions."+found.groups.cameraid+"."+found.groups.motionid);
 						}
 					}
 				});
