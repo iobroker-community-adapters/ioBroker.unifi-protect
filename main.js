@@ -213,7 +213,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
-					this.deleteOldMotionEvents();
+					this.deleteOldMotionEvents(motionEvents);
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
@@ -424,19 +424,27 @@ class UnifiProtect extends utils.Adapter {
 		});
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
-			stateArray = this.createOwnState("cameras." + motionEvents[motionEvents.length - 1].camera + "lastMotion." + key, value, key, stateArray);
+			stateArray = this.createOwnState("cameras." + motionEvents[motionEvents.length - 1].camera + ".lastMotion." + key, value, key, stateArray);
 		});
 		this.processStateChanges(stateArray, this);
 	}
 
-	deleteOldMotionEvents() {
+	deleteOldMotionEvents(motionEvents) {
 		const that = this;
 		that.getChannelsOf("motions", function (err, channels) {
 			if (channels !== undefined) {
 				channels.forEach(channel => {
-					const found = channel._id.match(/motions\.(?<cameraid>[a-z0-9]+)$/i);
+					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)$/i);
 					if (found != null && found.groups !== undefined) {
-						that.deleteChannel("motions", found.groups.cameraid);
+						let isincur = false;
+						for (let i = 0; i < motionEvents.length; i++) {
+							if (motionEvents[i].id == found.groups.motionid) {
+								isincur = true;
+							}
+						}
+						if (!isincur) {
+							that.deleteChannel("motions", found.groups.motionid);
+						}
 					}
 				});
 			}
