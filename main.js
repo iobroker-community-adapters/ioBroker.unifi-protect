@@ -165,7 +165,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					const cameras = JSON.parse(data).cameras;
-					this.createOwnChannel("cameras", "Cameras");
+					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
@@ -213,7 +213,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
-					this.deleteOldMotionEvents(motionEvents);
+					this.deleteOldMotionEvents();
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
@@ -414,39 +414,29 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-
 	addMotionEvents(motionEvents) {
 		let stateArray = [];
 		motionEvents.forEach(motionEvent => {
-			this.createOwnChannel("motions." + motionEvent.camera + "." + motionEvent.id, motionEvent.score);
+			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions." + motionEvent.camera + "." + motionEvent.id + "." + key, value, key, stateArray);
+				stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
 			});
 		});
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-			stateArray = this.createOwnState("motions." + motionEvents[motionEvents.length - 1].camera + ".lastMotion." + key, value, key, stateArray);
+			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+			stateArray = this.createOwnState("cameras." + motionEvents[motionEvents.length - 1].camera + "lastMotion." + key, value, key, stateArray);
 		});
 		this.processStateChanges(stateArray, this);
 	}
 
-	deleteOldMotionEvents(currentMotionEvents) {
+	deleteOldMotionEvents() {
 		const that = this;
 		that.getChannelsOf("motions", function (err, channels) {
 			if (channels !== undefined) {
 				channels.forEach(channel => {
-					const found = channel._id.match(/motions\.(?<cameraid>[a-z0-9]+)\.(?<motionid>[a-z0-9]+)$/i);
+					const found = channel._id.match(/motions\.(?<cameraid>[a-z0-9]+)$/i);
 					if (found != null && found.groups !== undefined) {
-						//check if in currentMotionEvents
-						let isin = false;
-						for (let i = 0; i < currentMotionEvents.length; i++) {
-							if (currentMotionEvents[i].camera == found.groups.cameraid && currentMotionEvents[i].id == found.groups.motionid) {
-								isin = true;
-								break;
-							}
-						}
-						if (!isin) {
-							that.deleteChannel("", channel._id);
-						}
+						that.deleteChannel("motions", found.groups.cameraid);
 					}
 				});
 			}
