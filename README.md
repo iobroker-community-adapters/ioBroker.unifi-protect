@@ -17,6 +17,10 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* continuosly refresh motion events
+* added setting to specify how many last events and time
+
 ### 0.0.6 (2020-02-08)
 * make some settings changeable (name, osdSettings.*, recordingSettings.mode, ledSettings.isEnabled)
 
