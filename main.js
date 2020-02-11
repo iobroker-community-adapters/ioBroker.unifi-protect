@@ -25,6 +25,7 @@ class UnifiProtect extends utils.Adapter {
 
 		this.writeables = [
 			"name",
+			"isRtspEnabled",
 			"ledSettings.isEnabled",
 			"osdSettings.isNameEnabled",
 			"osdSettings.isDebugEnabled",
@@ -506,22 +507,23 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.message" property to be set to true in io-package.json
-	//  * @param {ioBroker.Message} obj
-	//  */
-	// onMessage(obj) {
-	// 	if (typeof obj === "object" && obj.message) {
-	// 		if (obj.command === "send") {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info("send command");
+	/**
+	 * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+	 * Using this method requires "common.message" property to be set to true in io-package.json
+	 * @param {ioBroker.Message} obj
+	 */
+	onMessage(obj) {
+		if (typeof obj === "object" && obj.message) {
+			this.log.error(JSON.stringify(obj));
+			if (obj.command === "send") {
+				// e.g. send email or pushover or whatever
+				this.log.info("send command");
 
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-	// 		}
-	// 	}
-	// }
+				// Send response in callback if required
+				if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+			}
+		}
+	}
 
 }
 
