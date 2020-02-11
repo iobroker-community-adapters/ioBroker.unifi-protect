@@ -100,7 +100,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async renewToken() {
-		this.apiAuthBearerToken = this.getApiAuthBearerToken();
+		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 	}
 
 	getApiAuthBearerToken() {
@@ -140,8 +140,43 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	// 		this.apiAccessKey = await this.getApiAccessKey();
 	getApiAccessKey() {
+		return new Promise((resolve, reject) => {
+			const options = {
+				hostname: this.config.protectip,
+				port: this.config.protectport,
+				path: `/api/auth/access-key`,
+				method: "POST",
+				rejectUnauthorized: false,
+				timeout: 10000,
+				headers: {
+					"Authorization": "Bearer " + this.apiAuthBearerToken
+				}
+			};
 
+			const req = https.request(options, res => {
+				let data = "";
+				res.on("data", d => {
+					data += d;
+				});
+				res.on("end", () => {
+					if (res.statusCode == 200) {
+						resolve(JSON.parse(data).accessKey);
+					} else if (res.statusCode == 401 || res.statusCode == 403) {
+						this.log.error("Unifi Protect reported authorization failure");
+						this.renewToken();
+						reject();
+					}
+				});
+			});
+
+			req.on("error", e => {
+				this.log.error(e.toString());
+				reject();
+			});
+			req.end();
+		});
 	}
 
 	getCameraList() {
@@ -230,6 +265,18 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+	getThumbnail(thumb, width) {
+		const apiAccessKey = this.getApiAccessKey();
+		const height = width / 1.8;
+		return `https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
+	}
+
+	getSnapshot(camera) {
+		const getApiAccessKey = this.getApiAccessKey();
+		const ts = Date.now() * 1000;
+		return `https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`;
+	}
+
 	updateData() {
 		this.getCameraList();
 		this.getMotionEvents();
@@ -276,8 +323,6 @@ class UnifiProtect extends utils.Adapter {
 				"Content-Length": data.length
 			}
 		};
-
-		this.log.error(`/api/cameras/${cameraid}`);
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
@@ -401,7 +446,6 @@ class UnifiProtect extends utils.Adapter {
 	 * Function to create a device
 	 */
 	createOwnDevice(name, desc) {
-
 		if (typeof (desc) === "undefined")
 			desc = name;
 
@@ -420,11 +464,11 @@ class UnifiProtect extends utils.Adapter {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
 		});
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
-			stateArray = this.createOwnState("cameras." + motionEvents[motionEvents.length - 1].camera + ".lastMotion." + key, value, key, stateArray);
 		});
 		this.processStateChanges(stateArray, this);
 	}
