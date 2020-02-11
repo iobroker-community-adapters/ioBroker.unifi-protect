@@ -374,8 +374,8 @@ class UnifiProtect extends utils.Adapter {
 		if (Array.isArray(value) && typeof value[0] === "object") {
 			this.createOwnChannel(name);
 			this.log.error(JSON.stringify(value));
-			for (let i = 0; i < value.length; i++) {
-				Object.entries(value[i]).forEach(([key, value]) => {
+			for (let i = 0; i < value[0].length; i++) {
+				Object.entries(value[0][i]).forEach(([key, value]) => {
 					stateArray = this.createOwnState(name + "." + i + "." + key, value, key, stateArray);
 				});
 				return stateArray;
