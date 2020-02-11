@@ -371,8 +371,17 @@ class UnifiProtect extends utils.Adapter {
 		if (typeof (desc) === "undefined")
 			desc = name;
 
-		if (Array.isArray(value))
-			value = value.toString();
+		if (Array.isArray(value) && typeof value[0] === "object") {
+			this.createOwnChannel(name);
+			for (let i = 0; i < value.length; i++) {
+				this.log.error(JSON.stringify(value[i]));
+				this.createOwnChannel(name+"."+i);
+				Object.entries(value).forEach(([key, value]) => {
+					stateArray = this.createOwnState(name + "." + i + "." + key, value, key, stateArray);
+				});
+				return stateArray;
+			}
+		}
 
 		if (typeof value === "object" && value !== null) {
 			this.createOwnChannel(name);
@@ -381,6 +390,9 @@ class UnifiProtect extends utils.Adapter {
 			});
 			return stateArray;
 		}
+
+		if (Array.isArray(value))
+			value = value.toString();
 
 		let write = false;
 		for (let i = 0; i < this.writeables.length; i++) {
