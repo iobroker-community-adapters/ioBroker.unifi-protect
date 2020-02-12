@@ -513,8 +513,8 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.Message} obj
 	 */
 	onMessage(obj) {
+		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
-			this.log.error(JSON.stringify(obj));
 			if (obj.command === "send") {
 				// e.g. send email or pushover or whatever
 				this.log.info("send command");
