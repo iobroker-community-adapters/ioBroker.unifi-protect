@@ -512,15 +512,15 @@ class UnifiProtect extends utils.Adapter {
 	 * Using this method requires "common.message" property to be set to true in io-package.json
 	 * @param {ioBroker.Message} obj
 	 */
-	onMessage(obj) {
+	async onMessage(obj) {
 		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
 			if (obj.command === "getThumbnail") {
 				const json = JSON.parse(JSON.stringify(obj.message));
-				if (obj.callback) this.sendTo(obj.from, obj.command, this.getThumbnail(json.thumbnail), obj.callback);
+				if (obj.callback) this.sendTo(obj.from, obj.command, await this.getThumbnail(json.thumbnail), obj.callback);
 			} else if (obj.command === "getSnapshot") {
 				const json = JSON.parse(JSON.stringify(obj.message));
-				if (obj.callback) this.sendTo(obj.from, obj.command, this.getSnapshot(json.cameraid), obj.callback);
+				if (obj.callback) this.sendTo(obj.from, obj.command, await this.getSnapshot(json.cameraid), obj.callback);
 			}
 		}
 	}
