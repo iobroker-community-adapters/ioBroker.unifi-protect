@@ -266,7 +266,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	getThumbnail(thumb, width) {
+	getThumbnail(thumb, width=640) {
 		const apiAccessKey = this.getApiAccessKey();
 		const height = width / 1.8;
 		return `https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
@@ -515,12 +515,12 @@ class UnifiProtect extends utils.Adapter {
 	onMessage(obj) {
 		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
-			if (obj.command === "send") {
-				// e.g. send email or pushover or whatever
-				this.log.info("send command");
-
-				// Send response in callback if required
-				if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+			if (obj.command === "getThumbnail") {
+				const json = JSON.parse(JSON.stringify(obj.message));
+				if (obj.callback) this.sendTo(obj.from, obj.command, this.getThumbnail(json.thumbnail), obj.callback);
+			} else if (obj.command === "getSnapshot") {
+				const json = JSON.parse(JSON.stringify(obj.message));
+				if (obj.callback) this.sendTo(obj.from, obj.command, this.getSnapshot(json.cameraid), obj.callback);
 			}
 		}
 	}
