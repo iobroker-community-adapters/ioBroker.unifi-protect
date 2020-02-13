@@ -54,10 +54,8 @@ class UnifiProtect extends utils.Adapter {
 				//noinspection JSUnresolvedVariable
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
+			this.updateData();
 		});
-
-		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
-		this.updateData();
 	}
 
 	/**
@@ -120,11 +118,14 @@ class UnifiProtect extends utils.Adapter {
 		return result;
 	}
 
-	async renewToken() {
-		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+	async renewToken(force = false) {
+		if (!this.apiAuthBearerToken || force) {
+			this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+		}
 	}
 
 	updateData() {
+		this.renewToken();
 		this.getCameraList();
 		this.getMotionEvents();
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
@@ -192,7 +193,7 @@ class UnifiProtect extends utils.Adapter {
 						resolve(JSON.parse(data).accessKey);
 					} else if (res.statusCode == 401 || res.statusCode == 403) {
 						this.log.error("Unifi Protect reported authorization failure");
-						this.renewToken();
+						this.renewToken(true);
 						reject();
 					}
 				});
@@ -238,7 +239,7 @@ class UnifiProtect extends utils.Adapter {
 					this.processStateChanges(stateArray, this);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
-					this.renewToken();
+					this.renewToken(true);
 				}
 			});
 		});
@@ -279,7 +280,7 @@ class UnifiProtect extends utils.Adapter {
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("Unifi Protect reported authorization failure");
-					this.renewToken();
+					this.renewToken(true);
 				} else {
 					this.log.error("Status Code: " + res.statusCode);
 				}
