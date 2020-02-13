@@ -90,11 +90,10 @@
             "zh-cn": "统一保护"
         },
         "authors": [
-            "Peter Baumert <peter.baumert@outlook.de>"
+            "Peter Baumert <ioBroker.unifi-protect@outlook.com>"
         ],
         "keywords": [
             "ioBroker",
-            "template",
             "Smart Home",
             "home automation"
         ],
@@ -121,9 +120,12 @@
     },
     "native": {
         "protectip": "127.0.0.1",
-        "protectport": "7773",
+        "protectport": 7773,
         "username": "admin",
-        "password": ""
+		"password": "",
+		"numMotions": 10,
+		"secMotions": 86400,
+		"interval": 60
     },
     "objects": [],
     "instanceObjects": []

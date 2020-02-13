@@ -35,7 +35,7 @@ class UnifiProtect extends utils.Adapter {
 		];
 
 		this.on("ready", this.onReady.bind(this));
-		this.on("objectChange", this.onObjectChange.bind(this));
+		//this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
 		this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
@@ -46,9 +46,18 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	async onReady() {
 		this.subscribeStates("*");
+		this.getForeignObject("system.config", (err, obj) => {
+			if (obj && obj.native && obj.native.secret) {
+				//noinspection JSUnresolvedVariable
+				this.config.password = this.decrypt(obj.native.secret, this.config.password);
+			} else {
+				//noinspection JSUnresolvedVariable
+				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
+			}
+		});
+
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		this.updateData();
-		setInterval(() => this.updateData(), 60000);
 	}
 
 	/**
@@ -57,6 +66,9 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	onUnload(callback) {
 		try {
+			if (this.timer) {
+				clearTimeout(this.timer);
+			}
 			this.log.info("cleaned everything up...");
 			callback();
 		} catch (e) {
@@ -64,20 +76,20 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
-	/**
-	 * Is called if a subscribed object changes
-	 * @param {string} id
-	 * @param {ioBroker.Object | null | undefined} obj
-	 */
-	onObjectChange(id, obj) {
-		if (obj) {
-			// The object was changed
-			this.log.silly(`object ${id} changed: ${JSON.stringify(obj)}`);
-		} else {
-			// The object was deleted
-			this.log.silly(`object ${id} deleted`);
-		}
-	}
+	// /**
+	//  * Is called if a subscribed object changes
+	//  * @param {string} id
+	//  * @param {ioBroker.Object | null | undefined} obj
+	//  */
+	// onObjectChange(id, obj) {
+	// 	if (obj) {
+	// 		// The object was changed
+	// 		this.log.silly(`object ${id} changed: ${JSON.stringify(obj)}`);
+	// 	} else {
+	// 		// The object was deleted
+	// 		this.log.silly(`object ${id} deleted`);
+	// 	}
+	// }
 
 	/**
 	 * Is called if a subscribed state changes
@@ -100,8 +112,22 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
+	decrypt(key, value) {
+		let result = "";
+		for (let i = 0; i < value.length; ++i) {
+			result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+		}
+		return result;
+	}
+
 	async renewToken() {
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+	}
+
+	updateData() {
+		this.getCameraList();
+		this.getMotionEvents();
+		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
 	getApiAuthBearerToken() {
@@ -225,7 +251,7 @@ class UnifiProtect extends utils.Adapter {
 
 	getMotionEvents() {
 		const now = Date.now();
-		const eventStart = now - (86400 * 1000);
+		const eventStart = now - (this.config.secMotions * 1000);
 		const eventEnd = now + (10 * 1000);
 
 		const options = {
@@ -276,11 +302,6 @@ class UnifiProtect extends utils.Adapter {
 		const getApiAccessKey = await this.getApiAccessKey();
 		const ts = Date.now() * 1000;
 		return `https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`;
-	}
-
-	updateData() {
-		this.getCameraList();
-		this.getMotionEvents();
 	}
 
 	changeSetting(state, val) {
