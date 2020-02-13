@@ -18,29 +18,63 @@
 	<script type="text/javascript" src="words.js"></script>
 
 	<script type="text/javascript">
-		// This will be called by the admin adapter when the settings page loads
-		function load(settings, onChange) {
+		var secret;
+
+		function encrypt(key, value) {
+			var result = '';
+			for (var i = 0; i < value.length; ++i) {
+				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+			}
+			return result;
+		}
+
+		function decrypt(key, value) {
+			var result = '';
+			for (var i = 0; i < value.length; ++i) {
+				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+			}
+			return result;
+		}
+
+		// the function loadSettings has to exist ...
+		function loadHelper(settings, onChange) {
 			// example: select elements with id=key and class=value and insert value
 			if (!settings) return;
+			if (settings.electricityPollingInterval === undefined) settings.electricityPollingInterval = 20;
+
 			$('.value').each(function () {
 				var $key = $(this);
 				var id = $key.attr('id');
+				if (id === 'password') {
+					settings[id] = decrypt(secret, settings[id]);
+				}
+
 				if ($key.attr('type') === 'checkbox') {
 					// do not call onChange direct, because onChange could expect some arguments
-					$key.prop('checked', settings[id])
-						.on('change', () => onChange())
-						;
+					$key.prop('checked', settings[id]).change(function () {
+						onChange();
+					});
 				} else {
 					// do not call onChange direct, because onChange could expect some arguments
-					$key.val(settings[id])
-						.on('change', () => onChange())
-						.on('keyup', () => onChange())
-						;
+					$key.val(settings[id]).change(function () {
+						onChange();
+					}).keyup(function () {
+						onChange();
+					});
 				}
 			});
 			onChange(false);
-			// reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
-			if (M) M.updateTextFields();
+			M.updateTextFields();  // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
+		}
+
+		// the function loadSettings has to exist ...
+		function load(settings, onChange) {
+			socket.emit('getObject', 'system.config', function (err, obj) {
+				secret = (obj.native ? obj.native.secret : '') || 'Y5JQ6qCfnhysf9NG';
+				loadHelper(settings, onChange);
+			});
+
+			onChange(false);
 		}
 
 		// This will be called by the admin adapter when the user presses the save button
@@ -49,12 +83,19 @@
 			var obj = {};
 			$('.value').each(function () {
 				var $this = $(this);
+				var id = $this.attr('id');
+
 				if ($this.attr('type') === 'checkbox') {
-					obj[$this.attr('id')] = $this.prop('checked');
+					obj[id] = $this.prop('checked');
 				} else {
-					obj[$this.attr('id')] = $this.val();
+					var value = $this.val();
+					if (id === 'password') {
+						value = encrypt(secret, value);
+					}
+					obj[id] = value;
 				}
 			});
+
 			callback(obj);
 		}
 	</script>
@@ -81,7 +122,7 @@
 			</div>
 
 			<div class="col s6 input-field">
-				<input type="text" class="value" id="protectport" />
+				<input type="number" class="value" id="protectport" />
 				<label for="protectport" class="translate">Port</label>
 			</div>
 
@@ -93,6 +134,21 @@
 			<div class="col s6 input-field">
 				<input type="password" class="value" id="password" />
 				<label for="password" class="translate">Password</label>
+			</div>
+
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="interval" />
+				<label for="interval" class="translate">Refresh Interval</label>
+			</div>
+
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="numMotions" />
+				<label for="numMotions" class="translate">Number of Motions</label>
+			</div>
+
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="secMotions" />
+				<label for="secMotions" class="translate">Last x Seconds of Motions</label>
 			</div>
 		</div>
 

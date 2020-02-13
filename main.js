@@ -25,6 +25,7 @@ class UnifiProtect extends utils.Adapter {
 
 		this.writeables = [
 			"name",
+			"isRtspEnabled",
 			"ledSettings.isEnabled",
 			"osdSettings.isNameEnabled",
 			"osdSettings.isDebugEnabled",
@@ -34,9 +35,9 @@ class UnifiProtect extends utils.Adapter {
 		];
 
 		this.on("ready", this.onReady.bind(this));
-		this.on("objectChange", this.onObjectChange.bind(this));
+		//this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
-		// this.on("message", this.onMessage.bind(this));
+		this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
 	}
 
@@ -45,9 +46,18 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	async onReady() {
 		this.subscribeStates("*");
+		this.getForeignObject("system.config", (err, obj) => {
+			if (obj && obj.native && obj.native.secret) {
+				//noinspection JSUnresolvedVariable
+				this.config.password = this.decrypt(obj.native.secret, this.config.password);
+			} else {
+				//noinspection JSUnresolvedVariable
+				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
+			}
+		});
+
 		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
 		this.updateData();
-		setInterval(() => this.updateData(), 60000);
 	}
 
 	/**
@@ -56,6 +66,9 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	onUnload(callback) {
 		try {
+			if (this.timer) {
+				clearTimeout(this.timer);
+			}
 			this.log.info("cleaned everything up...");
 			callback();
 		} catch (e) {
@@ -63,20 +76,20 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
-	/**
-	 * Is called if a subscribed object changes
-	 * @param {string} id
-	 * @param {ioBroker.Object | null | undefined} obj
-	 */
-	onObjectChange(id, obj) {
-		if (obj) {
-			// The object was changed
-			this.log.silly(`object ${id} changed: ${JSON.stringify(obj)}`);
-		} else {
-			// The object was deleted
-			this.log.silly(`object ${id} deleted`);
-		}
-	}
+	// /**
+	//  * Is called if a subscribed object changes
+	//  * @param {string} id
+	//  * @param {ioBroker.Object | null | undefined} obj
+	//  */
+	// onObjectChange(id, obj) {
+	// 	if (obj) {
+	// 		// The object was changed
+	// 		this.log.silly(`object ${id} changed: ${JSON.stringify(obj)}`);
+	// 	} else {
+	// 		// The object was deleted
+	// 		this.log.silly(`object ${id} deleted`);
+	// 	}
+	// }
 
 	/**
 	 * Is called if a subscribed state changes
@@ -99,8 +112,22 @@ class UnifiProtect extends utils.Adapter {
 		}
 	}
 
+	decrypt(key, value) {
+		let result = "";
+		for (let i = 0; i < value.length; ++i) {
+			result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
+		}
+		return result;
+	}
+
 	async renewToken() {
-		this.apiAuthBearerToken = this.getApiAuthBearerToken();
+		this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+	}
+
+	updateData() {
+		this.getCameraList();
+		this.getMotionEvents();
+		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
 	getApiAuthBearerToken() {
@@ -140,8 +167,43 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	// 		this.apiAccessKey = await this.getApiAccessKey();
 	getApiAccessKey() {
+		return new Promise((resolve, reject) => {
+			const options = {
+				hostname: this.config.protectip,
+				port: this.config.protectport,
+				path: `/api/auth/access-key`,
+				method: "POST",
+				rejectUnauthorized: false,
+				timeout: 10000,
+				headers: {
+					"Authorization": "Bearer " + this.apiAuthBearerToken
+				}
+			};
 
+			const req = https.request(options, res => {
+				let data = "";
+				res.on("data", d => {
+					data += d;
+				});
+				res.on("end", () => {
+					if (res.statusCode == 200) {
+						resolve(JSON.parse(data).accessKey);
+					} else if (res.statusCode == 401 || res.statusCode == 403) {
+						this.log.error("Unifi Protect reported authorization failure");
+						this.renewToken();
+						reject();
+					}
+				});
+			});
+
+			req.on("error", e => {
+				this.log.error(e.toString());
+				reject();
+			});
+			req.end();
+		});
 	}
 
 	getCameraList() {
@@ -189,7 +251,7 @@ class UnifiProtect extends utils.Adapter {
 
 	getMotionEvents() {
 		const now = Date.now();
-		const eventStart = now - (86400 * 1000);
+		const eventStart = now - (this.config.secMotions * 1000);
 		const eventEnd = now + (10 * 1000);
 
 		const options = {
@@ -230,9 +292,16 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	updateData() {
-		this.getCameraList();
-		this.getMotionEvents();
+	async getThumbnail(thumb, callback, width = 640) {
+		const apiAccessKey = await this.getApiAccessKey();
+		const height = width / 1.8;
+		callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
+	}
+
+	async getSnapshot(camera, callback) {
+		const getApiAccessKey = await this.getApiAccessKey();
+		const ts = Date.now() * 1000;
+		callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
 	}
 
 	changeSetting(state, val) {
@@ -276,8 +345,6 @@ class UnifiProtect extends utils.Adapter {
 				"Content-Length": data.length
 			}
 		};
-
-		this.log.error(`/api/cameras/${cameraid}`);
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
@@ -326,8 +393,16 @@ class UnifiProtect extends utils.Adapter {
 		if (typeof (desc) === "undefined")
 			desc = name;
 
-		if (Array.isArray(value))
-			value = value.toString();
+		if (Array.isArray(value) && typeof value[0] === "object" && typeof value[0].id !== "undefined") {
+			this.createOwnChannel(name);
+			for (let i = 0; i < value.length; i++) {
+				const id = value[i].id;
+				Object.entries(value[i]).forEach(([key, val]) => {
+					stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray);
+				});
+			}
+			return stateArray;
+		}
 
 		if (typeof value === "object" && value !== null) {
 			this.createOwnChannel(name);
@@ -336,6 +411,9 @@ class UnifiProtect extends utils.Adapter {
 			});
 			return stateArray;
 		}
+
+		if (Array.isArray(value))
+			value = value.toString();
 
 		let write = false;
 		for (let i = 0; i < this.writeables.length; i++) {
@@ -401,7 +479,6 @@ class UnifiProtect extends utils.Adapter {
 	 * Function to create a device
 	 */
 	createOwnDevice(name, desc) {
-
 		if (typeof (desc) === "undefined")
 			desc = name;
 
@@ -420,11 +497,11 @@ class UnifiProtect extends utils.Adapter {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
 		});
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
-			stateArray = this.createOwnState("cameras." + motionEvents[motionEvents.length - 1].camera + ".lastMotion." + key, value, key, stateArray);
 		});
 		this.processStateChanges(stateArray, this);
 	}
@@ -451,22 +528,23 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.message" property to be set to true in io-package.json
-	//  * @param {ioBroker.Message} obj
-	//  */
-	// onMessage(obj) {
-	// 	if (typeof obj === "object" && obj.message) {
-	// 		if (obj.command === "send") {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info("send command");
-
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-	// 		}
-	// 	}
-	// }
+	/**
+	 * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+	 * Using this method requires "common.message" property to be set to true in io-package.json
+	 * @param {ioBroker.Message} obj
+	 */
+	onMessage(obj) {
+		this.log.error(JSON.stringify(obj));
+		if (typeof obj === "object" && obj.message) {
+			const json = JSON.parse(JSON.stringify(obj.message));
+			const that = this;
+			if (obj.command === "getThumbnail") {
+				if (obj.callback) this.getThumbnail(json.thumbnail, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
+			} else if (obj.command === "getSnapshot") {
+				if (obj.callback) this.getSnapshot(json.cameraid, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
+			}
+		}
+	}
 
 }
 
