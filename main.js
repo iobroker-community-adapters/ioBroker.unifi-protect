@@ -292,16 +292,16 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getThumbnail(thumb, width=640) {
+	async getThumbnail(thumb, callback, width = 640) {
 		const apiAccessKey = await this.getApiAccessKey();
 		const height = width / 1.8;
-		return `https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
+		callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
 	}
 
-	async getSnapshot(camera) {
+	async getSnapshot(camera, callback) {
 		const getApiAccessKey = await this.getApiAccessKey();
 		const ts = Date.now() * 1000;
-		return `https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`;
+		callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
 	}
 
 	changeSetting(state, val) {
@@ -536,12 +536,12 @@ class UnifiProtect extends utils.Adapter {
 	onMessage(obj) {
 		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
+			const json = JSON.parse(JSON.stringify(obj.message));
+			const that = this;
 			if (obj.command === "getThumbnail") {
-				const json = JSON.parse(JSON.stringify(obj.message));
-				if (obj.callback) this.sendTo(obj.from, obj.command, this.getThumbnail(json.thumbnail), obj.callback);
+				if (obj.callback) this.getThumbnail(json.thumbnail, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
 			} else if (obj.command === "getSnapshot") {
-				const json = JSON.parse(JSON.stringify(obj.message));
-				if (obj.callback) this.sendTo(obj.from, obj.command, this.getSnapshot(json.cameraid), obj.callback);
+				if (obj.callback) this.getSnapshot(json.cameraid, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
 			}
 		}
 	}
