@@ -52,6 +52,9 @@ class UnifiProtect extends utils.Adapter {
 			} else {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
+			this.camerasDone = true;
+			this.motionsDone = true;
+			this.gotToken = false;
 			this.updateData();
 		});
 	}
@@ -119,13 +122,18 @@ class UnifiProtect extends utils.Adapter {
 	async renewToken(force = false) {
 		if (!this.apiAuthBearerToken || force) {
 			this.apiAuthBearerToken = await this.getApiAuthBearerToken().catch((err) => console.log(err.toString()));
+			this.gotToken = true;
 		}
 	}
 
 	updateData() {
 		this.renewToken();
-		this.getCameraList();
-		this.getMotionEvents();
+		if (this.camerasDone && this.gotToken) {
+			this.getCameraList();
+		}
+		if (this.motionsDone && this.gotToken) {
+			this.getMotionEvents();
+		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
@@ -220,6 +228,7 @@ class UnifiProtect extends utils.Adapter {
 
 		const req = https.request(options, res => {
 			let data = "";
+			this.camerasDone = false;
 			res.on("data", d => {
 				data += d;
 			});
@@ -234,21 +243,24 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray);
 						});
 					});
-					this.processStateChanges(stateArray, this);
+					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getCameraList: Unifi Protect reported authorization failure");
+					this.camerasDone = true;
 					this.renewToken(true);
 				}
 			});
 		});
 
 		req.on("error", e => {
+			this.camerasDone = true;
 			this.log.error(e.toString());
 		});
 		req.end();
 	}
 
 	getMotionEvents() {
+		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - (this.config.secMotions * 1000);
 		const eventEnd = now + (10 * 1000);
@@ -278,8 +290,10 @@ class UnifiProtect extends utils.Adapter {
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
+					this.motionsDone = true;
 					this.renewToken(true);
 				} else {
+					this.motionsDone = true;
 					this.log.error("Status Code: " + res.statusCode);
 				}
 			});
@@ -502,7 +516,7 @@ class UnifiProtect extends utils.Adapter {
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
 		});
-		this.processStateChanges(stateArray, this);
+		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
 	}
 
 	deleteOldMotionEvents(motionEvents) {
