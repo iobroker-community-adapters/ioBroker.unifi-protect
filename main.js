@@ -48,10 +48,8 @@ class UnifiProtect extends utils.Adapter {
 		this.subscribeStates("*");
 		this.getForeignObject("system.config", (err, obj) => {
 			if (obj && obj.native && obj.native.secret) {
-				//noinspection JSUnresolvedVariable
 				this.config.password = this.decrypt(obj.native.secret, this.config.password);
 			} else {
-				//noinspection JSUnresolvedVariable
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
 			this.updateData();
@@ -120,7 +118,7 @@ class UnifiProtect extends utils.Adapter {
 
 	async renewToken(force = false) {
 		if (!this.apiAuthBearerToken || force) {
-			this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+			this.apiAuthBearerToken = await this.getApiAuthBearerToken().catch((err) => console.log(err.toString()));
 		}
 	}
 
@@ -154,7 +152,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getApiAuthBearerToken: Unifi Protect reported authorization failure");
 					reject();
 				}
 			});
@@ -192,7 +190,7 @@ class UnifiProtect extends utils.Adapter {
 					if (res.statusCode == 200) {
 						resolve(JSON.parse(data).accessKey);
 					} else if (res.statusCode == 401 || res.statusCode == 403) {
-						this.log.error("Unifi Protect reported authorization failure");
+						this.log.error("getApiAccessKey: Unifi Protect reported authorization failure");
 						this.renewToken(true);
 						reject();
 					}
@@ -238,7 +236,7 @@ class UnifiProtect extends utils.Adapter {
 					});
 					this.processStateChanges(stateArray, this);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getCameraList: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 				}
 			});
@@ -279,7 +277,7 @@ class UnifiProtect extends utils.Adapter {
 					this.deleteOldMotionEvents(motionEvents);
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 				} else {
 					this.log.error("Status Code: " + res.statusCode);
