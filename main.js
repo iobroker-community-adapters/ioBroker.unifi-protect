@@ -521,12 +521,11 @@ class UnifiProtect extends utils.Adapter {
 
 	deleteOldMotionEvents(motionEvents) {
 		const that = this;
-		that.getChannelsOf("motions", function (err, channels) {
+		that.getStatesOf("motions", function (err, channels) {
 			if (channels !== undefined) {
 				channels.forEach(channel => {
-					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.metadata)?$/i);
+					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)?$/i);
 					if (found != null && found.groups !== undefined) {
-						that.log.error(found.groups.motionid + " " + channel._id);
 						let isincur = false;
 						for (let i = 0; i < motionEvents.length; i++) {
 							if (motionEvents[i].id == found.groups.motionid) {
@@ -534,7 +533,7 @@ class UnifiProtect extends utils.Adapter {
 							}
 						}
 						if (!isincur && found.groups.motionid != "lastMotion") {
-							that.delObject(channel._id, true);
+							that.delForeignObject(channel._id, { recursive: true });
 						}
 					}
 				});
