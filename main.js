@@ -526,6 +526,7 @@ class UnifiProtect extends utils.Adapter {
 				channels.forEach(channel => {
 					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.metadata)?$/i);
 					if (found != null && found.groups !== undefined) {
+						that.log.error(found.groups.motionid + " " + channel._id);
 						let isincur = false;
 						for (let i = 0; i < motionEvents.length; i++) {
 							if (motionEvents[i].id == found.groups.motionid) {
