@@ -513,10 +513,11 @@ class UnifiProtect extends utils.Adapter {
 				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
 		});
-		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
+		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
 			});
+		}
 	}
 
 	deleteOldMotionEvents(motionEvents) {
