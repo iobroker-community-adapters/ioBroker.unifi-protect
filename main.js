@@ -534,7 +534,7 @@ class UnifiProtect extends utils.Adapter {
 							}
 						}
 						if (!isincur && found.groups.motionid != "lastMotion") {
-							that.delObject(channel._id, {recursive: true});
+							that.delObject(channel._id, {"recursive": true});
 						}
 					}
 				});
