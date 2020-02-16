@@ -514,9 +514,9 @@ class UnifiProtect extends utils.Adapter {
 			});
 		});
 		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
-		});
-		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
+			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
+				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+			});
 	}
 
 	deleteOldMotionEvents(motionEvents) {
