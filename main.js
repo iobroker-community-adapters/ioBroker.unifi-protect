@@ -262,7 +262,7 @@ class UnifiProtect extends utils.Adapter {
 	getMotionEvents() {
 		this.motionsDone = false;
 		const now = Date.now();
-		const eventStart = now - (this.config.secMotions * 1000);
+		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10 ) * 1000);
 		const eventEnd = now + (10 * 1000);
 
 		const options = {
@@ -509,7 +509,9 @@ class UnifiProtect extends utils.Adapter {
 		motionEvents.forEach(motionEvent => {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				if (this.config.getMotions) {
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				}
 				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
 		});
