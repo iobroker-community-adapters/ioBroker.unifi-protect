@@ -12,11 +12,6 @@ const https = require("https");
 // Load your modules here, e.g.:
 // const fs = require("fs");
 
-const paths = {
-	udmLogin: "/proxy/protect/api/auth/login",
-	Login: "/api/auth"
-};
-
 class UnifiProtect extends utils.Adapter {
 
 	/**
@@ -152,7 +147,7 @@ class UnifiProtect extends utils.Adapter {
 			const options = {
 				hostname: this.config.protectip,
 				port: this.config.protectport,
-				path: (this.isUDM ? paths.udmLogin : paths.Login),
+				path: "/api/auth",
 				method: "POST",
 				rejectUnauthorized: false,
 				timeout: 10000,
@@ -164,11 +159,7 @@ class UnifiProtect extends utils.Adapter {
 
 			const req = https.request(options, res => {
 				if (res.statusCode == 200) {
-					if (!this.isUDM) {
-						resolve(res.headers["authorization"]);
-					} else {
-						resolve(this.extractCsrfTokenFromCookie(res.headers["set-cookie"]));
-					}
+					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getApiAuthBearerToken: Unifi Protect reported authorization failure");
 					reject();
@@ -224,25 +215,16 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	getCameraList() {
-		let header = "";
-		if (this.isUDM) {
-			header = JSON.stringify({
-				"x-csrf-token": this.apiAuthBearerToken
-			});
-		} else {
-			header = JSON.stringify({
-				"Authorization": "Bearer " + this.apiAuthBearerToken,
-			});
-		}
-		
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? "/proxy/protect": "")+`/api/bootstrap`,
+			path: `/api/bootstrap`,
 			method: "GET",
 			rejectUnauthorized: false,
 			timeout: 10000,
-			headers: header
+			headers: {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			}
 		};
 
 		const req = https.request(options, res => {
@@ -566,6 +548,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	extractCsrfTokenFromCookie(cookie) {
+		
 		if (cookie !== "") {
 			const cookie_bits = cookie.split("=");
 			let jwt = "";
