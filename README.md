@@ -17,7 +17,7 @@ Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.0.8 (2020-02-17)
 * made motion Events optional (Last Motion is always stored)
 * made interval and "last x seconds of motions" adjustable
 * properly delete old motions
