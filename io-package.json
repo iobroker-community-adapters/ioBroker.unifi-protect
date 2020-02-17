@@ -122,9 +122,10 @@
         "protectip": "127.0.0.1",
         "protectport": 7773,
         "username": "admin",
-		"password": "",
+        "password": "",
+        "getMotions": false,
 		"numMotions": 10,
-		"secMotions": 86400,
+		"secMotions": 600,
 		"interval": 60
     },
     "objects": [],

@@ -48,12 +48,14 @@ class UnifiProtect extends utils.Adapter {
 		this.subscribeStates("*");
 		this.getForeignObject("system.config", (err, obj) => {
 			if (obj && obj.native && obj.native.secret) {
-				//noinspection JSUnresolvedVariable
 				this.config.password = this.decrypt(obj.native.secret, this.config.password);
 			} else {
-				//noinspection JSUnresolvedVariable
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
+			this.isUDM = false;
+			this.camerasDone = true;
+			this.motionsDone = true;
+			this.gotToken = false;
 			this.updateData();
 		});
 	}
@@ -120,14 +122,19 @@ class UnifiProtect extends utils.Adapter {
 
 	async renewToken(force = false) {
 		if (!this.apiAuthBearerToken || force) {
-			this.apiAuthBearerToken = await this.getApiAuthBearerToken();
+			this.apiAuthBearerToken = await this.getApiAuthBearerToken().catch((err) => console.log(err.toString()));
+			this.gotToken = true;
 		}
 	}
 
 	updateData() {
 		this.renewToken();
-		this.getCameraList();
-		this.getMotionEvents();
+		if (this.camerasDone && this.gotToken) {
+			this.getCameraList();
+		}
+		if (this.motionsDone && this.gotToken) {
+			this.getMotionEvents();
+		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
@@ -154,7 +161,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getApiAuthBearerToken: Unifi Protect reported authorization failure");
 					reject();
 				}
 			});
@@ -192,7 +199,7 @@ class UnifiProtect extends utils.Adapter {
 					if (res.statusCode == 200) {
 						resolve(JSON.parse(data).accessKey);
 					} else if (res.statusCode == 401 || res.statusCode == 403) {
-						this.log.error("Unifi Protect reported authorization failure");
+						this.log.error("getApiAccessKey: Unifi Protect reported authorization failure");
 						this.renewToken(true);
 						reject();
 					}
@@ -222,6 +229,7 @@ class UnifiProtect extends utils.Adapter {
 
 		const req = https.request(options, res => {
 			let data = "";
+			this.camerasDone = false;
 			res.on("data", d => {
 				data += d;
 			});
@@ -236,23 +244,26 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray);
 						});
 					});
-					this.processStateChanges(stateArray, this);
+					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getCameraList: Unifi Protect reported authorization failure");
+					this.camerasDone = true;
 					this.renewToken(true);
 				}
 			});
 		});
 
 		req.on("error", e => {
+			this.camerasDone = true;
 			this.log.error(e.toString());
 		});
 		req.end();
 	}
 
 	getMotionEvents() {
+		this.motionsDone = false;
 		const now = Date.now();
-		const eventStart = now - (this.config.secMotions * 1000);
+		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
 		const eventEnd = now + (10 * 1000);
 
 		const options = {
@@ -279,9 +290,11 @@ class UnifiProtect extends utils.Adapter {
 					this.deleteOldMotionEvents(motionEvents);
 					this.addMotionEvents(motionEvents);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("Unifi Protect reported authorization failure");
+					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
+					this.motionsDone = true;
 					this.renewToken(true);
 				} else {
+					this.motionsDone = true;
 					this.log.error("Status Code: " + res.statusCode);
 				}
 			});
@@ -289,6 +302,7 @@ class UnifiProtect extends utils.Adapter {
 
 		req.on("error", e => {
 			this.log.error(e.toString());
+			this.motionsDone = true;
 		});
 		req.end();
 	}
@@ -497,22 +511,26 @@ class UnifiProtect extends utils.Adapter {
 		motionEvents.forEach(motionEvent => {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				if (this.config.getMotions) {
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+				}
 				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
 		});
-		Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-			stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
-		});
-		this.processStateChanges(stateArray, this);
+		if (motionEvents.length > 0) {
+			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
+				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+			});
+		}
+		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
 	}
 
 	deleteOldMotionEvents(motionEvents) {
 		const that = this;
-		that.getChannelsOf("motions", function (err, channels) {
+		that.getStatesOf("motions", function (err, channels) {
 			if (channels !== undefined) {
 				channels.forEach(channel => {
-					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)$/i);
+					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)*$/i);
 					if (found != null && found.groups !== undefined) {
 						let isincur = false;
 						for (let i = 0; i < motionEvents.length; i++) {
@@ -520,13 +538,38 @@ class UnifiProtect extends utils.Adapter {
 								isincur = true;
 							}
 						}
-						if (!isincur) {
-							that.deleteChannel("motions", found.groups.motionid);
+						if (!isincur && found.groups.motionid != "lastMotion") {
+							that.delForeignObject(channel._id, { recursive: true });
 						}
 					}
 				});
 			}
 		});
+	}
+
+	extractCsrfTokenFromCookie(cookie) {
+		
+		if (cookie !== "") {
+			const cookie_bits = cookie.split("=");
+			let jwt = "";
+			if (typeof cookie_bits[1] !== undefined) {
+				jwt = cookie_bits[1];
+			} else {
+				return false;
+			}
+
+			const jwt_components = jwt.split(".");
+			let jwt_payload = "";
+			if (typeof jwt_components[1] !== undefined) {
+				jwt_payload = jwt_components[1];
+			} else {
+				return false;
+			}
+
+			return JSON.parse(Buffer.from(jwt_payload, "base64").toString()).csrfToken;
+		}
+
+		return false;
 	}
 
 	/**
