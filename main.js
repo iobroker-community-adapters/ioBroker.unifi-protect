@@ -520,6 +520,7 @@ class UnifiProtect extends utils.Adapter {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
 			});
 		}
+		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
 	}
 
 	deleteOldMotionEvents(motionEvents) {
