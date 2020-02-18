@@ -155,7 +155,8 @@ class UnifiProtect extends utils.Adapter {
 	determineEndpointStyle() {
 		return new Promise((resolve, reject) => {
 			const options = {
-				uri: `https://${this.config.protectip}:${this.config.protectport}`,
+				hostname: this.config.protectip,
+				port: this.config.protectport,
 				resolveWithFullResponse: true,
 				timeout: 1000
 			};
