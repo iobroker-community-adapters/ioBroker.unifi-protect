@@ -158,6 +158,7 @@ class UnifiProtect extends utils.Adapter {
 				hostname: this.config.protectip,
 				port: this.config.protectport,
 				resolveWithFullResponse: true,
+				rejectUnauthorized: false,
 				timeout: 1000
 			};
 
