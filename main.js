@@ -34,6 +34,15 @@ class UnifiProtect extends utils.Adapter {
 			"recordingSettings.mode"
 		];
 
+		this.paths = {
+			login: "/api/auth",
+			loginUDM: "/api/auth/login",
+			cameras: "/api/bootstrap",
+			camerasUDM: "/proxy/protect/api/bootstrap",
+			events: "/api/events",
+			eventsUDM: "/proxy/protect/api/events"
+		};
+
 		this.on("ready", this.onReady.bind(this));
 		//this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
@@ -138,6 +147,35 @@ class UnifiProtect extends utils.Adapter {
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
+	determineEndpointStyle(baseControllerUrl) {
+		return new Promise((resolve, reject) => {
+			const options = {
+				uri: baseControllerUrl,
+				resolveWithFullResponse: true,
+				timeout: 1000
+			};
+
+			const req = https.request(options, res => {
+				if (res.headers["x-csrf-token"]) {
+					resolve({
+						isUnifiOS: true,
+						csrfToken: res.headers["x-csrf-token"]
+					});
+				} else {
+					resolve({
+						isUnifiOS: false
+					});
+				}
+			});
+
+			req.on("error", e => {
+				this.log.error(e.toString());
+				reject();
+			});
+			req.end();
+		});
+	}
+
 	getApiAuthBearerToken() {
 		return new Promise((resolve, reject) => {
 			const data = JSON.stringify({
@@ -147,10 +185,11 @@ class UnifiProtect extends utils.Adapter {
 			const options = {
 				hostname: this.config.protectip,
 				port: this.config.protectport,
-				path: "/api/auth",
+				path: (this.isUDM ? this.paths.loginUDM : this.paths.login),
 				method: "POST",
 				rejectUnauthorized: false,
-				timeout: 10000,
+				resolveWithFullResponse: true,
+				timeout: 1000,
 				headers: {
 					"Content-Type": "application/json",
 					"Content-Length": data.length
@@ -218,7 +257,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/api/bootstrap`,
+			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras),
 			method: "GET",
 			rejectUnauthorized: false,
 			timeout: 10000,
@@ -269,7 +308,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/api/events?end=${eventEnd}&start=${eventStart}&type=motion`,
+			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
 			timeout: 10000,
@@ -566,7 +605,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	extractCsrfTokenFromCookie(cookie) {
-		
+
 		if (cookie !== "") {
 			const cookie_bits = cookie.split("=");
 			let jwt = "";
