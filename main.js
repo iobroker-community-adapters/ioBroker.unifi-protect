@@ -527,7 +527,25 @@ class UnifiProtect extends utils.Adapter {
 
 	deleteOldMotionEvents(motionEvents) {
 		const that = this;
-		that.getStatesOf("motions", function (err, channels) {
+		that.getStatesOf("motions", function (err, states) {
+			if (states !== undefined) {
+				states.forEach(state => {
+					const found = state._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)*$/i);
+					if (found != null && found.groups !== undefined) {
+						let isincur = false;
+						for (let i = 0; i < motionEvents.length; i++) {
+							if (motionEvents[i].id == found.groups.motionid) {
+								isincur = true;
+							}
+						}
+						if (!isincur && found.groups.motionid != "lastMotion") {
+							that.delForeignObject(state._id, { recursive: true });
+						}
+					}
+				});
+			}
+		});
+		that.getChannelsOf("motions", function (err, channels) {
 			if (channels !== undefined) {
 				channels.forEach(channel => {
 					const found = channel._id.match(/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)*$/i);
