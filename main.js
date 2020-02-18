@@ -62,6 +62,7 @@ class UnifiProtect extends utils.Adapter {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
 			this.isUDM = false;
+			this.csrfToken = null;
 			this.camerasDone = true;
 			this.motionsDone = true;
 			this.gotToken = false;
@@ -131,6 +132,10 @@ class UnifiProtect extends utils.Adapter {
 
 	async renewToken(force = false) {
 		if (!this.apiAuthBearerToken || force) {
+			const opt = await this.determineEndpointStyle().catch((err) => console.log(err.toString()));
+			this.isUDM = opt.isUDM;
+			this.csrfToken = opt.csrfToken;
+			this.log.error(JSON.stringify(opt));
 			this.apiAuthBearerToken = await this.getApiAuthBearerToken().catch((err) => console.log(err.toString()));
 			this.gotToken = true;
 		}
@@ -147,10 +152,10 @@ class UnifiProtect extends utils.Adapter {
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
-	determineEndpointStyle(baseControllerUrl) {
+	determineEndpointStyle() {
 		return new Promise((resolve, reject) => {
 			const options = {
-				uri: baseControllerUrl,
+				uri: `https://${this.config.protectip}:${this.config.protectport}`,
 				resolveWithFullResponse: true,
 				timeout: 1000
 			};
@@ -158,12 +163,13 @@ class UnifiProtect extends utils.Adapter {
 			const req = https.request(options, res => {
 				if (res.headers["x-csrf-token"]) {
 					resolve({
-						isUnifiOS: true,
+						isUDM: true,
 						csrfToken: res.headers["x-csrf-token"]
 					});
 				} else {
 					resolve({
-						isUnifiOS: false
+						isUDM: false,
+						csrfToken: null
 					});
 				}
 			});
