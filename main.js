@@ -643,15 +643,22 @@ class UnifiProtect extends utils.Adapter {
 
 	addMotionEvents(motionEvents) {
 		let stateArray = [];
+		const cameras = {};
+		let i = 0;
 		motionEvents.forEach(motionEvent => {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
 					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
 				}
-				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
+				cameras[motionEvent.camera] = i;
+				i++;
 			});
 		});
+		cameras.forEach(camera => {
+			this.log.error(camera+" "+cameras[camera]);
+		});
+		//stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
