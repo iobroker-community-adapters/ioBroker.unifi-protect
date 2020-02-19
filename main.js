@@ -420,6 +420,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					fs.writeFileSync(path, data.read()); 
+					callback(path);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
 					this.renewToken(true);
