@@ -138,7 +138,6 @@ class UnifiProtect extends utils.Adapter {
 			const opt = await this.determineEndpointStyle().catch(() => this.log.error("Couldn't determin Endpoint Style."));
 			this.isUDM = opt.isUDM;
 			this.csrfToken = opt.csrfToken;
-			this.cookies = opt.cookies;
 			this.log.error(JSON.stringify(opt));
 			this.apiAuthBearerToken = await this.login().catch(() => this.log.error("Couldn't login."));
 			this.gotToken = true;
@@ -169,8 +168,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.headers["x-csrf-token"]) {
 					resolve({
 						isUDM: true,
-						csrfToken: res.headers["x-csrf-token"],
-						cookies: res.headers["set-cookie"]
+						csrfToken: res.headers["x-csrf-token"]
 					});
 				} else {
 					resolve({
@@ -218,6 +216,10 @@ class UnifiProtect extends utils.Adapter {
 
 			const req = https.request(options, res => {
 				if (res.statusCode == 200) {
+					if(this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i,"");
+					}
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getApiAuthBearerToken: Unifi Protect reported authorization failure");
@@ -284,7 +286,8 @@ class UnifiProtect extends utils.Adapter {
 
 		if (this.isUDM) {
 			options.headers = {
-				"X-CSRF-Token": this.csrfToken
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
 			};
 		} else {
 			options.headers = {
@@ -332,25 +335,25 @@ class UnifiProtect extends utils.Adapter {
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
 		const eventEnd = now + (10 * 1000);
 
-		let headers;
-		if (this.isUDM) {
-			headers = {
-				"X-CSRF-Token": this.csrfToken
-			};
-		} else {
-			headers = {
-				"Authorization": "Bearer " + this.apiAuthBearerToken
-			};
-		}
-
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
-			headers: headers
+			headers: {}
 		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+		}
 
 		const req = https.request(options, res => {
 			let data = "";
@@ -421,29 +424,29 @@ class UnifiProtect extends utils.Adapter {
 			return;
 		}
 
-		let headers;
-		if (this.isUDM) {
-			headers = {
-				"X-CSRF-Token": this.csrfToken,
-				"Content-Type": "application/json",
-				"Content-Length": data.length
-			};
-		} else {
-			headers = {
-				"Authorization": "Bearer " + this.apiAuthBearerToken,
-				"Content-Type": "application/json",
-				"Content-Length": data.length
-			};
-		}
-
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras)+cameraid,
 			method: "PATCH",
 			rejectUnauthorized: false,
-			headers: headers
+			headers: {}
 		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies,
+				"Content-Type": "application/json",
+				"Content-Length": data.length
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken,
+				"Content-Type": "application/json",
+				"Content-Length": data.length
+			};
+		}
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
