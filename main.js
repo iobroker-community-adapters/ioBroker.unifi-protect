@@ -655,14 +655,14 @@ class UnifiProtect extends utils.Adapter {
 				i++;
 			});
 		});
-		Object.entries(cameras).forEach(([camera, id]) => {
-			Object.entries(motionEvents[id]).forEach(([key, value]) => {
-				stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray);
-			});
-		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+			});
+			Object.entries(cameras).forEach(([camera, id]) => {
+				Object.entries(motionEvents[id]).forEach(([key, value]) => {
+					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray);
+				});
 			});
 		}
 		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
