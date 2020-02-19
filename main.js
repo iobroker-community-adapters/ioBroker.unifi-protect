@@ -183,7 +183,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(e.toString());
+				this.log.error(JSON.stringify(e));
 				reject();
 			});
 			req.end();
@@ -231,7 +231,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(e.toString());
+				this.log.error(JSON.stringify(e));
 				reject();
 			});
 			req.write(data);
@@ -326,7 +326,7 @@ class UnifiProtect extends utils.Adapter {
 
 		req.on("error", e => {
 			this.camerasDone = true;
-			this.log.error(e.toString());
+			this.log.error(JSON.stringify(e));
 		});
 		req.end();
 	}
@@ -380,7 +380,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(e.toString());
+			this.log.error(JSON.stringify(e));
 			this.motionsDone = true;
 		});
 		req.end();
@@ -431,7 +431,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(e.toString());
+			this.log.error(JSON.stringify(e));
 		});
 		req.end();
 	}
@@ -505,7 +505,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(e.toString());
+			this.log.error(JSON.stringify(e));
 		});
 		req.write(data);
 		req.end();
