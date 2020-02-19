@@ -8,6 +8,8 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const https = require("https");
+const Stream = require("stream").Transform;
+const fs = require("fs"); 
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -42,7 +44,9 @@ class UnifiProtect extends utils.Adapter {
 			events: "/api/events",
 			eventsUDM: "/proxy/protect/api/events",
 			cameras: "/api/cameras/",
-			camerasUDM: "/proxy/protect/api/cameras/"
+			camerasUDM: "/proxy/protect/api/cameras/",
+			thumb: "/api/thumbnails/",
+			thumbUDM: "/proxy/protect/api/thumbnails/"
 		};
 
 		this.on("ready", this.onReady.bind(this));
@@ -382,12 +386,53 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getThumbnail(thumb, callback, width = 640) {
-		if (!this.isUDM) {
+	async getThumbnail(thumb, path, callback, width = 640) {
+		const height = width / 1.8;
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: "",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+			options.path = this.paths.thumbUDM + `${thumb}?h=${height}&w=${width}`;
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
 			const apiAccessKey = await this.getApiAccessKey();
-			const height = width / 1.8;
-			callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
+			options.path = this.paths.thumb + `${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
 		}
+
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					fs.writeFileSync(path, data.read()); 
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error(e.toString());
+		});
+		req.end();
 	}
 
 	async getSnapshot(camera, callback) {
@@ -689,7 +734,7 @@ class UnifiProtect extends utils.Adapter {
 			const json = JSON.parse(JSON.stringify(obj.message));
 			const that = this;
 			if (obj.command === "getThumbnail") {
-				if (obj.callback) this.getThumbnail(json.thumbnail, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
+				if (obj.callback) this.getThumbnail(json.thumbnail, json.path, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
 			} else if (obj.command === "getSnapshot") {
 				if (obj.callback) this.getSnapshot(json.cameraid, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
 			}
