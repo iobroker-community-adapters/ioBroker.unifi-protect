@@ -133,7 +133,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async renewToken(force = false) {
-		if (!this.apiAuthBearerToken || force) {
+		if ((!this.apiAuthBearerToken && !this.isUDM) || (!this.csrfToken && this.isUDM) || force) {
 			const opt = await this.determineEndpointStyle().catch(() => this.log.error("Couldn't determin Endpoint Style."));
 			this.isUDM = opt.isUDM;
 			this.csrfToken = opt.csrfToken;
