@@ -138,7 +138,6 @@ class UnifiProtect extends utils.Adapter {
 			const opt = await this.determineEndpointStyle().catch(() => this.log.error("Couldn't determin Endpoint Style."));
 			this.isUDM = opt.isUDM;
 			this.csrfToken = opt.csrfToken;
-			this.log.error(JSON.stringify(opt));
 			this.apiAuthBearerToken = await this.login().catch(() => this.log.error("Couldn't login."));
 			this.gotToken = true;
 		}
@@ -216,9 +215,9 @@ class UnifiProtect extends utils.Adapter {
 
 			const req = https.request(options, res => {
 				if (res.statusCode == 200) {
-					if(this.isUDM) {
+					if (this.isUDM) {
 						// @ts-ignore
-						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i,"");
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
 					}
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
@@ -303,7 +302,6 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					this.log.error(data);
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
@@ -385,15 +383,19 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async getThumbnail(thumb, callback, width = 640) {
-		const apiAccessKey = await this.getApiAccessKey();
-		const height = width / 1.8;
-		callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
+		if (!this.isUDM) {
+			const apiAccessKey = await this.getApiAccessKey();
+			const height = width / 1.8;
+			callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
+		}
 	}
 
 	async getSnapshot(camera, callback) {
-		const getApiAccessKey = await this.getApiAccessKey();
-		const ts = Date.now() * 1000;
-		callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
+		if (!this.isUDM) {
+			const getApiAccessKey = await this.getApiAccessKey();
+			const ts = Date.now() * 1000;
+			callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
+		}
 	}
 
 	changeSetting(state, val) {
@@ -427,7 +429,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras)+cameraid,
+			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras) + cameraid,
 			method: "PATCH",
 			rejectUnauthorized: false,
 			headers: {}
@@ -683,7 +685,6 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.Message} obj
 	 */
 	onMessage(obj) {
-		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
 			const json = JSON.parse(JSON.stringify(obj.message));
 			const that = this;
