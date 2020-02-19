@@ -9,7 +9,7 @@
 const utils = require("@iobroker/adapter-core");
 const https = require("https");
 const Stream = require("stream").Transform;
-const fs = require("fs"); 
+const fs = require("fs");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -419,7 +419,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					fs.writeFileSync(path, data.read()); 
+					fs.writeFileSync(path, data.read());
 					callback(path);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
@@ -655,10 +655,11 @@ class UnifiProtect extends utils.Adapter {
 				i++;
 			});
 		});
-		cameras.forEach(camera => {
-			this.log.error(camera+" "+cameras[camera]);
+		Object.entries(cameras).forEach(([camera, id]) => {
+			Object.entries(motionEvents[id]).forEach(([key, value]) => {
+				stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray);
+			});
 		});
-		//stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
