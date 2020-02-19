@@ -651,9 +651,9 @@ class UnifiProtect extends utils.Adapter {
 				if (this.config.getMotions) {
 					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
 				}
-				cameras[motionEvent.camera] = i;
-				i++;
 			});
+			cameras[motionEvent.camera] = i;
+			i++;
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
