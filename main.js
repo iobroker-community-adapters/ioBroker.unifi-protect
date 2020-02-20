@@ -183,7 +183,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+				this.log.error("determineEndpointStyle " + JSON.stringify(e));
 				if (e["code"] == "ECONNRESET") {
 					this.renewToken(true);
 				}
@@ -234,7 +234,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+				this.log.error("login " + JSON.stringify(e));
 				if (e["code"] == "ECONNRESET") {
 					this.renewToken(true);
 				}
@@ -332,7 +332,7 @@ class UnifiProtect extends utils.Adapter {
 
 		req.on("error", e => {
 			this.camerasDone = true;
-			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			this.log.error("getCameraList " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
@@ -389,7 +389,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			this.log.error("getMotionEvents " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
@@ -443,7 +443,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			this.log.error("getThumbnail " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
@@ -520,7 +520,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			this.log.error("changeSetting " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
