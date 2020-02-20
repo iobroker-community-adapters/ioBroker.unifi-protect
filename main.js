@@ -183,7 +183,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(JSON.stringify(e));
+				this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+				if (e["code"] == "ECONNRESET") {
+					this.renewToken(true);
+				}
 				reject();
 			});
 			req.end();
@@ -231,7 +234,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(JSON.stringify(e));
+				this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+				if (e["code"] == "ECONNRESET") {
+					this.renewToken(true);
+				}
 				reject();
 			});
 			req.write(data);
@@ -326,7 +332,10 @@ class UnifiProtect extends utils.Adapter {
 
 		req.on("error", e => {
 			this.camerasDone = true;
-			this.log.error(JSON.stringify(e));
+			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 		});
 		req.end();
 	}
@@ -380,7 +389,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(JSON.stringify(e));
+			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 			this.motionsDone = true;
 		});
 		req.end();
@@ -431,7 +443,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(JSON.stringify(e));
+			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 		});
 		req.end();
 	}
@@ -505,7 +520,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(JSON.stringify(e));
+			this.log.error(arguments.callee.name + " " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 		});
 		req.write(data);
 		req.end();
