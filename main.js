@@ -290,6 +290,7 @@ class UnifiProtect extends utils.Adapter {
 			path: (this.isUDM ? this.paths.bootstrapUDM : this.paths.bootstrap),
 			method: "GET",
 			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
 			headers: {}
 		};
 
@@ -312,6 +313,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
@@ -352,6 +357,7 @@ class UnifiProtect extends utils.Adapter {
 			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
 			headers: {}
 		};
 
@@ -373,6 +379,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+					}
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
 					this.deleteOldMotionEvents(motionEvents);
