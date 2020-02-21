@@ -521,6 +521,8 @@ class UnifiProtect extends utils.Adapter {
 			};
 		}
 
+		this.log.error(JSON.stringify(options));
+
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
 				this.log.debug(`Camera setting ${parent}.${setting} set to ${val}`);
