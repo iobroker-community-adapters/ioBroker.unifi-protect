@@ -307,8 +307,7 @@ class UnifiProtect extends utils.Adapter {
 			"Content-Length": Buffer.byteLength(data, "utf8"),
 			"Host": this.config.protectip,
 			"Origin": "https://${this.config.protectip}",
-			"Sec-Fetch-Mode": "cors",
-			"Sec-Fetch-Site": "same-origin"
+			"Referer": "https://${this.config.protectip}/protect/"
 		};
 
 		this.log.error(JSON.stringify(options));
@@ -328,6 +327,8 @@ class UnifiProtect extends utils.Adapter {
 				this.renewToken(true);
 			}
 		});
+
+		this.log.error("muh");
 		req.write(data);
 		req.end();
 
