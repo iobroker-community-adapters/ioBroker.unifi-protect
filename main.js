@@ -114,7 +114,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
-		if (state) {
+		if (state && !this.isUDM) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			for (let i = 0; i < this.writeables.length; i++) {
@@ -283,7 +283,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	setUser(authUserId) {
+	/*setUser(authUserId) {
 		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json; charset=utf-8", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
 		const data = JSON.stringify({
 			settings: {
@@ -332,7 +332,7 @@ class UnifiProtect extends utils.Adapter {
 		req.write(data);
 		req.end();
 
-	}
+	}*/
 
 	getCameraList() {
 		const options = {
@@ -367,7 +367,7 @@ class UnifiProtect extends utils.Adapter {
 					if (this.isUDM) {
 						// @ts-ignore
 						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
-						this.setUser(JSON.parse(data).authUserId);
+						/*this.setUser(JSON.parse(data).authUserId);*/
 					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
@@ -513,12 +513,57 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getSnapshot(camera, callback) {
-		if (!this.isUDM) {
-			const getApiAccessKey = await this.getApiAccessKey();
-			const ts = Date.now() * 1000;
-			callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
+	async getSnapshot(camera, path, callback) {
+		const ts = Date.now() * 1000;
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: "",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}`;
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+			const apiAccessKey = await this.getApiAccessKey();
+			options.path = `/api/cameras/${camera}/snapshot?accessKey=${apiAccessKey}&ts=${ts}`;
 		}
+		
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					fs.writeFileSync(path, data.read());
+					callback(path);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getSnapshot: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error("getSnapshot " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+		});
+		req.end();
 	}
 
 	changeSetting(state, val) {
@@ -564,10 +609,7 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies,
 				"Content-Type": "application/json; charset=utf-8",
-				"Content-Length": Buffer.byteLength(data, "utf8"),
-				"Host": this.config.protectip,
-				"Origin": `https://${this.config.protectip}`,
-				"Referer": `https://${this.config.protectip}/protect/cameras/${cameraid}/recording`
+				"Content-Length": Buffer.byteLength(data, "utf8")
 			};
 		} else {
 			options.headers = {
@@ -832,7 +874,7 @@ class UnifiProtect extends utils.Adapter {
 			if (obj.command === "getThumbnail") {
 				if (obj.callback) this.getThumbnail(json.thumbnail, json.path, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
 			} else if (obj.command === "getSnapshot") {
-				if (obj.callback) this.getSnapshot(json.cameraid, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
+				if (obj.callback) this.getSnapshot(json.cameraid, json.path, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
 			}
 		}
 	}
