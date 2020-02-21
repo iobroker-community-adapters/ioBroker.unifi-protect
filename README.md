@@ -15,7 +15,28 @@
 Connects to Unifi Protect Controller and pulls all Data from added Cameras.
 !!NOT TESTED WITH NEW UDM!!
 
+## Examples for getThumbnail and getSnapshot
+
+```
+on({ id: 'unifi-protect.0.motions.lastMotion.thumbnail', change: "ne" }, function () {
+    const thumb = getState('unifi-protect.0.motions.lastMotion.thumbnail'/*thumbnail*/).val;
+    sendTo('unifi-protect.0', 'getThumbnail', { "thumbnail": thumb, "path": path }, function (url) {
+        sendImage(path);
+    });
+});
+```
+
+```
+sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9", "path": path }, function (url) {
+    sendImage(path);
+});
+```
+
 ## Changelog
+
+### __WORK IN PROGRESS__
+* lastMotion of camera only updating if neccessary
+* first UDM integrations, changing settings NOT working yet
 
 ### 0.0.8 (2020-02-17)
 * made motion Events optional (Last Motion is always stored)
