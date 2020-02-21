@@ -283,6 +283,45 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	setUser(authUserId) {
+		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
+		const data = JSON.stringify({ "settings": { "flags": {} } });
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/proxy/protect/api/users/${authUserId}`,
+			method: "PATCH",
+			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
+			headers: {}
+		};
+
+		options.headers = {
+			"X-CSRF-Token": this.csrfToken,
+			"Cookie": this.cookies,
+			"Content-Type": "application/json",
+			"Content-Length": data.length
+		};
+
+		const req = https.request(options, res => {
+			if (res.statusCode == 200) {
+				this.log.debug(`User flags set.`);
+			} else {
+				this.log.error(`Status Code: ${res.statusCode}`);
+			}
+		});
+
+		req.on("error", e => {
+			this.log.error("changeSetting " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+		});
+		req.write(data);
+		req.end();
+
+	}
+
 	getCameraList() {
 		const options = {
 			hostname: this.config.protectip,
@@ -316,6 +355,7 @@ class UnifiProtect extends utils.Adapter {
 					if (this.isUDM) {
 						// @ts-ignore
 						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+						this.setUser(JSON.parse(data).authUserId);
 					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
@@ -503,6 +543,7 @@ class UnifiProtect extends utils.Adapter {
 			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras) + cameraid,
 			method: "PATCH",
 			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
 			headers: {}
 		};
 
