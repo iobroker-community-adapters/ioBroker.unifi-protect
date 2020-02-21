@@ -13,7 +13,8 @@
 ## unifi-protect adapter for ioBroker
 
 Connects to Unifi Protect Controller and pulls all Data from added Cameras.
-!!NOT TESTED WITH NEW UDM!!
+
+Most features tested with new UDM Pro too. Changing settings isnt working yet.
 
 ## Examples for getThumbnail and getSnapshot
 
