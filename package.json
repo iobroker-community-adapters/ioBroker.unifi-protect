@@ -1,6 +1,6 @@
 {
   "name": "iobroker.unifi-protect",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "unifi-protect",
   "author": {
     "name": "Peter Baumert",

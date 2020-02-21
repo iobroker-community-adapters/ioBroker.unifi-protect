@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.8",
+        "version": "0.0.9",
         "news": {
+            "0.0.9": {
+                "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
+                "de": "* lastMotion der Kamera wird nur aktualisiert, wenn dies erforderlich ist\r\n* Erste UDM-Integrationen, Einstellungen ändern funktioniert noch NICHT",
+                "ru": "* lastMotion обновления камеры только при необходимости\r\n* первые UDM интеграции, изменение настроек еще не работает",
+                "pt": "* lastMotion da câmera atualizando apenas se necessário\r\n* primeiras integrações UDM, alterando configurações ainda não funcionando",
+                "nl": "* lastMotion van camera wordt alleen bijgewerkt indien nodig\r\n* eerste UDM-integraties, instellingen wijzigen werkt nog NIET",
+                "fr": "* lastMotion de la caméra uniquement mise à jour si nécessaire\r\n* premières intégrations UDM, la modification des paramètres ne fonctionne pas encore",
+                "it": "* lastMotion della telecamera si aggiorna solo se necessario\r\n* prime integrazioni UDM, la modifica delle impostazioni NON funziona ancora",
+                "es": "* lastMotion de cámara solo se actualiza si es necesario\r\n* primeras integraciones UDM, la configuración cambiante NO funciona todavía",
+                "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
+                "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用"
+            },
             "0.0.8": {
                 "en": "* made motion Events optional (Last Motion is always stored)\r\n* made interval and \"last x seconds of motions\" adjustable\r\n* properly delete old motions",
                 "de": "* Bewegungsereignisse optional gemacht (Letzte Bewegung wird immer gespeichert)\r\n* Intervall und \"letzte x Sekunden der Bewegungen\" einstellbar gemacht\r\n* Alte Bewegungen ordnungsgemäß löschen",
