@@ -8,6 +8,8 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const https = require("https");
+const Stream = require("stream").Transform;
+const fs = require("fs");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -34,6 +36,19 @@ class UnifiProtect extends utils.Adapter {
 			"recordingSettings.mode"
 		];
 
+		this.paths = {
+			login: "/api/auth",
+			loginUDM: "/api/auth/login",
+			bootstrap: "/api/bootstrap",
+			bootstrapUDM: "/proxy/protect/api/bootstrap",
+			events: "/api/events",
+			eventsUDM: "/proxy/protect/api/events",
+			cameras: "/api/cameras/",
+			camerasUDM: "/proxy/protect/api/cameras/",
+			thumb: "/api/thumbnails/",
+			thumbUDM: "/proxy/protect/api/thumbnails/"
+		};
+
 		this.on("ready", this.onReady.bind(this));
 		//this.on("objectChange", this.onObjectChange.bind(this));
 		this.on("stateChange", this.onStateChange.bind(this));
@@ -53,6 +68,8 @@ class UnifiProtect extends utils.Adapter {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
 			this.isUDM = false;
+			this.csrfToken = null;
+			this.cookies = null;
 			this.camerasDone = true;
 			this.motionsDone = true;
 			this.gotToken = false;
@@ -97,7 +114,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
-		if (state) {
+		if (state && !this.isUDM) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			for (let i = 0; i < this.writeables.length; i++) {
@@ -121,8 +138,11 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async renewToken(force = false) {
-		if (!this.apiAuthBearerToken || force) {
-			this.apiAuthBearerToken = await this.getApiAuthBearerToken().catch((err) => console.log(err.toString()));
+		if ((!this.apiAuthBearerToken && !this.isUDM) || (!this.csrfToken && this.isUDM) || force) {
+			const opt = await this.determineEndpointStyle().catch(() => this.log.error("Couldn't determin Endpoint Style."));
+			this.isUDM = opt.isUDM;
+			this.csrfToken = opt.csrfToken;
+			this.apiAuthBearerToken = await this.login().catch(() => this.log.error("Couldn't login."));
 			this.gotToken = true;
 		}
 	}
@@ -138,27 +158,74 @@ class UnifiProtect extends utils.Adapter {
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
 
-	getApiAuthBearerToken() {
+	determineEndpointStyle() {
+		return new Promise((resolve, reject) => {
+			const options = {
+				hostname: this.config.protectip,
+				port: this.config.protectport,
+				resolveWithFullResponse: true,
+				rejectUnauthorized: false
+			};
+
+			const req = https.request(options, res => {
+				if (res.headers["x-csrf-token"]) {
+					resolve({
+						isUDM: true,
+						csrfToken: res.headers["x-csrf-token"]
+					});
+				} else {
+					resolve({
+						isUDM: false,
+						csrfToken: null,
+						cookies: null
+					});
+				}
+			});
+
+			req.on("error", e => {
+				this.log.error("determineEndpointStyle " + JSON.stringify(e));
+				if (e["code"] == "ECONNRESET") {
+					this.renewToken(true);
+				}
+				reject();
+			});
+			req.end();
+		});
+	}
+
+	login() {
 		return new Promise((resolve, reject) => {
 			const data = JSON.stringify({
 				username: this.config.username,
 				password: this.config.password
 			});
+			let headers = {
+				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8")
+			};
+			if (this.isUDM) {
+				headers = {
+					"Content-Type": "application/json; charset=utf-8",
+					"Content-Length": Buffer.byteLength(data, "utf8"),
+					"X-CSRF-Token": this.csrfToken
+				};
+			}
 			const options = {
 				hostname: this.config.protectip,
 				port: this.config.protectport,
-				path: "/api/auth",
+				path: (this.isUDM ? this.paths.loginUDM : this.paths.login),
 				method: "POST",
 				rejectUnauthorized: false,
-				timeout: 10000,
-				headers: {
-					"Content-Type": "application/json",
-					"Content-Length": data.length
-				}
+				resolveWithFullResponse: true,
+				headers: headers
 			};
 
 			const req = https.request(options, res => {
 				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+					}
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getApiAuthBearerToken: Unifi Protect reported authorization failure");
@@ -167,7 +234,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 
 			req.on("error", e => {
-				this.log.error(e.toString());
+				this.log.error("login " + JSON.stringify(e));
+				if (e["code"] == "ECONNRESET") {
+					this.renewToken(true);
+				}
 				reject();
 			});
 			req.write(data);
@@ -184,7 +254,6 @@ class UnifiProtect extends utils.Adapter {
 				path: `/api/auth/access-key`,
 				method: "POST",
 				rejectUnauthorized: false,
-				timeout: 10000,
 				headers: {
 					"Authorization": "Bearer " + this.apiAuthBearerToken
 				}
@@ -214,18 +283,78 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	/*setUser(authUserId) {
+		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json; charset=utf-8", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
+		const data = JSON.stringify({
+			settings: {
+				flags: {}
+			}
+		});
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: `/proxy/protect/api/users/${authUserId}`,
+			method: "PATCH",
+			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
+			headers: {}
+		};
+
+		options.headers = {
+			"X-CSRF-Token": this.csrfToken,
+			"Cookie": this.cookies,
+			"Content-Type": "application/json; charset=utf-8",
+			"Content-Length": Buffer.byteLength(data, "utf8"),
+			"Host": this.config.protectip,
+			"Origin": `https://${this.config.protectip}`,
+			"Referer": `https://${this.config.protectip}/protect/`
+		};
+
+		this.log.error(JSON.stringify(options));
+		this.log.error(data);
+
+		const req = https.request(options, res => {
+			if (res.statusCode == 200) {
+				this.log.debug(`User flags set.`);
+			} else {
+				this.log.error(`Status Code: ${res.statusCode}`);
+			}
+		});
+
+		req.on("error", e => {
+			this.log.error("changeSetting " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+		});
+
+		this.log.error("muh");
+		req.write(data);
+		req.end();
+
+	}*/
+
 	getCameraList() {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/api/bootstrap`,
+			path: (this.isUDM ? this.paths.bootstrapUDM : this.paths.bootstrap),
 			method: "GET",
 			rejectUnauthorized: false,
-			timeout: 10000,
-			headers: {
-				"Authorization": "Bearer " + this.apiAuthBearerToken
-			}
+			resolveWithFullResponse: true,
+			headers: {}
 		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+		}
 
 		const req = https.request(options, res => {
 			let data = "";
@@ -235,6 +364,11 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+						/*this.setUser(JSON.parse(data).authUserId);*/
+					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
@@ -255,7 +389,10 @@ class UnifiProtect extends utils.Adapter {
 
 		req.on("error", e => {
 			this.camerasDone = true;
-			this.log.error(e.toString());
+			this.log.error("getCameraList " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 		});
 		req.end();
 	}
@@ -269,14 +406,23 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/api/events?end=${eventEnd}&start=${eventStart}&type=motion`,
+			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
-			timeout: 10000,
-			headers: {
-				"Authorization": "Bearer " + this.apiAuthBearerToken
-			}
+			resolveWithFullResponse: true,
+			headers: {}
 		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+		}
 
 		const req = https.request(options, res => {
 			let data = "";
@@ -285,6 +431,10 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+					}
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
 					this.deleteOldMotionEvents(motionEvents);
@@ -301,22 +451,119 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(e.toString());
+			this.log.error("getMotionEvents " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 			this.motionsDone = true;
 		});
 		req.end();
 	}
 
-	async getThumbnail(thumb, callback, width = 640) {
-		const apiAccessKey = await this.getApiAccessKey();
+	async getThumbnail(thumb, path, callback, width = 640) {
 		const height = width / 1.8;
-		callback(`https://${this.config.protectip}:${this.config.protectport}/api/thumbnails/${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`);
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: "",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+			options.path = this.paths.thumbUDM + `${thumb}?h=${height}&w=${width}`;
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+			const apiAccessKey = await this.getApiAccessKey();
+			options.path = this.paths.thumb + `${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
+		}
+
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					fs.writeFileSync(path, data.read());
+					callback(path);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error("getThumbnail " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+		});
+		req.end();
 	}
 
-	async getSnapshot(camera, callback) {
-		const getApiAccessKey = await this.getApiAccessKey();
+	async getSnapshot(camera, path, callback) {
 		const ts = Date.now() * 1000;
-		callback(`https://${this.config.protectip}:${this.config.protectport}/api/cameras/${camera}/snapshot?accessKey=${getApiAccessKey}&ts=${ts}`);
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: "",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}`;
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+			const apiAccessKey = await this.getApiAccessKey();
+			options.path = `/api/cameras/${camera}/snapshot?accessKey=${apiAccessKey}&ts=${ts}`;
+		}
+		
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					fs.writeFileSync(path, data.read());
+					callback(path);
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getSnapshot: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error("getSnapshot " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+		});
+		req.end();
 	}
 
 	changeSetting(state, val) {
@@ -350,16 +597,30 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: `/api/cameras/${cameraid}`,
+			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras) + cameraid,
 			method: "PATCH",
 			rejectUnauthorized: false,
-			timeout: 10000,
-			headers: {
-				"Authorization": "Bearer " + this.apiAuthBearerToken,
-				"Content-Type": "application/json",
-				"Content-Length": data.length
-			}
+			resolveWithFullResponse: true,
+			headers: {}
 		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies,
+				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8")
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken,
+				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8")
+			};
+		}
+
+		this.log.error(JSON.stringify(options));
+		this.log.error(JSON.stringify(data));
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
@@ -370,7 +631,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error(e.toString());
+			this.log.error("changeSetting " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
 		});
 		req.write(data);
 		req.end();
@@ -508,18 +772,26 @@ class UnifiProtect extends utils.Adapter {
 
 	addMotionEvents(motionEvents) {
 		let stateArray = [];
+		const cameras = {};
+		let i = 0;
 		motionEvents.forEach(motionEvent => {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
 					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
 				}
-				stateArray = this.createOwnState("cameras." + motionEvent.camera + ".lastMotion." + key, value, key, stateArray);
 			});
+			cameras[motionEvent.camera] = i;
+			i++;
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
 				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+			});
+			Object.entries(cameras).forEach(([camera, id]) => {
+				Object.entries(motionEvents[id]).forEach(([key, value]) => {
+					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray);
+				});
 			});
 		}
 		this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
@@ -566,7 +838,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	extractCsrfTokenFromCookie(cookie) {
-		
+
 		if (cookie !== "") {
 			const cookie_bits = cookie.split("=");
 			let jwt = "";
@@ -596,14 +868,13 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.Message} obj
 	 */
 	onMessage(obj) {
-		this.log.error(JSON.stringify(obj));
 		if (typeof obj === "object" && obj.message) {
 			const json = JSON.parse(JSON.stringify(obj.message));
 			const that = this;
 			if (obj.command === "getThumbnail") {
-				if (obj.callback) this.getThumbnail(json.thumbnail, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
+				if (obj.callback) this.getThumbnail(json.thumbnail, json.path, function (thumb) { that.sendTo(obj.from, obj.command, thumb, obj.callback); });
 			} else if (obj.command === "getSnapshot") {
-				if (obj.callback) this.getSnapshot(json.cameraid, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
+				if (obj.callback) this.getSnapshot(json.cameraid, json.path, function (snap) { that.sendTo(obj.from, obj.command, snap, obj.callback); });
 			}
 		}
 	}
