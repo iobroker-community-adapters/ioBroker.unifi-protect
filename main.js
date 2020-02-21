@@ -306,8 +306,8 @@ class UnifiProtect extends utils.Adapter {
 			"Content-Type": "application/json; charset=utf-8",
 			"Content-Length": Buffer.byteLength(data, "utf8"),
 			"Host": this.config.protectip,
-			"Origin": "https://${this.config.protectip}",
-			"Referer": "https://${this.config.protectip}/protect/"
+			"Origin": `https://${this.config.protectip}`,
+			"Referer": `https://${this.config.protectip}/protect/`
 		};
 
 		this.log.error(JSON.stringify(options));
@@ -566,8 +566,8 @@ class UnifiProtect extends utils.Adapter {
 				"Content-Type": "application/json; charset=utf-8",
 				"Content-Length": Buffer.byteLength(data, "utf8"),
 				"Host": this.config.protectip,
-				"Origin": "https://${this.config.protectip}",
-				"Referer": "https://${this.config.protectip}/protect/cameras/${cameraid}/recording"
+				"Origin": `https://${this.config.protectip}`,
+				"Referer": `https://${this.config.protectip}/protect/cameras/${cameraid}/recording`
 			};
 		} else {
 			options.headers = {
