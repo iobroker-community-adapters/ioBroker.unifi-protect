@@ -200,11 +200,13 @@ class UnifiProtect extends utils.Adapter {
 				password: this.config.password
 			});
 			let headers = {
-				"Content-Type": "application/json; charset=utf-8"
+				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8")
 			};
 			if (this.isUDM) {
 				headers = {
 					"Content-Type": "application/json; charset=utf-8",
+					"Content-Length": Buffer.byteLength(data, "utf8"),
 					"X-CSRF-Token": this.csrfToken
 				};
 			}
@@ -302,12 +304,15 @@ class UnifiProtect extends utils.Adapter {
 			"X-CSRF-Token": this.csrfToken,
 			"Cookie": this.cookies,
 			"Content-Type": "application/json; charset=utf-8",
+			"Content-Length": Buffer.byteLength(data, "utf8"),
 			"Host": this.config.protectip,
-			"Origin": "https://${this.config.protectip}"
+			"Origin": "https://${this.config.protectip}",
+			"Sec-Fetch-Mode": "cors",
+			"Sec-Fetch-Site": "same-origin"
 		};
 
 		this.log.error(JSON.stringify(options));
-		this.log.error(JSON.stringify(data));
+		this.log.error(data);
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
@@ -323,7 +328,7 @@ class UnifiProtect extends utils.Adapter {
 				this.renewToken(true);
 			}
 		});
-		req.write(data, "utf8");
+		req.write(data);
 		req.end();
 
 	}
@@ -558,6 +563,7 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies,
 				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8"),
 				"Host": this.config.protectip,
 				"Origin": "https://${this.config.protectip}",
 				"Referer": "https://${this.config.protectip}/protect/cameras/${cameraid}/recording"
@@ -565,7 +571,8 @@ class UnifiProtect extends utils.Adapter {
 		} else {
 			options.headers = {
 				"Authorization": "Bearer " + this.apiAuthBearerToken,
-				"Content-Type": "application/json; charset=utf-8"
+				"Content-Type": "application/json; charset=utf-8",
+				"Content-Length": Buffer.byteLength(data, "utf8")
 			};
 		}
 
