@@ -200,13 +200,11 @@ class UnifiProtect extends utils.Adapter {
 				password: this.config.password
 			});
 			let headers = {
-				"Content-Type": "application/json",
-				"Content-Length": data.length
+				"Content-Type": "application/json; charset=utf-8"
 			};
 			if (this.isUDM) {
 				headers = {
-					"Content-Type": "application/json",
-					"Content-Length": data.length,
+					"Content-Type": "application/json; charset=utf-8",
 					"X-CSRF-Token": this.csrfToken
 				};
 			}
@@ -284,7 +282,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	setUser(authUserId) {
-		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
+		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json; charset=utf-8", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
 		const data = JSON.stringify({ "settings": { "flags": {} } });
 		const options = {
 			hostname: this.config.protectip,
@@ -299,8 +297,7 @@ class UnifiProtect extends utils.Adapter {
 		options.headers = {
 			"X-CSRF-Token": this.csrfToken,
 			"Cookie": this.cookies,
-			"Content-Type": "application/json",
-			"Content-Length": data.length
+			"Content-Type": "application/json; charset=utf-8"
 		};
 
 		this.log.error(JSON.stringify(options));
@@ -554,14 +551,12 @@ class UnifiProtect extends utils.Adapter {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies,
-				"Content-Type": "application/json",
-				"Content-Length": data.length
+				"Content-Type": "application/json; charset=utf-8"
 			};
 		} else {
 			options.headers = {
 				"Authorization": "Bearer " + this.apiAuthBearerToken,
-				"Content-Type": "application/json",
-				"Content-Length": data.length
+				"Content-Type": "application/json; charset=utf-8"
 			};
 		}
 
