@@ -301,7 +301,9 @@ class UnifiProtect extends utils.Adapter {
 		options.headers = {
 			"X-CSRF-Token": this.csrfToken,
 			"Cookie": this.cookies,
-			"Content-Type": "application/json; charset=utf-8"
+			"Content-Type": "application/json; charset=utf-8",
+			"Host": this.config.protectip,
+			"Origin": "https://${this.config.protectip}"
 		};
 
 		this.log.error(JSON.stringify(options));
@@ -555,7 +557,10 @@ class UnifiProtect extends utils.Adapter {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies,
-				"Content-Type": "application/json; charset=utf-8"
+				"Content-Type": "application/json; charset=utf-8",
+				"Host": this.config.protectip,
+				"Origin": "https://${this.config.protectip}",
+				"Referer": "https://${this.config.protectip}/protect/cameras/${cameraid}/recording"
 			};
 		} else {
 			options.headers = {
