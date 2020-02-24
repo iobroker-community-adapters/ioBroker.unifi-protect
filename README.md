@@ -19,16 +19,37 @@ Most features tested with new UDM Pro too. Changing settings isnt working yet.
 ## Examples for getThumbnail and getSnapshot
 
 ```
+// Settings
+const path = '/opt/iobroker/tmp/temp.jpg';
+const threshold = 50;
+
+// Send to Telegram ( or what you prefer )
+function sendImage(path) {
+    sendTo('telegram.0', path);
+}
+
+//Trigger Script
 on({ id: 'unifi-protect.0.motions.lastMotion.thumbnail', change: "ne" }, function () {
     const thumb = getState('unifi-protect.0.motions.lastMotion.thumbnail'/*thumbnail*/).val;
-    sendTo('unifi-protect.0', 'getThumbnail', { "thumbnail": thumb, "path": path }, function (url) {
-        sendImage(path);
-    });
+    const end = getState('unifi-protect.0.motions.lastMotion.end'/*thumbnail*/).val;
+    const cameraid = getState('unifi-protect.0.motions.lastMotion.camera'/*thumbnail*/).val;
+    const score = getState('unifi-protect.0.motions.lastMotion.score'/*thumbnail*/).val;
+    if (score < threshold) { return; }
+    // if Event has ended send the Thumbnail otherwise get current Snapshot
+    if (end != null) {
+        sendTo('unifi-protect.0', 'getThumbnail', { "thumbnail": thumb, "path": path }, function (res) {
+            sendImage(path);
+        });
+    } else {
+        sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": cameraid, "path": path }, function (res) {
+            sendImage(path);
+        });
+    }
 });
 ```
 
 ```
-sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9", "path": path }, function (url) {
+sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9", "path": path }, function (res) {
     sendImage(path);
 });
 ```
