@@ -438,7 +438,7 @@ class UnifiProtect extends utils.Adapter {
 					const cameras = {};
 					const newMotionEvents = [];
 					motionEvents.slice().reverse().forEach(motionEvent => {
-						if (typeof cameras[motionEvent.camera] === undefined) {
+						if (!cameras[motionEvent.camera]) {
 							cameras[motionEvent.camera] = 0;
 						}
 						if (cameras[motionEvent.camera] < this.config.numMotions) {
