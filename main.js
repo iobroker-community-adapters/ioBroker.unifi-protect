@@ -184,9 +184,6 @@ class UnifiProtect extends utils.Adapter {
 
 			req.on("error", e => {
 				this.log.error("determineEndpointStyle " + JSON.stringify(e));
-				if (e["code"] == "ECONNRESET") {
-					this.renewToken(true);
-				}
 				reject();
 			});
 			req.end();
