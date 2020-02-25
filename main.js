@@ -25,6 +25,13 @@ class UnifiProtect extends utils.Adapter {
 			name: "unifi-protect",
 		});
 
+		this.isUDM = false;
+		this.csrfToken = null;
+		this.cookies = null;
+		this.camerasDone = true;
+		this.motionsDone = true;
+		this.gotToken = false;
+
 		this.writeables = [
 			"name",
 			"isRtspEnabled",
@@ -67,12 +74,6 @@ class UnifiProtect extends utils.Adapter {
 			} else {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
-			this.isUDM = false;
-			this.csrfToken = null;
-			this.cookies = null;
-			this.camerasDone = true;
-			this.motionsDone = true;
-			this.gotToken = false;
 			this.updateData();
 		});
 	}
