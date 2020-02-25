@@ -44,11 +44,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "test:js": "mocha --opts test/mocha.custom.opts",
-    "test:package": "mocha test/package --exit",
-    "test:unit": "mocha test/unit --exit",
-    "test:integration": "mocha test/integration --exit",
-    "test": "npm run test:js && npm run test:package",
+    "test": "node node_modules/mocha/bin/mocha --exit",
     "lint": "eslint",
     "release": "release-script"
   },
