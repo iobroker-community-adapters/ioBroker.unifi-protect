@@ -142,14 +142,18 @@ class UnifiProtect extends utils.Adapter {
 		if ((!this.apiAuthBearerToken && !this.isUDM) || (!this.csrfToken && this.isUDM) || force) {
 			const opt = await this.determineEndpointStyle().catch(() => {
 				this.log.error("Couldn't determin Endpoint Style.");
-				return;
 			});
+			if (typeof opt === "undefined") {
+				return;
+			}
 			this.isUDM = opt.isUDM;
 			this.csrfToken = opt.csrfToken;
 			this.apiAuthBearerToken = await this.login().catch(() => {
 				this.log.error("Couldn't login.");
-				return;
 			});
+			if (typeof this.apiAuthBearerToken === "undefined") {
+				return;
+			}
 			this.gotToken = true;
 		}
 	}
