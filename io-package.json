@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.9",
+        "version": "0.0.10",
         "news": {
+            "0.0.10": {
+                "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
+                "de": "* Travis CI für Integrationstests behoben\r\n* Verwenden Sie tatsächlich die letzte x-Bewegungseinstellung",
+                "ru": "* travis ci для интеграционных тестов исправлен\r\n* на самом деле использовать последнюю настройку движения х",
+                "pt": "* travis ci para testes de integração corrigidos\r\n* use realmente a última configuração de movimento x",
+                "nl": "* travis ci voor integratietests vastgesteld\r\n* gebruik eigenlijk de laatste x beweging instelling",
+                "fr": "* travis ci pour les tests d'intégration corrigé\r\n* utilise réellement le dernier paramètre de mouvement x",
+                "it": "* Travis ci per i test di integrazione corretti\r\n* utilizza effettivamente l'ultima impostazione di movimento x",
+                "es": "* travis ci para pruebas de integración arregladas\r\n* realmente usa la última configuración de movimiento x",
+                "pl": "* Naprawiono travis ci do testów integracyjnych\r\n* faktycznie używam ustawienia ostatniego x ruchu",
+                "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置"
+            },
             "0.0.9": {
                 "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
                 "de": "* lastMotion der Kamera wird nur aktualisiert, wenn dies erforderlich ist\r\n* Erste UDM-Integrationen, Einstellungen ändern funktioniert noch NICHT",

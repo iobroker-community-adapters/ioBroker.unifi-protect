@@ -56,7 +56,7 @@ sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.0.10 (2020-02-26)
 * travis ci for integration tests fixed
 * actually use last x motion setting
 
