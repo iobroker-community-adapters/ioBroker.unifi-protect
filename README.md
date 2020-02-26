@@ -56,6 +56,10 @@ sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* travis ci for integration tests fixed
+* actually use last x motion setting
+
 ### 0.0.9 (2020-02-21)
 * lastMotion of camera only updating if neccessary
 * first UDM integrations, changing settings NOT working yet
