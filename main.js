@@ -151,9 +151,6 @@ class UnifiProtect extends utils.Adapter {
 			this.apiAuthBearerToken = await this.login().catch(() => {
 				this.log.error("Couldn't login.");
 			});
-			if (typeof this.apiAuthBearerToken === "undefined") {
-				return;
-			}
 			this.gotToken = true;
 		}
 	}
@@ -291,8 +288,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	/*setUser(authUserId) {
-		//fetch("https://unifi.delrg.battlemap.wtf/proxy/protect/api/users/5e4a844903d52503870003ed", { "credentials": "include", "headers": { "accept": "application/json; charset=utf-8", "accept-language": "en-US,en;q=0.9,de;q=0.8,ro;q=0.7", "cache-control": "no-cache", "content-type": "application/json; charset=utf-8", "pragma": "no-cache", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "x-csrf-token": "a6434819-a28e-4d3b-a8f1-f131c7858819" }, "referrer": "https://unifi.delrg.battlemap.wtf/protect/cameras", "referrerPolicy": "no-referrer-when-downgrade", "body": "{\"settings\":{\"flags\":{}}}", "method": "PATCH", "mode": "cors" });
+	setUser(authUserId) {
 		const data = JSON.stringify({
 			settings: {
 				flags: {}
@@ -315,15 +311,16 @@ class UnifiProtect extends utils.Adapter {
 			"Content-Length": Buffer.byteLength(data, "utf8"),
 			"Host": this.config.protectip,
 			"Origin": `https://${this.config.protectip}`,
-			"Referer": `https://${this.config.protectip}/protect/`
+			"Referer": `https://${this.config.protectip}/protect/cameras`
 		};
 
-		this.log.error(JSON.stringify(options));
 		this.log.error(data);
 
 		const req = https.request(options, res => {
 			if (res.statusCode == 200) {
 				this.log.debug(`User flags set.`);
+				// @ts-ignore
+				this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
 			} else {
 				this.log.error(`Status Code: ${res.statusCode}`);
 			}
@@ -336,11 +333,10 @@ class UnifiProtect extends utils.Adapter {
 			}
 		});
 
-		this.log.error("muh");
 		req.write(data);
 		req.end();
 
-	}*/
+	}
 
 	getCameraList() {
 		const options = {
@@ -375,7 +371,7 @@ class UnifiProtect extends utils.Adapter {
 					if (this.isUDM) {
 						// @ts-ignore
 						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
-						/*this.setUser(JSON.parse(data).authUserId);*/
+						this.setUser(JSON.parse(data).authUserId);
 					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
