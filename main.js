@@ -115,7 +115,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
-		if (state && !this.isUDM) {
+		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 			for (let i = 0; i < this.writeables.length; i++) {
@@ -153,6 +153,11 @@ class UnifiProtect extends utils.Adapter {
 			});
 			this.gotToken = true;
 		}
+	}
+
+	updateCookie(cookie) {
+		this.cookies = cookie;
+		this.csrfToken = JSON.parse((new Buffer(cookie.split(".")[1], "base64")).toString("ascii")).csrfToken;
 	}
 
 	updateData() {
@@ -229,7 +234,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUDM) {
 						// @ts-ignore
-						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
 					resolve(res.headers["authorization"]);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
@@ -288,56 +293,6 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	setUser(authUserId) {
-		const data = JSON.stringify({
-			settings: {
-				flags: {}
-			}
-		});
-		const options = {
-			hostname: this.config.protectip,
-			port: this.config.protectport,
-			path: `/proxy/protect/api/users/${authUserId}`,
-			method: "PATCH",
-			rejectUnauthorized: false,
-			resolveWithFullResponse: true,
-			headers: {}
-		};
-
-		options.headers = {
-			"X-CSRF-Token": this.csrfToken,
-			"Cookie": this.cookies,
-			"Content-Type": "application/json; charset=utf-8",
-			"Content-Length": Buffer.byteLength(data, "utf8"),
-			"Host": this.config.protectip,
-			"Origin": `https://${this.config.protectip}`,
-			"Referer": `https://${this.config.protectip}/protect/cameras`
-		};
-
-		this.log.error(data);
-
-		const req = https.request(options, res => {
-			if (res.statusCode == 200) {
-				this.log.debug(`User flags set.`);
-				// @ts-ignore
-				this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
-			} else {
-				this.log.error(`Status Code: ${res.statusCode}`);
-			}
-		});
-
-		req.on("error", e => {
-			this.log.error("changeSetting " + JSON.stringify(e));
-			if (e["code"] == "ECONNRESET") {
-				this.renewToken(true);
-			}
-		});
-
-		req.write(data);
-		req.end();
-
-	}
-
 	getCameraList() {
 		const options = {
 			hostname: this.config.protectip,
@@ -370,8 +325,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUDM) {
 						// @ts-ignore
-						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
-						this.setUser(JSON.parse(data).authUserId);
+						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
 					const cameras = JSON.parse(data).cameras;
 					this.createOwnDevice("cameras", "Cameras");
@@ -437,7 +391,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUDM) {
 						// @ts-ignore
-						this.cookies = res.headers["set-cookie"][0].replace(/(;.*)/i, "");
+						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
