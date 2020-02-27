@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.10",
+        "version": "0.0.11",
         "news": {
+            "0.0.11": {
+                "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
+                "de": "* Admin-Oberfläche ein wenig geändert\r\n* Beschreibung für Port hinzugefügt\r\n* UDM Pro beschreibbare Zustände behoben",
+                "ru": "* немного изменил интерфейс администратора\r\n* добавлено описание порта\r\n* исправлены состояния записи UDM Pro",
+                "pt": "* mudou a interface do administrador um pouco\r\n* descrição adicionada para a porta\r\n* estados graváveis do UDM Pro corrigidos",
+                "nl": "* Heeft de beheerdersinterface een beetje gewijzigd\r\n* Toegevoegde beschrijving voor poort\r\n* vaste UDM Pro beschrijfbare statussen",
+                "fr": "* interface d'administration un peu modifiée\r\n* description ajoutée pour le port\r\n* états inscriptibles UDM Pro fixes",
+                "it": "* ha cambiato leggermente l'interfaccia di amministrazione\r\n* aggiunta descrizione per la porta\r\n* stati scrivibili fissi di UDM Pro",
+                "es": "* Cambió un poco la interfaz de administrador\r\n* descripción agregada para el puerto\r\n* estados de escritura UDM Pro fijos",
+                "pl": "* zmieniono nieco interfejs administratora\r\n* dodano opis portu\r\n* naprawiono stany zapisu UDM Pro",
+                "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态"
+            },
             "0.0.10": {
                 "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
                 "de": "* Travis CI für Integrationstests behoben\r\n* Verwenden Sie tatsächlich die letzte x-Bewegungseinstellung",
