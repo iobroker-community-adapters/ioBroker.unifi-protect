@@ -677,7 +677,7 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		let common = {
-			name: desc,
+			name: desc.toString(),
 			type: typeof (value),
 			read: true,
 			write: write
@@ -685,7 +685,7 @@ class UnifiProtect extends utils.Adapter {
 
 		if (name.match("recordingSettings.mode") != null) {
 			common = {
-				name: desc,
+				name: desc.toString(),
 				type: typeof (value),
 				read: true,
 				write: true,
@@ -722,7 +722,7 @@ class UnifiProtect extends utils.Adapter {
 		this.setObjectNotExists(name, {
 			type: "channel",
 			common: {
-				name: desc
+				name: desc.toString()
 			},
 			native: {}
 		});
@@ -738,7 +738,7 @@ class UnifiProtect extends utils.Adapter {
 		this.setObjectNotExists(name, {
 			type: "device",
 			common: {
-				name: desc
+				name: desc.toString()
 			},
 			native: {}
 		});
