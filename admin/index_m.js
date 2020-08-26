@@ -92,11 +92,6 @@ async function createTreeViews(settings, onChange) {
                 tabindex: "0",                              // Whole tree behaves as one single control
                 titlesTabbable: false,                      // Node titles can receive keyboard focus
                 tooltip: false,                             // Use title as tooltip (also a callback could be specified)
-                // icon: function (event, data) {
-                //     if (data.node.isFolder()) {
-                //         return "unifi.png";
-                //     }
-                // },
                 source: [
                     tree
                 ],
@@ -110,15 +105,6 @@ async function createTreeViews(settings, onChange) {
                     }
                 },
                 select: function (event, data) {
-
-                    // Funktion um alle title auszulesen, kann für Übersetzung verwendet werden -> bitte drin lassen!
-                    // var selKeys = $.map(data.tree.getSelectedNodes(), function (node) {
-                    //     if (node.children === null) {
-                    //         return node.title;
-                    //     }
-                    // });
-                    // console.log(selKeys.join('\n').replace(/_/g, " "));
-
                     onChange();
                 }
             });
@@ -139,12 +125,12 @@ async function createTreeViews(settings, onChange) {
  * @param {*} tree 
  * @param {*} settings 
  */
-async function convertJsonToTreeObject(key, objList, tree, settings) {
+async function convertJsonToTreeObject(key, objList, tree, settings, channel = undefined) {
     for (const obj of objList) {
 
         if (!obj.channel) {
             let selected = false;
-            if (settings.statesFilter[key] && settings.statesFilter[key].includes(obj.id)) {
+            if (settings.statesFilter[key] && settings.statesFilter[key].includes(`${channel ? channel + '.' : ''}${obj.id}`)) {
                 selected = true;
                 tree.expanded = true;
             }
@@ -152,6 +138,7 @@ async function convertJsonToTreeObject(key, objList, tree, settings) {
             tree.children.push({
                 title: `<div class="fancytree-item-title-id">${obj.id}</div><div class="fancytree-item-title-name">${_(obj.name)}</div>`,
                 key: `${key}.${obj.id}`,
+                id: `${channel ? channel + '.' : ''}${obj.id}`,
                 selected: selected
             })
         } else {
@@ -164,7 +151,7 @@ async function convertJsonToTreeObject(key, objList, tree, settings) {
                 children: []
             };
 
-            await convertJsonToTreeObject(key, obj.states, subtree, settings);
+            await convertJsonToTreeObject(key, obj.states, subtree, settings, `${channel ? channel + '.' : ''}${obj.channel}`);
 
             tree.children.push(subtree);
         }
@@ -220,6 +207,20 @@ function save(callback) {
             obj[id] = value;
         }
     });
+
+    //Process statesFilter
+    obj.statesFilter = {};
+    $('[id*=tree_]').each(function () {
+        const settingsName = $(this).attr('id').replace('tree_', '');
+
+        const selected = $.ui.fancytree.getTree(`#tree_${settingsName}`).getSelectedNodes();
+        const selectedIds = $.map(selected, function (node) {
+            return node.data.id;
+        });
+
+        obj.statesFilter[settingsName] = selectedIds;
+    });
+
 
     callback(obj);
 }
