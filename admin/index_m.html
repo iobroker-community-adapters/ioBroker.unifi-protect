@@ -11,156 +11,112 @@
 
 	<script type="text/javascript" src="../../js/translate.js"></script>
 	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
+	<script type="text/javascript" src="../../lib/js/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="../../lib/js/jquery.fancytree-all.min.js"></script>
+	
+	<script type="text/javascript" src="../../js/translate.js"></script>
 	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
-
+	
 	<!-- Load our own files -->
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script type="text/javascript" src="words.js"></script>
-
-	<script type="text/javascript">
-		var secret;
-
-		function encrypt(key, value) {
-			var result = '';
-			for (var i = 0; i < value.length; ++i) {
-				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
-			}
-			return result;
-		}
-
-		function decrypt(key, value) {
-			var result = '';
-			for (var i = 0; i < value.length; ++i) {
-				result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
-			}
-			return result;
-		}
-
-		// the function loadSettings has to exist ...
-		function loadHelper(settings, onChange) {
-			// example: select elements with id=key and class=value and insert value
-			if (!settings) return;
-			if (settings.electricityPollingInterval === undefined) settings.electricityPollingInterval = 20;
-
-			$('.value').each(function () {
-				var $key = $(this);
-				var id = $key.attr('id');
-				if (id === 'password') {
-					settings[id] = decrypt(secret, settings[id]);
-				}
-
-				if ($key.attr('type') === 'checkbox') {
-					// do not call onChange direct, because onChange could expect some arguments
-					$key.prop('checked', settings[id]).change(function () {
-						onChange();
-					});
-				} else {
-					// do not call onChange direct, because onChange could expect some arguments
-					$key.val(settings[id]).change(function () {
-						onChange();
-					}).keyup(function () {
-						onChange();
-					});
-				}
-			});
-			onChange(false);
-			M.updateTextFields();  // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
-		}
-
-		// the function loadSettings has to exist ...
-		function load(settings, onChange) {
-			socket.emit('getObject', 'system.config', function (err, obj) {
-				secret = (obj.native ? obj.native.secret : '') || 'Y5JQ6qCfnhysf9NG';
-				loadHelper(settings, onChange);
-			});
-
-			onChange(false);
-		}
-
-		// This will be called by the admin adapter when the user presses the save button
-		function save(callback) {
-			// example: select elements with class=value and build settings object
-			var obj = {};
-			$('.value').each(function () {
-				var $this = $(this);
-				var id = $this.attr('id');
-
-				if ($this.attr('type') === 'checkbox') {
-					obj[id] = $this.prop('checked');
-				} else {
-					var value = $this.val();
-					if (id === 'password') {
-						value = encrypt(secret, value);
-					}
-					obj[id] = value;
-				}
-			});
-
-			callback(obj);
-		}
-	</script>
+	<script type="text/javascript" src="index_m.js"></script>
 
 </head>
 
 <body>
-
 	<div class="m adapter-container">
-
 		<div class="row">
-			<div class="col s12 m4 l2">
-				<img src="unifi-protect.png" class="logo">
+			<div class="col s12">
+				<ul class="tabs" style="height: auto;">
+					<li class="tab col s6 l2"><a href="#tab_general" class="translate active">general</a></li>
+					<li class="tab col s6 l2"><a href="#tab_cameras" class="translate">cameras</a></li>
+					<li class="tab col s6 l2"><a href="#tab_motions" class="translate">motions</a></li>
+
+					</li>
+				</ul>
 			</div>
+			<div id="tab_general" class="col s12 page">
+				<div class="col s12">
+					<div id="header-area" class="row" >
+						<div id="header-logo-title" class="col s6" >
+							<img class="logo" src="unifi-protect.png" >
+							<p>
+								<span class="h-title">Unifi Protect</span><br />
+								<span class="h-sub-title translate">Connects to Unifi Protect Controller and pulls all Data from added Cameras</p>
+							</p>
+						</div>
+					</div>
+
+					<div class="row">
+						<section>
+							<div class="row">
+								<div class="col s12 m6 l5 input-field">
+									<input type="text" class="value" id="protectip" />
+									<label for="protectip" class="translate">IP Address/Hostname</label>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="number" class="value" id="protectport" />
+									<label for="protectport" class="translate">Port</label>
+									<span>CloudKey Gen2: 7443 / UDM Pro: 443 / your custom port, if changed</span>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="text" class="value" id="username" />
+									<label for="username" class="translate">Username</label>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="password" class="value" id="password" />
+									<label for="password" class="translate">Password</label>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="number" class="value" id="interval" />
+									<label for="interval" class="translate">Refresh Interval</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col s12 input-field">
+									<input type="checkbox" class="value" id="getMotions" />
+									<label for="getMotions" class="translate">Get Motions (last Motion is always included)</label>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="number" class="value" id="numMotions" />
+									<label for="numMotions" class="translate">Number of Motions</label>
+								</div>
+					
+								<div class="col s12 m6 l5 input-field">
+									<input type="number" class="value" id="secMotions" />
+									<label for="secMotions" class="translate">Last x Seconds of Motions</label>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+			<div id="tab_cameras" class="col s12 page">
+				<section>
+					<div class="col s7">
+						<div class="row">
+							<div class="treeContainer" id="tree_datapoints"></div>
+						</div>
+					</div>
+				</section>
+			</div>
+			<div id="tab_motions" class="col s12 page">
+				<section>
+					<div class="col s7">
+						<div class="row">
+							<div class="treeContainer" id="tree_datapoints"></div>
+						</div>
+					</div>
+				</section>
+			</div>							
 		</div>
-
-		<!-- Put your content here -->
-
-		<!-- For example columns with settings: -->
-		<div class="row">
-			<div class="col s12 m6 l5 input-field">
-				<input type="text" class="value" id="protectip" />
-				<label for="protectip" class="translate">IP Address/Hostname</label>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="number" class="value" id="protectport" />
-				<label for="protectport" class="translate">Port</label>
-				<span>CloudKey Gen2: 7443 / UDM Pro: 443 / your custom port, if changed</span>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="text" class="value" id="username" />
-				<label for="username" class="translate">Username</label>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="password" class="value" id="password" />
-				<label for="password" class="translate">Password</label>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="number" class="value" id="interval" />
-				<label for="interval" class="translate">Refresh Interval</label>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col s12 input-field">
-				<input type="checkbox" class="value" id="getMotions" />
-				<label for="getMotions" class="translate">Get Motions (last Motion is always included)</label>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="number" class="value" id="numMotions" />
-				<label for="numMotions" class="translate">Number of Motions</label>
-			</div>
-
-			<div class="col s12 m6 l5 input-field">
-				<input type="number" class="value" id="secMotions" />
-				<label for="secMotions" class="translate">Last x Seconds of Motions</label>
-			</div>
-		</div>
-
 	</div>
-
 </body>
 
 </html>
