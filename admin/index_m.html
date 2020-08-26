@@ -2,21 +2,22 @@
 
 <head>
 
+
 	<!-- Load ioBroker scripts and styles-->
 	<link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
 	<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+	<link rel="stylesheet" type="text/css" href="../../lib/css/fancytree/ui.fancytree.min.css" />
 
 	<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
 	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
 
-	<script type="text/javascript" src="../../js/translate.js"></script>
 	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
 	<script type="text/javascript" src="../../lib/js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="../../lib/js/jquery.fancytree-all.min.js"></script>
-	
+
 	<script type="text/javascript" src="../../js/translate.js"></script>
 	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
-	
+
 	<!-- Load our own files -->
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<script type="text/javascript" src="words.js"></script>
@@ -43,7 +44,7 @@
 							<img class="logo" src="unifi-protect.png" >
 							<p>
 								<span class="h-title">Unifi Protect</span><br />
-								<span class="h-sub-title translate">Connects to Unifi Protect Controller and pulls all Data from added Cameras</p>
+								<span class="h-sub-title translate">get all your data from your cameras</p>
 							</p>
 						</div>
 					</div>
@@ -99,18 +100,18 @@
 			</div>
 			<div id="tab_cameras" class="col s12 page">
 				<section>
-					<div class="col s7">
+					<div class="col s12">
 						<div class="row">
-							<div class="treeContainer" id="tree_datapoints"></div>
+							<div class="treeContainer" id="tree_cameras"></div>
 						</div>
 					</div>
 				</section>
 			</div>
 			<div id="tab_motions" class="col s12 page">
 				<section>
-					<div class="col s7">
+					<div class="col s12">
 						<div class="row">
-							<div class="treeContainer" id="tree_datapoints"></div>
+							<div class="treeContainer" id="tree_motions"></div>
 						</div>
 					</div>
 				</section>

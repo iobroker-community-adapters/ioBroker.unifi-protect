@@ -174,7 +174,11 @@
         "getMotions": false,
         "numMotions": 10,
         "secMotions": 600,
-        "interval": 60
+        "interval": 60,
+        "statesFilter": {
+            "motions": [],
+            "cameras": []
+        }
     },
     "objects": [],
     "instanceObjects": []

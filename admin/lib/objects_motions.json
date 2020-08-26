@@ -1,0 +1,42 @@
+[
+    {
+        "id": "type",
+        "name": "type"
+    },
+    {
+        "id": "start",
+        "name": "start"
+    },
+    {
+        "id": "end",
+        "name": "end"
+    },
+    {
+        "id": "camera",
+        "name": "camera"
+    },
+    {
+        "id": "score",
+        "name": "score"
+    },
+    {
+        "id": "id",
+        "name": "id"
+    },
+    {
+        "id": "modelKey",
+        "name": "modelKey"
+    },
+    {
+        "id": "partition",
+        "name": "partition"
+    },
+    {
+        "id": "thumbnail",
+        "name": "thumbnail"
+    },
+    {
+        "id": "heatmap",
+        "name": "heatmap"
+    }
+]

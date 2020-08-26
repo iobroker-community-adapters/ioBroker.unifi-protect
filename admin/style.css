@@ -15,7 +15,7 @@
 /* Header section */
 #header-area {
 	margin-top: 4px;
-	margin-bottom: 1px;
+	margin-bottom: 20px;
 }
 
 #header-area #header-logo-title .logo {
@@ -38,4 +38,108 @@
 	font-size: 1.1em !important;
 	font-style: italic;
 	color: #2196f3;
+}
+
+/* Fancytree */
+.treeContainer {
+	width: calc(100% - 24px) !important;
+}
+
+.fancytree-container {
+	background: #efefef !important;
+	border-style: none !important;
+	font-size: 1rem !important;
+	font-family: "Segoe UI", Tahoma, Arial, "Courier New" !important;
+}
+
+.fancytree-title {
+	background: #efefef !important;
+	height: 24px;
+}
+
+.fancytree-node:hover,
+.fancytree-node:hover>.fancytree-title,
+.fancytree-title:hover {
+	background: #64b5f6 !important;
+	color: white !important;
+	font-weight: bold !important;
+	cursor: pointer;
+}
+
+ul.fancytree-container ul {
+	padding: 0 0 0 18px !important;
+	margin: 0;
+}
+
+.fancytree-node>span.fancytree-checkbox {
+	background-position: 0 0;
+	background-image: url("./img/checkbox.svg");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node.fancytree-partsel>span.fancytree-checkbox {
+	background-position: 0 0;
+	background-image: url("./img/checkbox_intermediate.svg");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node.fancytree-partsel.fancytree-selected>span.fancytree-checkbox {
+	background-position: 0 0;
+	background-image: url("./img/checkbox_marked.svg");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node>span.fancytree-icon,
+.fancytree-node>span.fancytree-icon:hover {
+	background-position: 0 0;
+	background-image: url("./img/state.png");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node.fancytree-folder>span.fancytree-icon {
+	background-position: 0 0;
+	background-image: url("./img/folder.png");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node.fancytree-folder>span.fancytree-expander {
+	background-position: 0 0;
+	background-image: url("./img/menu_right.svg");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-node.fancytree-expanded.fancytree-folder>span.fancytree-expander {
+	background-position: 0 0;
+	background-image: url("./img/menu_down.svg");
+	width: 24px;
+	height: 24px;
+}
+
+.fancytree-folder-title-id {
+	font-size: .9em;
+	min-width: 130px;
+}
+
+.fancytree-item-title-id {
+	min-width: 130px;
+}
+
+.fancytree-item-title-name {
+	width: auto;
+}
+
+.fancytree-node.fancytree-folder {
+	border-bottom: 0.5px solid #64b5f6;
+	margin-top: 20px;
+}
+
+.fancytree-node.fancytree-folder .fancytree-title {
+	font-size: 16px;
+	font-weight: 500;
 }
