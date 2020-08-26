@@ -136,7 +136,7 @@ ul.fancytree-container ul {
 
 .fancytree-node.fancytree-folder {
 	border-bottom: 0.5px solid #64b5f6;
-	margin-top: 20px;
+	margin-top: 10px;
 }
 
 .fancytree-node.fancytree-folder .fancytree-title {

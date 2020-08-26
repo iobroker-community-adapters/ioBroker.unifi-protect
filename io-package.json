@@ -176,7 +176,7 @@
         "secMotions": 600,
         "interval": 60,
         "statesFilter": {
-            "motions": [],
+            "motions": ["start", "end", "type", "thumbnail", "heatmap"],
             "cameras": []
         }
     },

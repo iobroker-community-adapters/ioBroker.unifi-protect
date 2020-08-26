@@ -57,36 +57,17 @@ async function createTreeViews(settings, onChange) {
     for (const key of Object.keys(settings.statesFilter)) {
 
         try {
-            let tree = []
-
             // get json data from file
-            const propList = await getUnifiObjects(key);
-
-            let children = [];
-            let expanded = false;
-            for (const child of propList) {
-
-                let selected = false;
-                if (settings.statesFilter[key] && settings.statesFilter[key].includes(child.id)) {
-                    selected = true;
-                    expanded = true;
-                }
-
-                children.push({
-                    title: `<div class="fancytree-item-title-id">${child.id}</div><div class="fancytree-item-title-name">${_(child.name)}</div>`,
-                    key: `${key}.${child.id}`,
-                    selected: selected
-                })
-            }
-
-            tree.push({
+            const objList = await getUnifiObjects(key);
+            const tree = {
                 title: `<div class="fancytree-folder-title-id">${key}</div><div class="fancytree-item-title-name">${_(`root_${key}`)}</div>`,
                 key: key,
                 folder: true,
-                expanded: true,
-                children: children
-            })
+                expanded: false,
+                children: []
+            };
 
+            await convertJsonToTreeObject(key, objList, tree, settings);
 
             $(`#tree_${key}`).fancytree({
                 activeVisible: true,                        // Make sure, active nodes are visible (expanded)
@@ -116,9 +97,9 @@ async function createTreeViews(settings, onChange) {
                 //         return "unifi.png";
                 //     }
                 // },
-                source:
+                source: [
                     tree
-                ,
+                ],
                 click: function (event, data) {
                     if (data.targetType === 'title' && !data.node.folder) {
                         data.node.setSelected(!data.node.isSelected());
@@ -144,9 +125,48 @@ async function createTreeViews(settings, onChange) {
 
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
-            
+
         } catch (err) {
             console.error(`[createTreeViews] key: ${key} error: ${err.message}, stack: ${err.stack}`);
+        }
+    }
+}
+
+
+/**
+ * @param {*} key 
+ * @param {*} objList 
+ * @param {*} tree 
+ * @param {*} settings 
+ */
+async function convertJsonToTreeObject(key, objList, tree, settings) {
+    for (const obj of objList) {
+
+        if (!obj.channel) {
+            let selected = false;
+            if (settings.statesFilter[key] && settings.statesFilter[key].includes(obj.id)) {
+                selected = true;
+                tree.expanded = true;
+            }
+
+            tree.children.push({
+                title: `<div class="fancytree-item-title-id">${obj.id}</div><div class="fancytree-item-title-name">${_(obj.name)}</div>`,
+                key: `${key}.${obj.id}`,
+                selected: selected
+            })
+        } else {
+            // channel
+            const subtree = {
+                title: `<div class="fancytree-folder-title-id">${obj.channel}</div><div class="fancytree-item-title-name">${_(`root_${obj.channel}`)}</div>`,
+                key: `${key}.${obj.channel}`,
+                folder: true,
+                expanded: false,
+                children: []
+            };
+
+            await convertJsonToTreeObject(key, obj.states, subtree, settings);
+
+            tree.children.push(subtree);
         }
     }
 }
