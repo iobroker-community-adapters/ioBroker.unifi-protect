@@ -160,8 +160,8 @@ class UnifiProtect extends utils.Adapter {
 		this.csrfToken = JSON.parse((new Buffer(cookie.split(".")[1], "base64")).toString("ascii")).csrfToken;
 	}
 
-	updateData() {
-		this.renewToken();
+	async updateData() {
+		await this.renewToken();
 		if (this.camerasDone && this.gotToken) {
 			this.getCameraList();
 		}
