@@ -176,8 +176,28 @@
         "secMotions": 600,
         "interval": 60,
         "statesFilter": {
-            "motions": ["start", "end", "type", "thumbnail", "heatmap"],
-            "cameras": []
+            "cameras": [
+                "connectedSince",
+                "connectionHost",
+                "firmwareVersion",
+                "host",
+                "isConnected",
+                "isMotionDetected",
+                "name",
+                "state",
+                "lastMotion.start",
+                "lastMotion.end",
+                "lastMotion.type",
+                "lastMotion.thumbnail",
+                "lastMotion.heatmap"
+            ],
+            "motions": [
+                "start",
+                "end",
+                "type",
+                "thumbnail",
+                "heatmap"
+            ]
         }
     },
     "objects": [],

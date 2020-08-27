@@ -123,11 +123,11 @@ ul.fancytree-container ul {
 
 .fancytree-folder-title-id {
 	font-size: .9em;
-	min-width: 130px;
+	min-width: 200px;
 }
 
 .fancytree-item-title-id {
-	min-width: 130px;
+	min-width: 200px;
 }
 
 .fancytree-item-title-name {
