@@ -177,6 +177,10 @@
         "interval": 60,
         "statesFilter": {
             "cameras": [
+                "channels.enabled",
+                "channels.name",
+                "channels.rtspAlias",
+                "channels.width",
                 "connectedSince",
                 "connectionHost",
                 "firmwareVersion",

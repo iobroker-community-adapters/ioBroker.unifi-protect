@@ -294,6 +294,23 @@
         "channel": "lastMotion",
         "states": [
             {
+                "channel": "metadata",
+                "states": [
+                    {
+                        "id": "objectConfidence",
+                        "name": "objectConfidence"
+                    },
+                    {
+                        "id": "objectCoords",
+                        "name": "objectCoords"
+                    },
+                    {
+                        "id": "objectType",
+                        "name": "objectCoords"
+                    }
+                ]
+            },
+            {
                 "id": "type",
                 "name": "type"
             },
@@ -332,23 +349,6 @@
             {
                 "id": "heatmap",
                 "name": "heatmap"
-            },
-            {
-                "channel": "metadata",
-                "states": [
-                    {
-                        "id": "objectConfidence",
-                        "name": "objectConfidence"
-                    },
-                    {
-                        "id": "objectCoords",
-                        "name": "objectCoords"
-                    },
-                    {
-                        "id": "objectType",
-                        "name": "objectCoords"
-                    }
-                ]
             }
         ]
     },

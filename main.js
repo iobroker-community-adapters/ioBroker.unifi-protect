@@ -162,9 +162,9 @@ class UnifiProtect extends utils.Adapter {
 
 	updateData() {
 		this.renewToken();
-		// if (this.camerasDone && this.gotToken) {
-		// 	this.getCameraList();
-		// }
+		if (this.camerasDone && this.gotToken) {
+			this.getCameraList();
+		}
 		if (this.motionsDone && this.gotToken) {
 			this.getMotionEvents();
 		}
@@ -333,7 +333,7 @@ class UnifiProtect extends utils.Adapter {
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray);
+							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras']);
 						});
 					});
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
@@ -641,31 +641,48 @@ class UnifiProtect extends utils.Adapter {
  	* Function to create a state and set its value
  	* only if it hasn't been set to this value before
  	*/
-	createOwnState(name, value, desc, stateArray, statesFilter = undefined, id = undefined) {
-
+	createOwnState(name, value, desc, stateArray, statesFilter = undefined) {
 		if (typeof (desc) === "undefined")
 			desc = name;
 
 		if (Array.isArray(value) && typeof value[0] === "object" && typeof value[0].id !== "undefined") {
-			this.createOwnChannel(name);
-			for (let i = 0; i < value.length; i++) {
-				const id = value[i].id;
-				Object.entries(value[i]).forEach(([key, val]) => {
-					stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray, statesFilter);
-				});
+			let channelName = name.split('.').slice(2).join('.');
+
+			if (statesFilter) {
+				let channelFilter = statesFilter.filter(x => x.includes(channelName));
+
+				if (channelFilter.length > 0) {
+					this.log.debug(`creating channel '${channelName}'`);
+					this.createOwnChannel(name);
+					for (let i = 0; i < value.length; i++) {
+						const id = value[i].id;
+						Object.entries(value[i]).forEach(([key, val]) => {
+							stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray, statesFilter);
+						});
+					}
+					return stateArray;
+				} else {
+					this.delObject(name, { recursive: true });
+					return stateArray;
+				}
 			}
-			return stateArray;
 		}
 
 		if (typeof value === "object" && value !== null) {
+			let channelName = name.split('.').slice(2).join('.');
+
 			if (statesFilter) {
-				let channelFilter = statesFilter.filter(x => x.includes(name.split('.').slice(2).join('.')));
+				let channelFilter = statesFilter.filter(x => x.includes(channelName));
 
 				if (channelFilter.length > 0) {
+					this.log.debug(`creating channel '${channelName}'`);
 					this.createOwnChannel(name);
 					Object.entries(value).forEach(([key, value]) => {
 						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter);
 					});
+					return stateArray;
+				} else {
+					this.delObject(name, { recursive: true });
 					return stateArray;
 				}
 			}
@@ -705,9 +722,17 @@ class UnifiProtect extends utils.Adapter {
 
 		// remove cam id and device
 		let idForFilter = name.split('.').slice(2).join('.');
+		let idForFilterSplitted = idForFilter.split('.');
+
+		if (!isNaN(idForFilterSplitted[1])) {
+			// if we have an array - number on pos 1, e.g. 'channels.0.bitrate' transform to 'channels.bitrate' for statesFilter
+			idForFilter = idForFilterSplitted.filter((f) => isNaN(f)).join('.')
+		}
 
 		// filter states
-		if (statesFilter && statesFilter.includes(idForFilter)) {
+		if (statesFilter && (statesFilter.includes(idForFilter)
+			|| (name.includes('cameras') && name.includes('lastMotion') && this.config.statesFilter['cameras'].includes(idForFilter)))		// lastMotion -> also add to cameras
+		) {
 			this.setObjectNotExists(name, {
 				type: "state",
 				common: common,
@@ -718,7 +743,7 @@ class UnifiProtect extends utils.Adapter {
 				stateArray.push({ name: name, val: value });
 			}
 		} else {
-			this.delObject(name, function () {});
+			this.delObject(name, function () { });
 		}
 
 		return stateArray;
