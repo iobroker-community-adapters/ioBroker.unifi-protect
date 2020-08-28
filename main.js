@@ -118,10 +118,22 @@ class UnifiProtect extends utils.Adapter {
 		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-			for (let i = 0; i < this.writeables.length; i++) {
-				if (id.match(this.writeables[i])) {
-					this.changeSetting(id, state.val);
-					continue;
+
+			let idSplitted = id.split('.');
+
+			this.log.warn(idSplitted[idSplitted.length - 1]);
+			
+			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
+				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, 1280, true);				
+
+				this.log.debug(`lastMotion thumbnail for cam ${camId} updated`);
+			} else {
+				for (let i = 0; i < this.writeables.length; i++) {
+					if (id.match(this.writeables[i])) {
+						this.changeSetting(id, state.val);
+						continue;
+					}
 				}
 			}
 		} else {
@@ -335,6 +347,27 @@ class UnifiProtect extends utils.Adapter {
 						Object.entries(camera).forEach(([key, value]) => {
 							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras']);
 						});
+
+						let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
+						let that = this;
+						if (this.config.downloadLastMotionThumb) {
+							this.setObjectNotExists(thumbnailUrlId,
+								{
+									type: 'state',
+									common: {
+										name: 'thumbnailUrl',
+										type: 'string',
+										read: true,
+										write: false,
+										role: 'value',
+									},
+									native: {}
+								}, function (obj) {
+									that.setState(thumbnailUrlId, `/vis.0/unifi-protect/lastMotion/${camera.id}.jpg`, true);
+								});
+						} else {
+							this.delObject(thumbnailUrlId);
+						}
 					});
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
@@ -665,7 +698,7 @@ class UnifiProtect extends utils.Adapter {
 				let channelFilter = statesFilter.filter(x => x.includes(channelName));
 
 				if (channelFilter.length > 0) {
-					this.log.debug(`creating channel '${channelName}'`);
+					// this.log.debug(`creating channel '${channelName}'`);
 					this.createOwnChannel(name);
 					for (let i = 0; i < value.length; i++) {
 						const id = value[i].id;
@@ -693,7 +726,7 @@ class UnifiProtect extends utils.Adapter {
 				let channelFilter = statesFilter.filter(x => x.includes(channelName));
 
 				if (channelFilter.length > 0) {
-					this.log.debug(`creating channel '${channelName}'`);
+					// this.log.debug(`creating channel '${channelName}'`);
 					this.createOwnChannel(name);
 					Object.entries(value).forEach(([key, value]) => {
 						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter);
@@ -908,7 +941,6 @@ class UnifiProtect extends utils.Adapter {
 			}
 		}
 	}
-
 }
 
 // @ts-ignore parent is a valid property on module

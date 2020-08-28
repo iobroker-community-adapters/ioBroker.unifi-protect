@@ -203,7 +203,8 @@
                 "thumbnail",
                 "heatmap"
             ]
-        }
+        },
+        "downloadLastMotionThumb": false
     },
     "objects": [],
     "instanceObjects": []
