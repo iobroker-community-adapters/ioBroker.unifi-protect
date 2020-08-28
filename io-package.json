@@ -189,6 +189,7 @@
                 "isMotionDetected",
                 "name",
                 "state",
+                "lastMotion",
                 "lastMotion.start",
                 "lastMotion.end",
                 "lastMotion.type",
