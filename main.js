@@ -642,6 +642,7 @@ class UnifiProtect extends utils.Adapter {
  	* only if it hasn't been set to this value before
  	*/
 	createOwnState(name, value, desc, stateArray, statesFilter = undefined) {
+
 		if (typeof (desc) === "undefined")
 			desc = name;
 
@@ -670,6 +671,11 @@ class UnifiProtect extends utils.Adapter {
 
 		if (typeof value === "object" && value !== null) {
 			let channelName = name.split('.').slice(2).join('.');
+			let channelNameSplitted = channelName.split('.');
+
+			if (!isNaN(channelNameSplitted[1])) {
+				channelName = channelNameSplitted.filter((f) => isNaN(f)).join('.');
+			}
 
 			if (statesFilter) {
 				let channelFilter = statesFilter.filter(x => x.includes(channelName));
