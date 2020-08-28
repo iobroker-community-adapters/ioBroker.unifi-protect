@@ -126,7 +126,7 @@ class UnifiProtect extends utils.Adapter {
 
 			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
 				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
-				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, 1280, true);
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, this.config.downloadLastMotionThumbWidth || 640, true);
 
 				this.log.debug(`lastMotion thumbnail for cam ${camId} updated`);
 			} else {

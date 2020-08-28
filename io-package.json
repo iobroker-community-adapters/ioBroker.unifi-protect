@@ -204,7 +204,10 @@
                 "heatmap"
             ]
         },
-        "downloadLastMotionThumb": false
+        "downloadLastMotionThumb": false,
+        "downloadLastMotionThumbWidth": 640,
+        "downloadSnapshot": false,
+        "downloadSnapshotWidth": 640
     },
     "objects": [],
     "instanceObjects": []
