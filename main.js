@@ -43,6 +43,10 @@ class UnifiProtect extends utils.Adapter {
 			"recordingSettings.mode"
 		];
 
+		this.cameraSubscribleStates = [
+			'lastMotion.thumbnail'
+		]
+
 		this.paths = {
 			login: "/api/auth",
 			loginUDM: "/api/auth/login",
@@ -67,7 +71,6 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		this.subscribeStates("*");
 		this.getForeignObject("system.config", (err, obj) => {
 			if (obj && obj.native && obj.native.secret) {
 				this.config.password = this.decrypt(obj.native.secret, this.config.password);
@@ -117,7 +120,7 @@ class UnifiProtect extends utils.Adapter {
 	onStateChange(id, state) {
 		if (state) {
 			// The state was changed
-			this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 
 			let idSplitted = id.split('.');
 
@@ -176,7 +179,7 @@ class UnifiProtect extends utils.Adapter {
 			this.getCameraList(onReady);
 		}
 		if (this.motionsDone && this.gotToken) {
-			this.getMotionEvents();
+			this.getMotionEvents(onReady);
 		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
@@ -343,7 +346,7 @@ class UnifiProtect extends utils.Adapter {
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras']);
+							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
 						});
 
 						if (onReady) {
@@ -367,6 +370,10 @@ class UnifiProtect extends utils.Adapter {
 							} else {
 								this.delObject(thumbnailUrlId);
 							}
+
+							for (const sub of this.cameraSubscribleStates) {
+								this.subscribeStates(`cameras.${camera.id}.${sub}`)
+							}
 						}
 					});
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
@@ -388,7 +395,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	getMotionEvents() {
+	getMotionEvents(onReady = false) {
 		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
@@ -686,7 +693,7 @@ class UnifiProtect extends utils.Adapter {
  	* Function to create a state and set its value
  	* only if it hasn't been set to this value before
  	*/
-	createOwnState(name, value, desc, stateArray, statesFilter = undefined) {
+	createOwnState(name, value, desc, stateArray, statesFilter, onReady) {
 
 		if (typeof (desc) === "undefined")
 			desc = name;
@@ -703,7 +710,7 @@ class UnifiProtect extends utils.Adapter {
 					for (let i = 0; i < value.length; i++) {
 						const id = value[i].id;
 						Object.entries(value[i]).forEach(([key, val]) => {
-							stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray, statesFilter);
+							stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray, statesFilter, onReady);
 						});
 					}
 					return stateArray;
@@ -729,7 +736,7 @@ class UnifiProtect extends utils.Adapter {
 					// this.log.debug(`creating channel '${channelName}'`);
 					this.createOwnChannel(name);
 					Object.entries(value).forEach(([key, value]) => {
-						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter);
+						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter, onReady);
 					});
 					return stateArray;
 				} else {
@@ -760,6 +767,12 @@ class UnifiProtect extends utils.Adapter {
 			for (let i = 0; i < this.writeables.length; i++) {
 				if (name.match(this.writeables[i])) {
 					write = true;
+
+					if (onReady) {
+						// only subscribe on writeable states on first run
+						this.subscribeStates(name);
+					}
+
 					continue;
 				}
 			}
@@ -834,7 +847,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	addMotionEvents(motionEvents) {
+	addMotionEvents(motionEvents, onReady = false) {
 		let stateArray = [];
 		const lastMotionPerCamera = {};
 		let i = 0;
@@ -842,7 +855,7 @@ class UnifiProtect extends utils.Adapter {
 			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
-					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions']);
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
 				}
 			});
 			lastMotionPerCamera[motionEvent.camera] = i;
@@ -850,11 +863,11 @@ class UnifiProtect extends utils.Adapter {
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions']);
+				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
 			});
 			Object.entries(lastMotionPerCamera).forEach(([camera, id]) => {
 				Object.entries(motionEvents[id]).forEach(([key, value]) => {
-					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions']);
+					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
 				});
 			});
 		}
