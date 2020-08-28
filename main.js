@@ -117,11 +117,9 @@ class UnifiProtect extends utils.Adapter {
 	onStateChange(id, state) {
 		if (state) {
 			// The state was changed
-			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 
 			let idSplitted = id.split('.');
-
-			this.log.warn(idSplitted[idSplitted.length - 1]);
 
 			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
 				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
@@ -741,38 +739,6 @@ class UnifiProtect extends utils.Adapter {
 			}
 		}
 
-		if (Array.isArray(value))
-			value = value.toString();
-
-		let write = false;
-		for (let i = 0; i < this.writeables.length; i++) {
-			if (name.match(this.writeables[i])) {
-				write = true;
-				continue;
-			}
-		}
-
-		let common = {
-			name: desc.toString(),
-			type: typeof (value),
-			read: true,
-			write: write
-		};
-
-		if (name.match("recordingSettings.mode") != null) {
-			common = {
-				name: desc.toString(),
-				type: typeof (value),
-				read: true,
-				write: true,
-				states: {
-					"always": "always",
-					"never": "never",
-					"motion": "motion"
-				}
-			};
-		}
-
 		// remove cam id and device
 		let idForFilter = name.split('.').slice(2).join('.');
 		let idForFilterSplitted = idForFilter.split('.');
@@ -786,6 +752,39 @@ class UnifiProtect extends utils.Adapter {
 		if (statesFilter && (statesFilter.includes(idForFilter)
 			|| (name.includes('cameras') && name.includes('lastMotion') && this.config.statesFilter['cameras'].includes(idForFilter)))		// lastMotion -> also add to cameras
 		) {
+
+			if (Array.isArray(value))
+				value = value.toString();
+
+			let write = false;
+			for (let i = 0; i < this.writeables.length; i++) {
+				if (name.match(this.writeables[i])) {
+					write = true;
+					continue;
+				}
+			}
+
+			let common = {
+				name: desc.toString(),
+				type: typeof (value),
+				read: true,
+				write: write
+			};
+
+			if (name.match("recordingSettings.mode") != null) {
+				common = {
+					name: desc.toString(),
+					type: typeof (value),
+					read: true,
+					write: true,
+					states: {
+						"always": "always",
+						"never": "never",
+						"motion": "motion"
+					}
+				};
+			}
+
 			this.setObjectNotExists(name, {
 				type: "state",
 				common: common,
