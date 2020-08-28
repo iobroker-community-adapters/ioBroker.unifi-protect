@@ -433,7 +433,7 @@
         ]
     },
     {
-        "channel": "pirSettings",
+        "channel": "recordingSettings",
         "states": [
             {
                 "id": "enablePirTimelapse",
