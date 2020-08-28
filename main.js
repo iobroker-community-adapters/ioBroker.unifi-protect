@@ -431,7 +431,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getThumbnail(thumb, path, callback, retries = 5, width = 640) {
+	async getThumbnail(thumb, path, callback, retries = 5, width = 640, visCompatible = false) {
 		const height = width / 1.8;
 
 		const options = {
@@ -464,8 +464,14 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					fs.writeFileSync(path, data.read());
-					callback(path);
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							callback(path);
+						})
+					} else {
+						fs.writeFileSync(path, data.read());
+						callback(path);
+					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
 					this.renewToken(true);
@@ -490,7 +496,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getSnapshot(camera, path, callback) {
+	async getSnapshot(camera, path, callback, visCompatible = false) {
 		const ts = Date.now() * 1000;
 
 		const options = {
@@ -523,8 +529,14 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					fs.writeFileSync(path, data.read());
-					callback(path);
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							callback(path);
+						})
+					} else {
+						fs.writeFileSync(path, data.read());
+						callback(path);
+					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getSnapshot: Unifi Protect reported authorization failure");
 					this.renewToken(true);
