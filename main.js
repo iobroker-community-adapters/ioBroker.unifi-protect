@@ -74,7 +74,7 @@ class UnifiProtect extends utils.Adapter {
 			} else {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
-			this.updateData();
+			this.updateData(true);
 		});
 	}
 
@@ -122,10 +122,10 @@ class UnifiProtect extends utils.Adapter {
 			let idSplitted = id.split('.');
 
 			this.log.warn(idSplitted[idSplitted.length - 1]);
-			
+
 			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
 				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
-				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, 1280, true);				
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, 1280, true);
 
 				this.log.debug(`lastMotion thumbnail for cam ${camId} updated`);
 			} else {
@@ -172,10 +172,10 @@ class UnifiProtect extends utils.Adapter {
 		this.csrfToken = JSON.parse((new Buffer(cookie.split(".")[1], "base64")).toString("ascii")).csrfToken;
 	}
 
-	async updateData() {
+	async updateData(onReady = false) {
 		await this.renewToken();
 		if (this.camerasDone && this.gotToken) {
-			this.getCameraList();
+			this.getCameraList(onReady);
 		}
 		if (this.motionsDone && this.gotToken) {
 			this.getMotionEvents();
@@ -305,7 +305,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	getCameraList() {
+	getCameraList(onReady = false) {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
@@ -348,25 +348,27 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras']);
 						});
 
-						let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
-						let that = this;
-						if (this.config.downloadLastMotionThumb) {
-							this.setObjectNotExists(thumbnailUrlId,
-								{
-									type: 'state',
-									common: {
-										name: 'thumbnailUrl',
-										type: 'string',
-										read: true,
-										write: false,
-										role: 'value',
-									},
-									native: {}
-								}, function (obj) {
-									that.setState(thumbnailUrlId, `/vis.0/unifi-protect/lastMotion/${camera.id}.jpg`, true);
-								});
-						} else {
-							this.delObject(thumbnailUrlId);
+						if (onReady) {
+							let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
+							let that = this;
+							if (this.config.downloadLastMotionThumb) {
+								this.setObjectNotExists(thumbnailUrlId,
+									{
+										type: 'state',
+										common: {
+											name: 'thumbnailUrl',
+											type: 'string',
+											read: true,
+											write: false,
+											role: 'value',
+										},
+										native: {}
+									}, function (obj) {
+										that.setState(thumbnailUrlId, `/vis.0/unifi-protect/lastMotion/${camera.id}.jpg`, true);
+									});
+							} else {
+								this.delObject(thumbnailUrlId);
+							}
 						}
 					});
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
