@@ -123,12 +123,11 @@ class UnifiProtect extends utils.Adapter {
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 
 			let idSplitted = id.split('.');
-
 			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
 				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
-				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 5, this.config.downloadLastMotionThumbWidth || 640, true);
 
-				this.log.debug(`lastMotion thumbnail for cam ${camId} updated`);
+				this.log.debug(`update lastMotion thumbnail for cam ${camId}`);
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 30, this.config.downloadLastMotionThumbWidth || 640, true);
 			} else {
 				for (let i = 0; i < this.writeables.length; i++) {
 					if (id.match(this.writeables[i])) {
@@ -473,6 +472,7 @@ class UnifiProtect extends utils.Adapter {
 
 	async getThumbnail(thumb, path, callback, retries = 5, width = 640, visCompatible = false) {
 		const height = width / 1.8;
+		let that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -506,22 +506,29 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (visCompatible) {
 						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getThumbnail] thumb stored successfully -> /vis.0${path}`);
 							callback(path);
-						})
+						});
 					} else {
 						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getThumbnail] thumb stored successfully -> ${path}`);
 						callback(path);
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 					if (retries > 0) {
-						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width); }, 1000);
+						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width, visCompatible); }, 1000);
 					}
 				} else {
-					this.log.error("Status Code: " + res.statusCode);
+					if (!visCompatible) {
+						this.log.error("[getThumbnail]: Status Code: " + res.statusCode);
+					} else {
+						// if refresh interval is very low -> protect needs time to save the image -> supress error message
+						this.log.debug("[getThumbnail]: Status Code: " + res.statusCode);
+					}
 					if (retries > 0) {
-						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width); }, 1000);
+						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width, visCompatible); }, 1000);
 					}
 				}
 			});
@@ -536,8 +543,10 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getSnapshot(camera, path, callback, visCompatible = false) {
+	async getSnapshot(camera, path, callback, width = 640, visCompatible = false) {
 		const ts = Date.now() * 1000;
+		const height = width / 1.8;
+		let that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -553,7 +562,7 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
 			};
-			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}`;
+			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}&h=${height}&w=${width}`;
 		} else {
 			options.headers = {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
@@ -571,17 +580,19 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (visCompatible) {
 						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getSnapshot] thumb stored successfully -> /vis.0${path}`);
 							callback(path);
-						})
+						});
 					} else {
 						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getSnapshot] thumb stored successfully -> ${path}`);
 						callback(path);
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("getSnapshot: Unifi Protect reported authorization failure");
+					this.log.error("[getSnapshot]: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 				} else {
-					this.log.error("Status Code: " + res.statusCode);
+					this.log.error("[getSnapshot] Status Code: " + res.statusCode);
 				}
 			});
 		});

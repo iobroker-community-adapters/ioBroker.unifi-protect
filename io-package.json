@@ -205,9 +205,7 @@
             ]
         },
         "downloadLastMotionThumb": false,
-        "downloadLastMotionThumbWidth": 640,
-        "downloadSnapshot": false,
-        "downloadSnapshotWidth": 640
+        "downloadLastMotionThumbWidth": 640
     },
     "objects": [],
     "instanceObjects": []

@@ -337,6 +337,30 @@ const dictionary = {
 		"es": "estado de conexión cableada",
 		"pl": "stan połączenia przewodowego",
 		"zh-cn": "有线连接状态"
+	},
+	"download image of last motion": {
+		"en": "download image of last motion",
+		"de": "Bild der letzten Bewegung herunterladen",
+		"ru": "скачать изображение последнего движения",
+		"pt": "baixar imagem do último movimento",
+		"nl": "download afbeelding van de laatste beweging",
+		"fr": "télécharger l'image du dernier mouvement",
+		"it": "scarica l'immagine dell'ultimo movimento",
+		"es": "descargar imagen del ultimo movimiento",
+		"pl": "pobierz obraz ostatniego ruchu",
+		"zh-cn": "下载最后一个动作的图像"
+	},
+	"image width of last motion": {
+		"en": "image width of last motion",
+		"de": "Bildbreite der letzten Bewegung",
+		"ru": "ширина изображения последнего движения",
+		"pt": "largura da imagem do último movimento",
+		"nl": "beeldbreedte van de laatste beweging",
+		"fr": "largeur d'image du dernier mouvement",
+		"it": "larghezza dell'immagine dell'ultimo movimento",
+		"es": "ancho de imagen del último movimiento",
+		"pl": "szerokość obrazu ostatniego ruchu",
+		"zh-cn": "最后动作的图像宽度"
 	}
 };
 
