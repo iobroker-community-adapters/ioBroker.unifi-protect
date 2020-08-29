@@ -42,6 +42,18 @@ async function loadHelper(settings, onChange) {
 
     await createTreeViews(settings, onChange);
 
+    $('#downloadLastMotionThumb').change(function (obj) {
+        var $myTree = $("#tree_cameras").fancytree();
+        var tree = $myTree.fancytree("getTree");
+
+        var node = tree.getNodeByKey('lastMotion.thumbnail');
+        if ($(this).is(":checked")) {
+            node.unselectable = true;
+            node.selected = true;
+        } else {
+            node.unselectable = false;
+        }
+    });
 
     onChange(false);
 
@@ -63,7 +75,7 @@ async function createTreeViews(settings, onChange) {
                 title: `<div class="fancytree-folder-title-id">${key}</div><div class="fancytree-item-title-name">${_(`root_${key}`)}</div>`,
                 key: key,
                 folder: true,
-                expanded: false,
+                expanded: true,
                 children: []
             };
 
@@ -130,22 +142,29 @@ async function convertJsonToTreeObject(key, objList, tree, settings, channel = u
 
         if (!obj.channel) {
             let selected = false;
+            let unselectable = false;
             if (settings.statesFilter[key] && settings.statesFilter[key].includes(`${channel ? channel + '.' : ''}${obj.id}`)) {
                 selected = true;
                 tree.expanded = true;
             }
 
+            if ($("#downloadLastMotionThumb").is(':checked') && `${channel ? channel + '.' : ''}${obj.id}` === 'lastMotion.thumbnail') {
+                selected = true;
+                unselectable = true;
+            }
+
             tree.children.push({
                 title: `<div class="fancytree-item-title-id">${obj.id}</div><div class="fancytree-item-title-name">${_(obj.name)}</div>`,
-                key: `${key}.${obj.id}`,
+                key: `${channel ? channel + '.' : ''}${obj.id}`,
                 id: `${channel ? channel + '.' : ''}${obj.id}`,
-                selected: selected
-            })
+                selected: selected,
+                unselectable: unselectable
+            });
         } else {
             // channel
             const subtree = {
                 title: `<div class="fancytree-folder-title-id">${obj.channel}</div><div class="fancytree-item-title-name">${_(`root_${obj.channel}`)}</div>`,
-                key: `${key}.${obj.channel}`,
+                key: `${obj.channel}`,
                 folder: true,
                 expanded: false,
                 children: []
