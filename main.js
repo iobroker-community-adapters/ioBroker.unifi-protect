@@ -598,11 +598,52 @@ class UnifiProtect extends utils.Adapter {
 		});
 
 		req.on("error", e => {
-			this.log.error("getSnapshot " + JSON.stringify(e));
+			this.log.error("[getSnapshot] " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
 		});
+		req.end();
+	}
+
+	async getSnapshotFromCam(ip, path, callback, visCompatible = false) {
+		let that = this;
+
+		const options = {
+			hostname: ip,
+			path: "/snap.jpeg",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {},
+
+		};
+
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getSnapshotFromCam] thumb stored successfully -> /vis.0${path}`);
+							callback(path);
+						});
+					} else {
+						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getSnapshotFromCam] thumb stored successfully -> ${path}`);
+						callback(path);
+					}
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("[getSnapshotFromCam]: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("[getSnapshotFromCam] Status Code: " + res.statusCode);
+				}
+			});
+		});
+
 		req.end();
 	}
 
