@@ -348,6 +348,11 @@ class UnifiProtect extends utils.Adapter {
 							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
 						});
 
+						let channelFilter = this.config.statesFilter['cameras'].filter(x => x.includes('lastMotion'));
+						if (channelFilter.length > 0) {
+							this.getLastMotionForCam(camera.id, camera.lastMotion, onReady);
+						}
+
 						if (onReady) {
 							let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
 							let that = this;
@@ -390,6 +395,72 @@ class UnifiProtect extends utils.Adapter {
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
+		});
+		req.end();
+	}
+
+	getLastMotionForCam(cameraId, lastMotitionTimestamp, onReady) {
+		const eventStart = lastMotitionTimestamp - (10 * 1000);
+		const eventEnd = lastMotitionTimestamp + (10 * 1000);
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`,
+			method: "GET",
+			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+		}
+
+		const req = https.request(options, res => {
+			let data = "";
+			res.on("data", d => {
+				data += d;
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
+					}
+					const motionEvents = JSON.parse(data);
+
+					if (motionEvents.length > 0) {
+						let stateArray = [];
+						Object.entries(motionEvents[0]).forEach(([key, value]) => {
+							stateArray = this.createOwnState("cameras." + cameraId + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
+						});
+						this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
+					}
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
+					this.motionsDone = true;
+					this.renewToken(true);
+				} else {
+					this.motionsDone = true;
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error("getMotionEvents " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+			this.motionsDone = true;
 		});
 		req.end();
 	}
