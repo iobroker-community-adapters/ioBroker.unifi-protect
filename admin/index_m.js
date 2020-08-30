@@ -55,6 +55,19 @@ async function loadHelper(settings, onChange) {
         }
     });
 
+    $('#takeSnapshotForLastMotion').change(function (obj) {
+        var $myTree = $("#tree_cameras").fancytree();
+        var tree = $myTree.fancytree("getTree");
+
+        var node = tree.getNodeByKey('lastMotion.thumbnail');
+        if ($(this).is(":checked")) {
+            node.unselectable = true;
+            node.selected = true;
+        } else {
+            node.unselectable = false;
+        }
+    });
+
     onChange(false);
 
     // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:

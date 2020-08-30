@@ -126,6 +126,19 @@ class UnifiProtect extends utils.Adapter {
 			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
 				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
 
+				if (this.config.takeSnapshotForLastMotion) {
+					let that = this;
+					this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
+						if (!err && host && host.val) {
+							// that.getSnapshotFromCam(host.val, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, true);
+
+							setTimeout(function () {
+								that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
+							}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+						}
+					});
+				}
+
 				this.log.debug(`update lastMotion thumbnail for cam ${camId}`);
 				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 30, this.config.downloadLastMotionThumbWidth || 640, true);
 			} else {
@@ -373,6 +386,26 @@ class UnifiProtect extends utils.Adapter {
 									});
 							} else {
 								this.delObject(thumbnailUrlId);
+							}
+
+							let snapshotUrl = `cameras.${camera.id}.lastMotion.snapshotUrl`;
+							if (this.config.takeSnapshotForLastMotion) {
+								this.setObjectNotExists(snapshotUrl,
+									{
+										type: 'state',
+										common: {
+											name: 'thumbnailUrl',
+											type: 'string',
+											read: true,
+											write: false,
+											role: 'value',
+										},
+										native: {}
+									}, function (obj) {
+										that.setState(snapshotUrl, `/vis.0/unifi-protect/lastMotion/${camera.id}_snapshot.jpg`, true);
+									});
+							} else {
+								this.delObject(snapshotUrl);
 							}
 
 							for (const sub of this.cameraSubscribleStates) {

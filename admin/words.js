@@ -361,6 +361,42 @@ const dictionary = {
 		"es": "ancho de imagen del último movimiento",
 		"pl": "szerokość obrazu ostatniego ruchu",
 		"zh-cn": "最后动作的图像宽度"
+	},
+	"take snapshot for last motion": {
+		"en": "take snapshot for last motion",
+		"de": "Schnappschuss für die letzte Bewegung machen",
+		"ru": "сделать снимок последнего движения",
+		"pt": "tire uma foto para o último movimento",
+		"nl": "maak een momentopname voor de laatste beweging",
+		"fr": "prendre un instantané du dernier mouvement",
+		"it": "scatta un'istantanea per l'ultimo movimento",
+		"es": "tomar instantánea para el último movimiento",
+		"pl": "wykonaj migawkę ostatniego ruchu",
+		"zh-cn": "拍摄最后的动作快照"
+	},
+	"image width of snapshot of last motion": {
+		"en": "image width of snapshot of last motion",
+		"de": "Bildbreite des Schnappschusses der letzten Bewegung",
+		"ru": "ширина изображения снимка последнего движения",
+		"pt": "largura da imagem do instantâneo do último movimento",
+		"nl": "beeldbreedte van momentopname van laatste beweging",
+		"fr": "largeur d'image de l'instantané du dernier mouvement",
+		"it": "larghezza dell'immagine dell'istantanea dell'ultimo movimento",
+		"es": "ancho de imagen de la instantánea del último movimiento",
+		"pl": "szerokość migawki ostatniego ruchu",
+		"zh-cn": "最后动作快照的图像宽度"
+	  },
+	"delay for snapshot of last motion": {
+		"en": "delay for snapshot of last motion",
+		"de": "Verzögerung für den Schnappschuss der letzten Bewegung",
+		"ru": "задержка для снимка последнего движения",
+		"pt": "atraso para instantâneo do último movimento",
+		"nl": "vertraging voor momentopname van laatste beweging",
+		"fr": "délai pour l'instantané du dernier mouvement",
+		"it": "ritardo per l'istantanea dell'ultimo movimento",
+		"es": "retraso para la instantánea del último movimiento",
+		"pl": "opóźnienie migawki ostatniego ruchu",
+		"zh-cn": "最后动作快照的延迟"
 	}
 };
 
