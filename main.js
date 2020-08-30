@@ -305,7 +305,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	getCameraList(onReady = false) {
+	getCameraList(onReady) {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
@@ -394,7 +394,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	getMotionEvents(onReady = false) {
+	getMotionEvents(onReady) {
 		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
@@ -448,7 +448,7 @@ class UnifiProtect extends utils.Adapter {
 					});
 					newMotionEvents.reverse();
 					this.deleteOldMotionEvents(newMotionEvents);
-					this.addMotionEvents(newMotionEvents);
+					this.addMotionEvents(newMotionEvents, onReady);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
 					this.motionsDone = true;
@@ -899,7 +899,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	addMotionEvents(motionEvents, onReady = false) {
+	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		const lastMotionPerCamera = {};
 		let i = 0;
