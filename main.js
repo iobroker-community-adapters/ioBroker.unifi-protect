@@ -128,15 +128,16 @@ class UnifiProtect extends utils.Adapter {
 
 				if (this.config.takeSnapshotForLastMotion) {
 					let that = this;
-					this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
-						if (!err && host && host.val) {
-							// that.getSnapshotFromCam(host.val, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, true);
+					
+					// this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
+					// 	if (!err && host && host.val) {
+					// 		that.getSnapshotFromCam(host.val, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, true);
+					// 	}
+					// });
 
-							setTimeout(function () {
-								that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
-							}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
-						}
-					});
+					setTimeout(function () {
+						that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
+					}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 				}
 
 				this.log.debug(`update lastMotion thumbnail for cam ${camId}`);
