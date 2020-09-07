@@ -57,7 +57,9 @@ class UnifiProtect extends utils.Adapter {
 			cameras: "/api/cameras/",
 			camerasUDM: "/proxy/protect/api/cameras/",
 			thumb: "/api/thumbnails/",
-			thumbUDM: "/proxy/protect/api/thumbnails/"
+			thumbUDM: "/proxy/protect/api/thumbnails/",
+			heatmap: "/api/heatmaps/",
+			heatmapUDM: "/proxy/protect/api/heatmaps/"
 		};
 
 		this.on("ready", this.onReady.bind(this));
