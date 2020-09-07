@@ -323,7 +323,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.bootstrapUDM : this.paths.bootstrap),
+			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -353,9 +353,11 @@ class UnifiProtect extends utils.Adapter {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
-					const cameras = JSON.parse(data).cameras;
+					const cameras = JSON.parse(data);
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
+
+					this.log.info(JSON.stringify(cameras));
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
