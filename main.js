@@ -128,7 +128,7 @@ class UnifiProtect extends utils.Adapter {
 
 				if (this.config.takeSnapshotForLastMotion) {
 					let that = this;
-					
+
 					// this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
 					// 	if (!err && host && host.val) {
 					// 		that.getSnapshotFromCam(host.val, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, true);
@@ -357,7 +357,6 @@ class UnifiProtect extends utils.Adapter {
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
 
-					this.log.info(JSON.stringify(cameras));
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
@@ -416,6 +415,8 @@ class UnifiProtect extends utils.Adapter {
 							}
 						}
 					});
+
+
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getCameraList: Unifi Protect reported authorization failure");
@@ -865,7 +866,8 @@ class UnifiProtect extends utils.Adapter {
 
 				if (channelFilter.length > 0) {
 					// this.log.debug(`creating channel '${channelName}'`);
-					this.createOwnChannel(name);
+					if (onReady) this.createOwnChannel(name);
+
 					for (let i = 0; i < value.length; i++) {
 						const id = value[i].id;
 						Object.entries(value[i]).forEach(([key, val]) => {
@@ -874,7 +876,7 @@ class UnifiProtect extends utils.Adapter {
 					}
 					return stateArray;
 				} else {
-					this.delObject(name, { recursive: true });
+					if (onReady) this.delObject(name, { recursive: true });
 					return stateArray;
 				}
 			}
@@ -893,13 +895,13 @@ class UnifiProtect extends utils.Adapter {
 
 				if (channelFilter.length > 0) {
 					// this.log.debug(`creating channel '${channelName}'`);
-					this.createOwnChannel(name);
+					if (onReady) this.createOwnChannel(name);
 					Object.entries(value).forEach(([key, value]) => {
 						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter, onReady);
 					});
 					return stateArray;
 				} else {
-					this.delObject(name, { recursive: true });
+					if (onReady) this.delObject(name, { recursive: true });
 					return stateArray;
 				}
 			}
@@ -922,52 +924,52 @@ class UnifiProtect extends utils.Adapter {
 			if (Array.isArray(value))
 				value = value.toString();
 
-			let write = false;
-			for (let i = 0; i < this.writeables.length; i++) {
-				if (name.match(this.writeables[i])) {
-					write = true;
+			if (onReady) {
+				let write = false;
+				for (let i = 0; i < this.writeables.length; i++) {
+					if (name.match(this.writeables[i])) {
+						write = true;
 
-					if (onReady) {
 						// only subscribe on writeable states on first run
 						this.subscribeStates(name);
+
+						continue;
 					}
-
-					continue;
 				}
-			}
 
-			let common = {
-				name: desc.toString(),
-				type: typeof (value),
-				read: true,
-				write: write
-			};
-
-			if (name.match("recordingSettings.mode") != null) {
-				common = {
+				let common = {
 					name: desc.toString(),
 					type: typeof (value),
 					read: true,
-					write: true,
-					states: {
-						"always": "always",
-						"never": "never",
-						"motion": "motion"
-					}
+					write: write
 				};
-			}
 
-			this.setObjectNotExists(name, {
-				type: "state",
-				common: common,
-				native: { id: name }
-			});
+				if (name.match("recordingSettings.mode") != null) {
+					common = {
+						name: desc.toString(),
+						type: typeof (value),
+						read: true,
+						write: true,
+						states: {
+							"always": "always",
+							"never": "never",
+							"motion": "motion"
+						}
+					};
+				}
+
+				this.setObjectNotExists(name, {
+					type: "state",
+					common: common,
+					native: { id: name }
+				});
+			}
 
 			if (typeof (value) !== "undefined") {
 				stateArray.push({ name: name, val: value });
 			}
 		} else {
-			this.delObject(name, function () { });
+			if (onReady) this.delObject(name, function () { });
 		}
 
 		return stateArray;
@@ -1011,10 +1013,11 @@ class UnifiProtect extends utils.Adapter {
 		const lastMotionPerCamera = {};
 		let i = 0;
 		motionEvents.forEach(motionEvent => {
-			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
+			if (onReady) this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
+
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
-					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions'], true);
 				}
 			});
 			lastMotionPerCamera[motionEvent.camera] = i;
