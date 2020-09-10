@@ -43,6 +43,10 @@ class UnifiProtect extends utils.Adapter {
 			"recordingSettings.mode"
 		];
 
+		this.cameraSubscribleStates = [
+			'lastMotion.thumbnail'
+		]
+
 		this.paths = {
 			login: "/api/auth",
 			loginUDM: "/api/auth/login",
@@ -53,7 +57,9 @@ class UnifiProtect extends utils.Adapter {
 			cameras: "/api/cameras/",
 			camerasUDM: "/proxy/protect/api/cameras/",
 			thumb: "/api/thumbnails/",
-			thumbUDM: "/proxy/protect/api/thumbnails/"
+			thumbUDM: "/proxy/protect/api/thumbnails/",
+			heatmap: "/api/heatmaps/",
+			heatmapUDM: "/proxy/protect/api/heatmaps/"
 		};
 
 		this.on("ready", this.onReady.bind(this));
@@ -67,14 +73,13 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		this.subscribeStates("*");
 		this.getForeignObject("system.config", (err, obj) => {
 			if (obj && obj.native && obj.native.secret) {
 				this.config.password = this.decrypt(obj.native.secret, this.config.password);
 			} else {
 				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
 			}
-			this.updateData();
+			this.updateData(true);
 		});
 	}
 
@@ -118,10 +123,33 @@ class UnifiProtect extends utils.Adapter {
 		if (state) {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-			for (let i = 0; i < this.writeables.length; i++) {
-				if (id.match(this.writeables[i])) {
-					this.changeSetting(id, state.val);
-					continue;
+
+			let idSplitted = id.split('.');
+			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
+				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
+
+				if (this.config.takeSnapshotForLastMotion) {
+					let that = this;
+
+					// this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
+					// 	if (!err && host && host.val) {
+					// 		that.getSnapshotFromCam(host.val, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, true);
+					// 	}
+					// });
+
+					setTimeout(function () {
+						that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
+					}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+				}
+
+				this.log.debug(`update lastMotion thumbnail for cam ${camId}`);
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 30, this.config.downloadLastMotionThumbWidth || 640, true);
+			} else {
+				for (let i = 0; i < this.writeables.length; i++) {
+					if (id.match(this.writeables[i])) {
+						this.changeSetting(id, state.val);
+						continue;
+					}
 				}
 			}
 		} else {
@@ -160,13 +188,13 @@ class UnifiProtect extends utils.Adapter {
 		this.csrfToken = JSON.parse((new Buffer(cookie.split(".")[1], "base64")).toString("ascii")).csrfToken;
 	}
 
-	updateData() {
-		this.renewToken();
+	async updateData(onReady = false) {
+		await this.renewToken();
 		if (this.camerasDone && this.gotToken) {
-			this.getCameraList();
+			this.getCameraList(onReady);
 		}
 		if (this.motionsDone && this.gotToken) {
-			this.getMotionEvents();
+			this.getMotionEvents(onReady);
 		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
 	}
@@ -293,11 +321,11 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	getCameraList() {
+	getCameraList(onReady) {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.bootstrapUDM : this.paths.bootstrap),
+			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -327,15 +355,70 @@ class UnifiProtect extends utils.Adapter {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
-					const cameras = JSON.parse(data).cameras;
+					const cameras = JSON.parse(data);
 					this.createOwnDevice("cameras", "Cameras");
 					let stateArray = [];
+
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray);
+							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
 						});
+
+						let channelFilter = this.config.statesFilter['cameras'].filter(x => x.includes('lastMotion'));
+						if (channelFilter.length > 0) {
+							this.getLastMotionForCam(camera.id, camera.lastMotion, onReady);
+						}
+
+						if (onReady) {
+							let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
+							let that = this;
+							if (this.config.downloadLastMotionThumb) {
+								this.setObjectNotExists(thumbnailUrlId,
+									{
+										type: 'state',
+										common: {
+											name: 'thumbnailUrl',
+											type: 'string',
+											read: true,
+											write: false,
+											role: 'value',
+										},
+										native: {}
+									}, function (obj) {
+										that.setState(thumbnailUrlId, `/vis.0/unifi-protect/lastMotion/${camera.id}.jpg`, true);
+									});
+							} else {
+								this.delObject(thumbnailUrlId);
+							}
+
+							let snapshotUrl = `cameras.${camera.id}.lastMotion.snapshotUrl`;
+							if (this.config.takeSnapshotForLastMotion) {
+								this.setObjectNotExists(snapshotUrl,
+									{
+										type: 'state',
+										common: {
+											name: 'thumbnailUrl',
+											type: 'string',
+											read: true,
+											write: false,
+											role: 'value',
+										},
+										native: {}
+									}, function (obj) {
+										that.setState(snapshotUrl, `/vis.0/unifi-protect/lastMotion/${camera.id}_snapshot.jpg`, true);
+									});
+							} else {
+								this.delObject(snapshotUrl);
+							}
+
+							for (const sub of this.cameraSubscribleStates) {
+								this.subscribeStates(`cameras.${camera.id}.${sub}`)
+							}
+						}
 					});
+
+
 					this.processStateChanges(stateArray, this, () => { this.camerasDone = true; });
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getCameraList: Unifi Protect reported authorization failure");
@@ -355,7 +438,73 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	getMotionEvents() {
+	getLastMotionForCam(cameraId, lastMotitionTimestamp, onReady) {
+		const eventStart = lastMotitionTimestamp - (10 * 1000);
+		const eventEnd = lastMotitionTimestamp + (10 * 1000);
+
+		const options = {
+			hostname: this.config.protectip,
+			port: this.config.protectport,
+			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`,
+			method: "GET",
+			rejectUnauthorized: false,
+			resolveWithFullResponse: true,
+			headers: {}
+		};
+
+		if (this.isUDM) {
+			options.headers = {
+				"X-CSRF-Token": this.csrfToken,
+				"Cookie": this.cookies
+			};
+		} else {
+			options.headers = {
+				"Authorization": "Bearer " + this.apiAuthBearerToken
+			};
+		}
+
+		const req = https.request(options, res => {
+			let data = "";
+			res.on("data", d => {
+				data += d;
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					if (this.isUDM) {
+						// @ts-ignore
+						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
+					}
+					const motionEvents = JSON.parse(data);
+
+					if (motionEvents.length > 0) {
+						let stateArray = [];
+						Object.entries(motionEvents[0]).forEach(([key, value]) => {
+							stateArray = this.createOwnState("cameras." + cameraId + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
+						});
+						this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
+					}
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
+					this.motionsDone = true;
+					this.renewToken(true);
+				} else {
+					this.motionsDone = true;
+					this.log.error("Status Code: " + res.statusCode);
+				}
+			});
+		});
+
+		req.on("error", e => {
+			this.log.error("getMotionEvents " + JSON.stringify(e));
+			if (e["code"] == "ECONNRESET") {
+				this.renewToken(true);
+			}
+			this.motionsDone = true;
+		});
+		req.end();
+	}
+
+	getMotionEvents(onReady) {
 		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
@@ -409,7 +558,7 @@ class UnifiProtect extends utils.Adapter {
 					});
 					newMotionEvents.reverse();
 					this.deleteOldMotionEvents(newMotionEvents);
-					this.addMotionEvents(newMotionEvents);
+					this.addMotionEvents(newMotionEvents, onReady);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getMotionEvents: Unifi Protect reported authorization failure");
 					this.motionsDone = true;
@@ -431,8 +580,9 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getThumbnail(thumb, path, callback, retries = 5, width = 640) {
+	async getThumbnail(thumb, path, callback, retries = 5, width = 640, visCompatible = false) {
 		const height = width / 1.8;
+		let that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -464,18 +614,31 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					fs.writeFileSync(path, data.read());
-					callback(path);
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getThumbnail] thumb stored successfully -> /vis.0${path}`);
+							callback(path);
+						});
+					} else {
+						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getThumbnail] thumb stored successfully -> ${path}`);
+						callback(path);
+					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error("getThumbnail: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 					if (retries > 0) {
-						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width); }, 1000);
+						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width, visCompatible); }, 1000);
 					}
 				} else {
-					this.log.error("Status Code: " + res.statusCode);
+					if (!visCompatible) {
+						this.log.error("[getThumbnail]: Status Code: " + res.statusCode);
+					} else {
+						// if refresh interval is very low -> protect needs time to save the image -> supress error message
+						this.log.debug("[getThumbnail]: Status Code: " + res.statusCode);
+					}
 					if (retries > 0) {
-						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width); }, 1000);
+						setTimeout(() => { this.getThumbnail(thumb, path, callback, retries - 1, width, visCompatible); }, 1000);
 					}
 				}
 			});
@@ -490,8 +653,10 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	async getSnapshot(camera, path, callback) {
+	async getSnapshot(camera, path, callback, width = 640, visCompatible = false) {
 		const ts = Date.now() * 1000;
+		const height = width / 1.8;
+		let that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -507,7 +672,7 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
 			};
-			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}`;
+			options.path = `/proxy/protect/api/cameras/${camera}/snapshot?ts=${ts}&h=${height}&w=${width}`;
 		} else {
 			options.headers = {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
@@ -523,23 +688,72 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					fs.writeFileSync(path, data.read());
-					callback(path);
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getSnapshot] thumb stored successfully -> /vis.0${path}`);
+							callback(path);
+						});
+					} else {
+						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getSnapshot] thumb stored successfully -> ${path}`);
+						callback(path);
+					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error("getSnapshot: Unifi Protect reported authorization failure");
+					this.log.error("[getSnapshot]: Unifi Protect reported authorization failure");
 					this.renewToken(true);
 				} else {
-					this.log.error("Status Code: " + res.statusCode);
+					this.log.error("[getSnapshot] Status Code: " + res.statusCode);
 				}
 			});
 		});
 
 		req.on("error", e => {
-			this.log.error("getSnapshot " + JSON.stringify(e));
+			this.log.error("[getSnapshot] " + JSON.stringify(e));
 			if (e["code"] == "ECONNRESET") {
 				this.renewToken(true);
 			}
 		});
+		req.end();
+	}
+
+	async getSnapshotFromCam(ip, path, callback, visCompatible = false) {
+		let that = this;
+
+		const options = {
+			hostname: ip,
+			path: "/snap.jpeg",
+			method: "GET",
+			rejectUnauthorized: false,
+			headers: {},
+
+		};
+
+		const req = https.request(options, res => {
+			const data = new Stream();
+			res.on("data", d => {
+				data.push(d);
+			});
+			res.on("end", () => {
+				if (res.statusCode == 200) {
+					if (visCompatible) {
+						this.writeFile('vis.0', path, data.read(), function (err) {
+							that.log.debug(`[getSnapshotFromCam] thumb stored successfully -> /vis.0${path}`);
+							callback(path);
+						});
+					} else {
+						fs.writeFileSync(path, data.read());
+						that.log.debug(`[getSnapshotFromCam] thumb stored successfully -> ${path}`);
+						callback(path);
+					}
+				} else if (res.statusCode == 401 || res.statusCode == 403) {
+					this.log.error("[getSnapshotFromCam]: Unifi Protect reported authorization failure");
+					this.renewToken(true);
+				} else {
+					this.log.error("[getSnapshotFromCam] Status Code: " + res.statusCode);
+				}
+			});
+		});
+
 		req.end();
 	}
 
@@ -641,74 +855,126 @@ class UnifiProtect extends utils.Adapter {
  	* Function to create a state and set its value
  	* only if it hasn't been set to this value before
  	*/
-	createOwnState(name, value, desc, stateArray) {
+	createOwnState(name, value, desc, stateArray, statesFilter, onReady) {
 
 		if (typeof (desc) === "undefined")
 			desc = name;
 
 		if (Array.isArray(value) && typeof value[0] === "object" && typeof value[0].id !== "undefined") {
-			this.createOwnChannel(name);
-			for (let i = 0; i < value.length; i++) {
-				const id = value[i].id;
-				Object.entries(value[i]).forEach(([key, val]) => {
-					stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray);
-				});
+			let channelName = name.split('.').slice(2).join('.');
+
+			if (statesFilter) {
+				let channelFilter = statesFilter.filter(x => x.includes(channelName));
+
+				if (channelFilter.length > 0) {
+					// this.log.debug(`creating channel '${channelName}'`);
+					if (onReady) this.createOwnChannel(name);
+
+					for (let i = 0; i < value.length; i++) {
+						const id = value[i].id;
+						Object.entries(value[i]).forEach(([key, val]) => {
+							stateArray = this.createOwnState(name + "." + id + "." + key, val, key, stateArray, statesFilter, onReady);
+						});
+					}
+					return stateArray;
+				} else {
+					if (onReady) this.delObject(name, { recursive: true });
+					return stateArray;
+				}
 			}
-			return stateArray;
 		}
 
 		if (typeof value === "object" && value !== null) {
-			this.createOwnChannel(name);
-			Object.entries(value).forEach(([key, value]) => {
-				stateArray = this.createOwnState(name + "." + key, value, key, stateArray);
-			});
-			return stateArray;
-		}
+			let channelName = name.split('.').slice(2).join('.');
+			let channelNameSplitted = channelName.split('.');
 
-		if (Array.isArray(value))
-			value = value.toString();
+			if (!isNaN(channelNameSplitted[1])) {
+				channelName = channelNameSplitted.filter((f) => isNaN(f)).join('.');
+			}
 
-		let write = false;
-		for (let i = 0; i < this.writeables.length; i++) {
-			if (name.match(this.writeables[i])) {
-				write = true;
-				continue;
+			if (statesFilter) {
+				let channelFilter = statesFilter.filter(x => x.includes(channelName));
+
+				if (channelFilter.length > 0) {
+					// this.log.debug(`creating channel '${channelName}'`);
+					if (onReady) this.createOwnChannel(name);
+					Object.entries(value).forEach(([key, value]) => {
+						stateArray = this.createOwnState(name + "." + key, value, key, stateArray, statesFilter, onReady);
+					});
+					return stateArray;
+				} else {
+					if (onReady) this.delObject(name, { recursive: true });
+					return stateArray;
+				}
 			}
 		}
 
-		let common = {
-			name: desc.toString(),
-			type: typeof (value),
-			read: true,
-			write: write
-		};
+		// remove cam id and device
+		let idForFilter = name.split('.').slice(2).join('.');
+		let idForFilterSplitted = idForFilter.split('.');
 
-		if (name.match("recordingSettings.mode") != null) {
-			common = {
-				name: desc.toString(),
-				type: typeof (value),
-				read: true,
-				write: true,
-				states: {
-					"always": "always",
-					"never": "never",
-					"motion": "motion"
-				}
-			};
+		if (!isNaN(idForFilterSplitted[1])) {
+			// if we have an array - number on pos 1, e.g. 'channels.0.bitrate' transform to 'channels.bitrate' for statesFilter
+			idForFilter = idForFilterSplitted.filter((f) => isNaN(f)).join('.')
 		}
 
-		this.setObjectNotExists(name, {
-			type: "state",
-			common: common,
-			native: { id: name }
-		});
+		// filter states
+		if (statesFilter && (statesFilter.includes(idForFilter)
+			|| (name.includes('cameras') && name.includes('lastMotion') && this.config.statesFilter['cameras'].includes(idForFilter)))		// lastMotion -> also add to cameras
+		) {
 
-		if (typeof (value) !== "undefined") {
-			stateArray.push({ name: name, val: value });
+			if (Array.isArray(value))
+				value = value.toString();
+
+			if (onReady) {
+				let write = false;
+				for (let i = 0; i < this.writeables.length; i++) {
+					if (name.match(this.writeables[i])) {
+						write = true;
+
+						// only subscribe on writeable states on first run
+						this.subscribeStates(name);
+
+						continue;
+					}
+				}
+
+				let common = {
+					name: desc.toString(),
+					type: typeof (value),
+					read: true,
+					write: write
+				};
+
+				if (name.match("recordingSettings.mode") != null) {
+					common = {
+						name: desc.toString(),
+						type: typeof (value),
+						read: true,
+						write: true,
+						states: {
+							"always": "always",
+							"never": "never",
+							"motion": "motion"
+						}
+					};
+				}
+
+				this.setObjectNotExists(name, {
+					type: "state",
+					common: common,
+					native: { id: name }
+				});
+			}
+
+			if (typeof (value) !== "undefined") {
+				stateArray.push({ name: name, val: value });
+			}
+		} else {
+			if (onReady) this.delObject(name, function () { });
 		}
 
 		return stateArray;
-
 	}
 
 	/**
@@ -744,15 +1010,16 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	addMotionEvents(motionEvents) {
+	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		const lastMotionPerCamera = {};
 		let i = 0;
 		motionEvents.forEach(motionEvent => {
-			this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
+			if (onReady) this.createOwnChannel("motions." + motionEvent.id, motionEvent.score);
+
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
-					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray);
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions'], true);
 				}
 			});
 			lastMotionPerCamera[motionEvent.camera] = i;
@@ -760,11 +1027,11 @@ class UnifiProtect extends utils.Adapter {
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray);
+				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
 			});
 			Object.entries(lastMotionPerCamera).forEach(([camera, id]) => {
 				Object.entries(motionEvents[id]).forEach(([key, value]) => {
-					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray);
+					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
 				});
 			});
 		}
@@ -852,7 +1119,6 @@ class UnifiProtect extends utils.Adapter {
 			}
 		}
 	}
-
 }
 
 // @ts-ignore parent is a valid property on module

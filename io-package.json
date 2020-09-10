@@ -174,7 +174,41 @@
         "getMotions": false,
         "numMotions": 10,
         "secMotions": 600,
-        "interval": 60
+        "interval": 60,
+        "statesFilter": {
+            "cameras": [
+                "channels.enabled",
+                "channels.name",
+                "channels.rtspAlias",
+                "channels.width",
+                "connectedSince",
+                "connectionHost",
+                "firmwareVersion",
+                "host",
+                "isConnected",
+                "isMotionDetected",
+                "name",
+                "state",
+                "lastMotion",
+                "lastMotion.start",
+                "lastMotion.end",
+                "lastMotion.type",
+                "lastMotion.thumbnail",
+                "lastMotion.heatmap"
+            ],
+            "motions": [
+                "start",
+                "end",
+                "type",
+                "thumbnail",
+                "heatmap"
+            ]
+        },
+        "downloadLastMotionThumb": false,
+        "downloadLastMotionThumbWidth": 640,
+        "takeSnapshotForLastMotion": false,
+        "takeSnapshotForLastMotionWidth": 640,
+        "takeSnapshotForLastMotionDelay": 0
     },
     "objects": [],
     "instanceObjects": []
