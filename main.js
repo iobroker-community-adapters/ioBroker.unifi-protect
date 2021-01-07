@@ -44,8 +44,8 @@ class UnifiProtect extends utils.Adapter {
 		];
 
 		this.cameraSubscribleStates = [
-			'lastMotion.thumbnail'
-		]
+			"lastMotion.thumbnail"
+		];
 
 		this.paths = {
 			login: "/api/auth",
@@ -124,12 +124,12 @@ class UnifiProtect extends utils.Adapter {
 			// The state was changed
 			this.log.silly(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 
-			let idSplitted = id.split('.');
-			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === 'lastMotion' && idSplitted[idSplitted.length - 1] === 'thumbnail' && this.config.downloadLastMotionThumb) {
-				let camId = id.replace(`${this.namespace}.cameras.`, '').replace('.lastMotion.thumbnail', '');
+			const idSplitted = id.split(".");
+			if (id.includes(`${this.namespace}.cameras.`) && idSplitted[idSplitted.length - 2] === "lastMotion" && idSplitted[idSplitted.length - 1] === "thumbnail" && this.config.downloadLastMotionThumb) {
+				const camId = id.replace(`${this.namespace}.cameras.`, "").replace(".lastMotion.thumbnail", "");
 
 				if (this.config.takeSnapshotForLastMotion) {
-					let that = this;
+					const that = this;
 
 					// this.getForeignState(id.replace(`.lastMotion.thumbnail`, '.host'), function (err, host) {
 					// 	if (!err && host && host.val) {
@@ -138,12 +138,12 @@ class UnifiProtect extends utils.Adapter {
 					// });
 
 					setTimeout(function () {
-						that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function (res) { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
+						that.getSnapshot(camId, `/unifi-protect/lastMotion/${camId}_snapshot.jpg`, function () { }, that.config.takeSnapshotForLastMotionWidth || 640, true);
 					}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 				}
 
 				this.log.debug(`update lastMotion thumbnail for cam ${camId}`);
-				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function (res) { }, 30, this.config.downloadLastMotionThumbWidth || 640, true);
+				this.getThumbnail(state.val, `/unifi-protect/lastMotion/${camId}.jpg`, function () { }, 30, this.config.downloadLastMotionThumbWidth || 640, true);
 			} else {
 				for (let i = 0; i < this.writeables.length; i++) {
 					if (id.match(this.writeables[i])) {
@@ -362,50 +362,50 @@ class UnifiProtect extends utils.Adapter {
 					cameras.forEach(camera => {
 						this.createOwnChannel("cameras." + camera.id, camera.name);
 						Object.entries(camera).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
+							stateArray = this.createOwnState("cameras." + camera.id + "." + key, value, key, stateArray, this.config.statesFilter["cameras"], onReady);
 						});
 
-						let channelFilter = this.config.statesFilter['cameras'].filter(x => x.includes('lastMotion'));
+						const channelFilter = this.config.statesFilter["cameras"].filter(x => x.includes("lastMotion"));
 						if (channelFilter.length > 0) {
 							this.getLastMotionForCam(camera.id, camera.lastMotion, onReady);
 						}
 
 						if (onReady) {
-							let thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
-							let that = this;
+							const thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
+							const that = this;
 							if (this.config.downloadLastMotionThumb) {
 								this.setObjectNotExists(thumbnailUrlId,
 									{
-										type: 'state',
+										type: "state",
 										common: {
-											name: 'thumbnailUrl',
-											type: 'string',
+											name: "thumbnailUrl",
+											type: "string",
 											read: true,
 											write: false,
-											role: 'value',
+											role: "value",
 										},
 										native: {}
-									}, function (obj) {
+									}, function () {
 										that.setState(thumbnailUrlId, `/vis.0/unifi-protect/lastMotion/${camera.id}.jpg`, true);
 									});
 							} else {
 								this.delObject(thumbnailUrlId);
 							}
 
-							let snapshotUrl = `cameras.${camera.id}.lastMotion.snapshotUrl`;
+							const snapshotUrl = `cameras.${camera.id}.lastMotion.snapshotUrl`;
 							if (this.config.takeSnapshotForLastMotion) {
 								this.setObjectNotExists(snapshotUrl,
 									{
-										type: 'state',
+										type: "state",
 										common: {
-											name: 'thumbnailUrl',
-											type: 'string',
+											name: "thumbnailUrl",
+											type: "string",
 											read: true,
 											write: false,
-											role: 'value',
+											role: "value",
 										},
 										native: {}
-									}, function (obj) {
+									}, function () {
 										that.setState(snapshotUrl, `/vis.0/unifi-protect/lastMotion/${camera.id}_snapshot.jpg`, true);
 									});
 							} else {
@@ -413,7 +413,7 @@ class UnifiProtect extends utils.Adapter {
 							}
 
 							for (const sub of this.cameraSubscribleStates) {
-								this.subscribeStates(`cameras.${camera.id}.${sub}`)
+								this.subscribeStates(`cameras.${camera.id}.${sub}`);
 							}
 						}
 					});
@@ -479,7 +479,7 @@ class UnifiProtect extends utils.Adapter {
 					if (motionEvents.length > 0) {
 						let stateArray = [];
 						Object.entries(motionEvents[0]).forEach(([key, value]) => {
-							stateArray = this.createOwnState("cameras." + cameraId + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['cameras'], onReady);
+							stateArray = this.createOwnState("cameras." + cameraId + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter["cameras"], onReady);
 						});
 						this.processStateChanges(stateArray, this, () => { this.motionsDone = true; });
 					}
@@ -582,7 +582,7 @@ class UnifiProtect extends utils.Adapter {
 
 	async getThumbnail(thumb, path, callback, retries = 5, width = 640, visCompatible = false) {
 		const height = width / 1.8;
-		let that = this;
+		const that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -615,7 +615,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					if (visCompatible) {
-						this.writeFile('vis.0', path, data.read(), function (err) {
+						this.writeFile("vis.0", path, data.read(), function () {
 							that.log.debug(`[getThumbnail] thumb stored successfully -> /vis.0${path}`);
 							callback(path);
 						});
@@ -656,7 +656,7 @@ class UnifiProtect extends utils.Adapter {
 	async getSnapshot(camera, path, callback, width = 640, visCompatible = false) {
 		const ts = Date.now() * 1000;
 		const height = width / 1.8;
-		let that = this;
+		const that = this;
 
 		const options = {
 			hostname: this.config.protectip,
@@ -689,7 +689,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					if (visCompatible) {
-						this.writeFile('vis.0', path, data.read(), function (err) {
+						this.writeFile("vis.0", path, data.read(), function () {
 							that.log.debug(`[getSnapshot] thumb stored successfully -> /vis.0${path}`);
 							callback(path);
 						});
@@ -717,7 +717,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async getSnapshotFromCam(ip, path, callback, visCompatible = false) {
-		let that = this;
+		const that = this;
 
 		const options = {
 			hostname: ip,
@@ -736,7 +736,7 @@ class UnifiProtect extends utils.Adapter {
 			res.on("end", () => {
 				if (res.statusCode == 200) {
 					if (visCompatible) {
-						this.writeFile('vis.0', path, data.read(), function (err) {
+						this.writeFile("vis.0", path, data.read(), function () {
 							that.log.debug(`[getSnapshotFromCam] thumb stored successfully -> /vis.0${path}`);
 							callback(path);
 						});
@@ -861,10 +861,10 @@ class UnifiProtect extends utils.Adapter {
 			desc = name;
 
 		if (Array.isArray(value) && typeof value[0] === "object" && typeof value[0].id !== "undefined") {
-			let channelName = name.split('.').slice(2).join('.');
+			const channelName = name.split(".").slice(2).join(".");
 
 			if (statesFilter) {
-				let channelFilter = statesFilter.filter(x => x.includes(channelName));
+				const channelFilter = statesFilter.filter(x => x.includes(channelName));
 
 				if (channelFilter.length > 0) {
 					// this.log.debug(`creating channel '${channelName}'`);
@@ -885,15 +885,15 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		if (typeof value === "object" && value !== null) {
-			let channelName = name.split('.').slice(2).join('.');
-			let channelNameSplitted = channelName.split('.');
+			let channelName = name.split(".").slice(2).join(".");
+			const channelNameSplitted = channelName.split(".");
 
 			if (!isNaN(channelNameSplitted[1])) {
-				channelName = channelNameSplitted.filter((f) => isNaN(f)).join('.');
+				channelName = channelNameSplitted.filter((f) => isNaN(f)).join(".");
 			}
 
 			if (statesFilter) {
-				let channelFilter = statesFilter.filter(x => x.includes(channelName));
+				const channelFilter = statesFilter.filter(x => x.includes(channelName));
 
 				if (channelFilter.length > 0) {
 					// this.log.debug(`creating channel '${channelName}'`);
@@ -910,17 +910,17 @@ class UnifiProtect extends utils.Adapter {
 		}
 
 		// remove cam id and device
-		let idForFilter = name.split('.').slice(2).join('.');
-		let idForFilterSplitted = idForFilter.split('.');
+		let idForFilter = name.split(".").slice(2).join(".");
+		const idForFilterSplitted = idForFilter.split(".");
 
 		if (!isNaN(idForFilterSplitted[1])) {
 			// if we have an array - number on pos 1, e.g. 'channels.0.bitrate' transform to 'channels.bitrate' for statesFilter
-			idForFilter = idForFilterSplitted.filter((f) => isNaN(f)).join('.')
+			idForFilter = idForFilterSplitted.filter((f) => isNaN(f)).join(".");
 		}
 
 		// filter states
 		if (statesFilter && (statesFilter.includes(idForFilter)
-			|| (name.includes('cameras') && name.includes('lastMotion') && this.config.statesFilter['cameras'].includes(idForFilter)))		// lastMotion -> also add to cameras
+			|| (name.includes("cameras") && name.includes("lastMotion") && this.config.statesFilter["cameras"].includes(idForFilter)))		// lastMotion -> also add to cameras
 		) {
 
 			if (Array.isArray(value))
@@ -1019,7 +1019,7 @@ class UnifiProtect extends utils.Adapter {
 
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
-					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter['motions'], true);
+					stateArray = this.createOwnState("motions." + motionEvent.id + "." + key, value, key, stateArray, this.config.statesFilter["motions"], true);
 				}
 			});
 			lastMotionPerCamera[motionEvent.camera] = i;
@@ -1027,11 +1027,11 @@ class UnifiProtect extends utils.Adapter {
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(([key, value]) => {
-				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
+				stateArray = this.createOwnState("motions.lastMotion." + key, value, key, stateArray, this.config.statesFilter["motions"], onReady);
 			});
 			Object.entries(lastMotionPerCamera).forEach(([camera, id]) => {
 				Object.entries(motionEvents[id]).forEach(([key, value]) => {
-					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter['motions'], onReady);
+					stateArray = this.createOwnState("cameras." + camera + ".lastMotion." + key, value, key, stateArray, this.config.statesFilter["motions"], onReady);
 				});
 			});
 		}
