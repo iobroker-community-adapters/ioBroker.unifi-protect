@@ -189,11 +189,14 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async updateData(onReady = false) {
+		this.log.silly("Update Data started.");
 		await this.renewToken();
 		if (this.camerasDone && this.gotToken) {
+			this.log.silly("Cameras not in progress so try again.");
 			this.getCameraList(onReady);
 		}
 		if (this.motionsDone && this.gotToken) {
+			this.log.silly("Motions not in progress so try again.");
 			this.getMotionEvents(onReady);
 		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
