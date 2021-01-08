@@ -189,14 +189,11 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async updateData(onReady = false) {
-		this.log.silly("Update Data started.");
 		await this.renewToken();
 		if (this.camerasDone && this.gotToken) {
-			this.log.silly("Cameras not in progress so try again.");
 			this.getCameraList(onReady);
 		}
 		if (this.motionsDone && this.gotToken) {
-			this.log.silly("Motions not in progress so try again.");
 			this.getMotionEvents(onReady);
 		}
 		this.timer = setTimeout(() => this.updateData(), this.config.interval * 1000);
@@ -508,7 +505,6 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	getMotionEvents(onReady) {
-		this.log.silly("Start to get motions.");
 		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
@@ -517,7 +513,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&types=motion`,
+			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -546,7 +542,6 @@ class UnifiProtect extends utils.Adapter {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
-					this.log.silly("Got motions from Protect.");
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
 
