@@ -25,7 +25,7 @@ class UnifiProtect extends utils.Adapter {
 			name: "unifi-protect",
 		});
 
-		this.isUDM = false;
+		this.isUnifiOS = false;
 		this.csrfToken = null;
 		this.cookies = null;
 		this.camerasDone = true;
@@ -49,17 +49,17 @@ class UnifiProtect extends utils.Adapter {
 
 		this.paths = {
 			login: "/api/auth",
-			loginUDM: "/api/auth/login",
+			loginUnifiOS: "/api/auth/login",
 			bootstrap: "/api/bootstrap",
-			bootstrapUDM: "/proxy/protect/api/bootstrap",
+			bootstrapUnifiOS: "/proxy/protect/api/bootstrap",
 			events: "/api/events",
-			eventsUDM: "/proxy/protect/api/events",
+			eventsUnifiOS: "/proxy/protect/api/events",
 			cameras: "/api/cameras/",
-			camerasUDM: "/proxy/protect/api/cameras/",
+			camerasUnifiOS: "/proxy/protect/api/cameras/",
 			thumb: "/api/thumbnails/",
-			thumbUDM: "/proxy/protect/api/thumbnails/",
+			thumbUnifiOS: "/proxy/protect/api/thumbnails/",
 			heatmap: "/api/heatmaps/",
-			heatmapUDM: "/proxy/protect/api/heatmaps/"
+			heatmapUnifiOS: "/proxy/protect/api/heatmaps/"
 		};
 
 		this.on("ready", this.onReady.bind(this));
@@ -167,14 +167,14 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async renewToken(force = false) {
-		if ((!this.apiAuthBearerToken && !this.isUDM) || (!this.csrfToken && this.isUDM) || force) {
+		if ((!this.apiAuthBearerToken && !this.isUnifiOS) || (!this.csrfToken && this.isUnifiOS) || force) {
 			const opt = await this.determineEndpointStyle().catch(() => {
 				this.log.error("Couldn't determin Endpoint Style.");
 			});
 			if (typeof opt === "undefined") {
 				return;
 			}
-			this.isUDM = opt.isUDM;
+			this.isUnifiOS = opt.isUnifiOS;
 			this.csrfToken = opt.csrfToken;
 			this.apiAuthBearerToken = await this.login().catch(() => {
 				this.log.error("Couldn't login.");
@@ -211,12 +211,12 @@ class UnifiProtect extends utils.Adapter {
 			const req = https.request(options, res => {
 				if (res.headers["x-csrf-token"]) {
 					resolve({
-						isUDM: true,
+						isUnifiOS: true,
 						csrfToken: res.headers["x-csrf-token"]
 					});
 				} else {
 					resolve({
-						isUDM: false,
+						isUnifiOS: false,
 						csrfToken: null,
 						cookies: null
 					});
@@ -241,7 +241,7 @@ class UnifiProtect extends utils.Adapter {
 				"Content-Type": "application/json; charset=utf-8",
 				"Content-Length": Buffer.byteLength(data, "utf8")
 			};
-			if (this.isUDM) {
+			if (this.isUnifiOS) {
 				headers = {
 					"Content-Type": "application/json; charset=utf-8",
 					"Content-Length": Buffer.byteLength(data, "utf8"),
@@ -251,7 +251,7 @@ class UnifiProtect extends utils.Adapter {
 			const options = {
 				hostname: this.config.protectip,
 				port: this.config.protectport,
-				path: (this.isUDM ? this.paths.loginUDM : this.paths.login),
+				path: (this.isUnifiOS ? this.paths.loginUnifiOS : this.paths.login),
 				method: "POST",
 				rejectUnauthorized: false,
 				resolveWithFullResponse: true,
@@ -260,7 +260,7 @@ class UnifiProtect extends utils.Adapter {
 
 			const req = https.request(options, res => {
 				if (res.statusCode == 200) {
-					if (this.isUDM) {
+					if (this.isUnifiOS) {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
@@ -325,14 +325,14 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras),
+			path: (this.isUnifiOS ? this.paths.camerasUnifiOS : this.paths.cameras),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
@@ -351,7 +351,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					if (this.isUDM) {
+					if (this.isUnifiOS) {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
@@ -445,14 +445,14 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`,
+			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`,
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
@@ -470,7 +470,7 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					if (this.isUDM) {
+					if (this.isUnifiOS) {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
@@ -505,6 +505,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	getMotionEvents(onReady) {
+		this.log.silly("Start to get motions.");
 		this.motionsDone = false;
 		const now = Date.now();
 		const eventStart = now - ((this.config.getMotions ? this.config.secMotions : this.config.interval + 10) * 1000);
@@ -513,14 +514,14 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.eventsUDM : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
+			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
@@ -538,10 +539,11 @@ class UnifiProtect extends utils.Adapter {
 			});
 			res.on("end", () => {
 				if (res.statusCode == 200) {
-					if (this.isUDM) {
+					if (this.isUnifiOS) {
 						// @ts-ignore
 						this.updateCookie(res.headers["set-cookie"][0].replace(/(;.*)/i, ""));
 					}
+					this.log.silly("Got motions from Protect.");
 					const motionEvents = JSON.parse(data);
 					this.createOwnDevice("motions", "Motion Events");
 
@@ -593,12 +595,12 @@ class UnifiProtect extends utils.Adapter {
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
 			};
-			options.path = this.paths.thumbUDM + `${thumb}?h=${height}&w=${width}`;
+			options.path = this.paths.thumbUnifiOS + `${thumb}?h=${height}&w=${width}`;
 		} else {
 			options.headers = {
 				"Authorization": "Bearer " + this.apiAuthBearerToken
@@ -667,7 +669,7 @@ class UnifiProtect extends utils.Adapter {
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies
@@ -788,14 +790,14 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUDM ? this.paths.camerasUDM : this.paths.cameras) + cameraid,
+			path: (this.isUnifiOS ? this.paths.camerasUnifiOS : this.paths.cameras) + cameraid,
 			method: "PATCH",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
 			headers: {}
 		};
 
-		if (this.isUDM) {
+		if (this.isUnifiOS) {
 			options.headers = {
 				"X-CSRF-Token": this.csrfToken,
 				"Cookie": this.cookies,
