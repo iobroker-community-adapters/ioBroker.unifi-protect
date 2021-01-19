@@ -37,6 +37,14 @@
         "name": "score"
     },
     {
+        "id": "smartDetectEvents",
+        "name": "smartDetectEvents"
+    },
+    {
+        "id": "smartDetectTypes",
+        "name": "smartDetectTypes"
+    },
+    {
         "id": "id",
         "name": "id"
     },
