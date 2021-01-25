@@ -164,8 +164,19 @@
             {
                 "js-controller": ">=1.4.2"
             }
-        ]
+        ],
+        "plugins": {
+            "sentry": {
+                "dsn": "https://f9c90a6b3ae0400eaa85e8e2bb198693@o508406.ingest.sentry.io/5606859"
+            }
+        }
     },
+    "encryptedNative": [
+        "password"
+    ],
+    "protectedNative": [
+        "password"
+    ],
     "native": {
         "protectip": "127.0.0.1",
         "protectport": 7443,
@@ -175,6 +186,11 @@
         "numMotions": 10,
         "secMotions": 600,
         "interval": 60,
+        "motionTypes" : [
+            "motion",
+            "smartDetectZone",
+            "ring"
+        ],
         "statesFilter": {
             "cameras": [
                 "channels.enabled",

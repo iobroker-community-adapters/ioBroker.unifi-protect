@@ -7,6 +7,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
+const tools = require(utils.controllerDir + "/lib/tools");
 const https = require("https");
 const Stream = require("stream").Transform;
 const fs = require("fs");
@@ -20,6 +21,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {Partial<ioBroker.AdapterOptions>} [options={}]
 	 */
 	constructor(options) {
+		// @ts-ignore
 		super({
 			...options,
 			name: "unifi-protect",
@@ -73,14 +75,22 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		this.getForeignObject("system.config", (err, obj) => {
-			if (obj && obj.native && obj.native.secret) {
-				this.config.password = this.decrypt(obj.native.secret, this.config.password);
-			} else {
-				this.config.password = this.decrypt("Y5JQ6qCfnhysf9NG", this.config.password);
+		this.getForeignObject("system.config", (err, systemConfig) => {
+			if (this.config.password && (!this.supportsFeature || !this.supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
+				this.config.password = tools.decrypt((systemConfig && systemConfig.native && systemConfig.native.secret) || "Y5JQ6qCfnhysf9NG", this.config.password);
 			}
 			this.updateData(true);
 		});
+	}
+
+	async errorHandling (codePart, error) {
+		this.log.error(`[${codePart}] error: ${error.message}, stack: ${error.stack}`);
+		if (this.supportsFeature && this.supportsFeature("PLUGINS")) {
+			const sentryInstance = this.getPluginInstance("sentry");
+			if (sentryInstance) {
+				sentryInstance.getSentryObject().captureException(error);
+			}
+		}
 	}
 
 	/**
@@ -156,14 +166,6 @@ class UnifiProtect extends utils.Adapter {
 			// The state was deleted
 			this.log.silly(`state ${id} deleted`);
 		}
-	}
-
-	decrypt(key, value) {
-		let result = "";
-		for (let i = 0; i < value.length; ++i) {
-			result += String.fromCharCode(key[i % key.length].charCodeAt(0) ^ value.charCodeAt(i));
-		}
-		return result;
 	}
 
 	async renewToken(force = false) {
@@ -513,7 +515,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&type=motion`,
+			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&types=` + this.config.motionTypes.join("&types="),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -960,6 +962,7 @@ class UnifiProtect extends utils.Adapter {
 					};
 				}
 
+				// @ts-ignore
 				this.setObjectNotExists(name, {
 					type: "state",
 					common: common,
