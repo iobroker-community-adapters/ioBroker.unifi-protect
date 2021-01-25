@@ -32,8 +32,10 @@ async function loadHelper(settings, onChange) {
 				onChange();
 			});
 		} else if ($key[0].localName == "select") {
-			$.each(settings[id] , function(key, value) {
-				$key.append(`<option` + (value == true ? " selected" : "") + ` value="${key}">${key}</option>`);
+			$.each($key[0].options , function() {
+				if (settings[id][this.val()] == true) {
+					this.prop("selected", true);
+				}
 			});
 		} else {
 			// do not call onChange direct, because onChange could expect some arguments

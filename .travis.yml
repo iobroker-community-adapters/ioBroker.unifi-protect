@@ -8,16 +8,9 @@ node_js:
   - '12'
   - '14'
 before_script:
-  - rm -rf ./tmp
   - export NPMVERSION=$(echo "$($(which npm) -v)"|cut -c1)
   - 'if [[ $NPMVERSION == 5 ]]; then npm install -g npm@5; fi'
   - npm -v
-  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter; fi'
-  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod +x ./cc-test-reporter; fi'
-  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./cc-test-reporter before-build; fi'
-after_success:
-  - sed -i "s|tmp/node_modules/iobroker.nut/||" ./coverage/lcov.info
-  - 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -r 3623f3070bd9cae772a6757bdb0bcac4f8c2ebfbdebbe8e577bea9275810950d; fi'
 env:
   - CXX=g++-6
 addons:
