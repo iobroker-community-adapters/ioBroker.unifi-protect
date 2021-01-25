@@ -31,7 +31,7 @@ async function loadHelper(settings, onChange) {
 			$key.prop("checked", settings[id]).change(function () {
 				onChange();
 			});
-		} else if ($key.localName == "select") {
+		} else if ($key[0].localName == "select") {
 			$.each(settings[id] , function(key, value) {
 				$key.append(`<option` + (value == true ? " selected" : "") + ` value="${key}">${key}</option>`);
 			});
