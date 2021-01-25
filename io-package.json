@@ -186,11 +186,11 @@
         "numMotions": 10,
         "secMotions": 600,
         "interval": 60,
-        "motionTypes" : [
-            "motion",
-            "smartDetectZone",
-            "ring"
-        ],
+        "motionTypes" : {
+            "motion": true,
+            "smartDetectZone": true,
+            "ring": true
+        },
         "statesFilter": {
             "cameras": [
                 "channels.enabled",

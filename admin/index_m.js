@@ -31,8 +31,10 @@ async function loadHelper(settings, onChange) {
 			$key.prop("checked", settings[id]).change(function () {
 				onChange();
 			});
-		} else if ($key.attr("type") === "radio") {
-			//
+		} else if ($key.localName == "select") {
+			$.each(settings[id] , function(key, value) {
+				$key.append(`<option` + (value == true ? " selected" : "") + ` value="${key}">${key}</option>`);
+			});
 		} else {
 			// do not call onChange direct, because onChange could expect some arguments
 			$key.val(settings[id]).change(function () {
