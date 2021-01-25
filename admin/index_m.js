@@ -34,7 +34,7 @@ async function loadHelper(settings, onChange) {
 		} else if ($key[0].localName == "select") {
 			$.each($key[0].options , function() {
 				if (settings[id][this.val()] == true) {
-					this.prop("selected", true);
+					$(this).prop("selected", true);
 				}
 			});
 		} else {
