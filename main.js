@@ -515,7 +515,7 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&types=` + this.config.motionTypes.join("&types="),
+			path: (this.isUnifiOS ? this.paths.eventsUnifiOS : this.paths.events) + `?end=${eventEnd}&start=${eventStart}&types=` + Object.keys(this.config.motionTypes).filter(key => this.config.motionTypes[key] === true).join("&types="),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,

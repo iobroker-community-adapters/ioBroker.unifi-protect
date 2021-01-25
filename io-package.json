@@ -188,8 +188,8 @@
         "interval": 60,
         "motionTypes" : {
             "motion": true,
-            "smartDetectZone": true,
-            "ring": true
+            "smartDetectZone": false,
+            "ring": false
         },
         "statesFilter": {
             "cameras": [
