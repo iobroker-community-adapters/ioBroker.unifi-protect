@@ -223,7 +223,7 @@ function save(callback) {
 			obj[id] = $key.prop("checked");
 		} else if ($key[0].localName == "select") {
 			$.each($key[0].options , function() {
-					settings[id][this.val()] = $(this).prop("selected");
+					obj[id][this.val()] = $(this).prop("selected");
 			});
 		} else {
 			let value = $key.val();
