@@ -216,17 +216,17 @@ function save(callback) {
 	// example: select elements with class=value and build settings object
 	const obj = {};
 	$(".value").each(function () {
-		const $this = $(this);
-		const id = $this.attr("id");
+		const $key = $(this);
+		const id = $key.attr("id");
 
-		if ($this.attr("type") === "checkbox") {
-			obj[id] = $this.prop("checked");
+		if ($key.attr("type") === "checkbox") {
+			obj[id] = $key.prop("checked");
 		} else if ($key[0].localName == "select") {
 			$.each($key[0].options , function() {
 					settings[id][this.val()] = $(this).prop("selected");
 			});
 		} else {
-			let value = $this.val();
+			let value = $key.val();
 			if (id === "password" && typeof supportsFeature == "function" && supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE")) {
 				value = encrypt(secret, value);
 			}
