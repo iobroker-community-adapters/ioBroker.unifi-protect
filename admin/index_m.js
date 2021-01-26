@@ -1,7 +1,5 @@
 let secret;
 
-
-
 // the function loadSettings has to exist ...
 async function load(settings, onChange) {
 	socket.emit("getObject", "system.config", function (err, obj) {
@@ -45,6 +43,8 @@ async function loadHelper(settings, onChange) {
 				onChange();
 			});
 		}
+
+		if (M) M.updateTextFields();
 	});
 
 	await createTreeViews(settings, onChange);
@@ -222,6 +222,10 @@ function save(callback) {
 
 		if ($this.attr("type") === "checkbox") {
 			obj[id] = $this.prop("checked");
+		} else if ($key[0].localName == "select") {
+			$.each($key[0].options , function() {
+					settings[id][this.val()] = $(this).prop("selected");
+			});
 		} else {
 			let value = $this.val();
 			if (id === "password" && (typeof supportsFeature !== "function" || !supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
