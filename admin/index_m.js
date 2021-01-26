@@ -16,7 +16,7 @@ async function loadHelper(settings, onChange) {
 	if (!settings) return;
 	if (settings.electricityPollingInterval === undefined) settings.electricityPollingInterval = 20;
     
-	if (settings.password && (typeof supportsFeature !== "function" || !supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
+	if (settings.password && typeof supportsFeature == "function" && supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE")) {
 		settings.password = decrypt(secret, settings.password);
 	}
 
@@ -227,7 +227,7 @@ function save(callback) {
 			});
 		} else {
 			let value = $this.val();
-			if (id === "password" && (typeof supportsFeature !== "function" || !supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
+			if (id === "password" && typeof supportsFeature == "function" && supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE")) {
 				value = encrypt(secret, value);
 			}
 			obj[id] = value;
