@@ -3,7 +3,7 @@ let secret;
 // the function loadSettings has to exist ...
 async function load(settings, onChange) {
 	socket.emit("getObject", "system.config", function (err, obj) {
-		secret = (obj.native ? obj.native.secret : "") || "Y5JQ6qCfnhysf9NG";
+		secret = (obj.native && obj.native.secret) || "Y5JQ6qCfnhysf9NG";
 		loadHelper(settings, onChange);
 	});
 
@@ -16,7 +16,7 @@ async function loadHelper(settings, onChange) {
 	if (!settings) return;
 	if (settings.electricityPollingInterval === undefined) settings.electricityPollingInterval = 20;
     
-	if (settings.password && typeof supportsFeature == "function" && supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE")) {
+	if (settings.password && (typeof supportsFeature !== "function" || !supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
 		settings.password = decrypt(secret, settings.password);
 	}
 
@@ -223,11 +223,11 @@ function save(callback) {
 			obj[id] = $key.prop("checked");
 		} else if ($key[0].localName == "select") {
 			$.each($key[0].options , function() {
-					obj[id][this.val()] = $(this).prop("selected");
+				obj[id][this.val()] = $(this).prop("selected");
 			});
 		} else {
 			let value = $key.val();
-			if (id === "password" && typeof supportsFeature == "function" && supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE")) {
+			if (id === "password" && (typeof supportsFeature !== "function" || !supportsFeature("ADAPTER_AUTO_DECRYPT_NATIVE"))) {
 				value = encrypt(secret, value);
 			}
 			obj[id] = value;
