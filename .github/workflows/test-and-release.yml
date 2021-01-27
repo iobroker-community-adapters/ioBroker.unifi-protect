@@ -1,20 +1,19 @@
 # This is a composition of lint and test scripts
-# Make sure to update this file along with the others
 
 name: Test and Release
 
 # Run this job on all pushes and pull requests
 # as well as tags with a semantic version
 on:
-  push:
-    branches:
-      - '*'
-    tags:
-      # normal versions
-      - "v?[0-9]+.[0-9]+.[0-9]+"
-      # pre-releases
-      - "v?[0-9]+.[0-9]+.[0-9]+-**"
-  pull_request: {}
+    push:
+        branches:
+            - "*"
+        tags:
+          # normal versions
+          - "v[0-9]+.[0-9]+.[0-9]+"
+          # pre-releases
+          - "v[0-9]+.[0-9]+.[0-9]+-**"
+    pull_request: {}
 
 jobs:
   # Performs quick checks before the expensive test runs
@@ -22,20 +21,27 @@ jobs:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [14.x]
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install Dependencies
-        run: npm ci
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm ci
+
+    # - name: Lint TypeScript code
+    #   run: npm run lint
+
+    #- name: Typecheck TypeScript code
+    #  run: npm run check
 
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
@@ -67,60 +73,76 @@ jobs:
         if: startsWith(runner.OS, 'windows')
         run: set DEBUG=testing:* & npm run test:integration
 
-  # Deploys the final package to NPM
+  # Deploys the final package to NPM and Github Actions
   deploy:
-    needs: [adapter-tests]
-
     # Trigger this step only when a commit on master is tagged with a version number
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
       github.event.base_ref == 'refs/heads/master' &&
-      startsWith(github.ref, 'refs/tags/')
+      startsWith(github.ref, 'refs/tags/v')
+    needs: [check-and-lint]
+
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [14.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
 
-      - name: Extract the version and commit body from the tag
-        # The body may be multiline, therefore we need to escape some characters
-        run: |
-          VERSION="${{ github.ref }}"
-          VERSION=${VERSION##*/}
-          VERSION=${VERSION##*v}
-          echo "::set-env name=VERSION::$VERSION"
-          BODY=$(git show -s --format=%b)
-          BODY="${BODY//'%'/'%25'}"
-          BODY="${BODY//$'\n'/'%0A'}"
-          BODY="${BODY//$'\r'/'%0D'}"
-          echo "::set-env name=BODY::$BODY"
-      - name: Install Dependencies
-        run: npm ci
+    - name: Extract the version and commit body from the tag
+      id: extract_release
+      # The body may be multiline, therefore we need to escape some characters
+      run: |
+        VERSION="${{ github.ref }}"
+        VERSION=${VERSION##*/v}
+        echo "::set-output name=VERSION::$VERSION"
+        BODY=$(git show -s --format=%b)
+        BODY="${BODY//'%'/'%25'}"
+        BODY="${BODY//$'\n'/'%0A'}"
+        BODY="${BODY//$'\r'/'%0D'}"
+        echo "::set-output name=BODY::$BODY"
+    - name: Install dependencies
+      run: npm ci
 
-      #      - name: Create a clean build
-      #        run: npm run build
-      - name: Publish package to npm
-        run: |
-          npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-          npm whoami
-          npm publish
-      - name: Create Github Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release v${{ env.VERSION }}
-          draft: false
-          # Prerelease versions create prereleases on Github
-          prerelease: ${{ contains(env.VERSION, '-') }}
-          body: ${{ env.BODY }}
+    - name: Publish package to npm
+      run: |
+        npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+        npm whoami
+        npm publish
+    - name: Create Github Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release v${{ steps.extract_release.outputs.VERSION }}
+        draft: false
+        # Prerelease versions create prereleases on Github
+        prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
+        body: ${{ steps.extract_release.outputs.BODY }}
+
+    - name: Notify Sentry.io about the release
+      run: |
+        npm i -g @sentry/cli
+        export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+        export SENTRY_ORG=hzgf
+        export SENTRY_PROJECT=unifi-protect
+        export SENTRY_VERSION=unifi-protect@${{ env.VERSION }}
+        sentry-cli releases new $SENTRY_VERSION
+        sentry-cli releases finalize $SENTRY_VERSION
+
+  # Dummy job for skipped builds - without this, github reports the build as failed
+  skip-ci:
+    if: contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip build
+        run: echo "Build skipped!"
