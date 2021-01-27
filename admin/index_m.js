@@ -222,6 +222,7 @@ function save(callback) {
 		if ($key.attr("type") === "checkbox") {
 			obj[id] = $key.prop("checked");
 		} else if ($key[0].localName == "select") {
+			obj[id] = {};
 			$.each($key[0].options , function() {
 				obj[id][$(this).val()] = $(this).prop("selected");
 			});
