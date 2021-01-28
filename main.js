@@ -20,6 +20,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {Partial<ioBroker.AdapterOptions>} [options={}]
 	 */
 	constructor(options) {
+		// @ts-ignore
 		super({
 			...options,
 			name: "unifi-protect",
@@ -249,7 +250,7 @@ class UnifiProtect extends utils.Adapter {
 				rejectUnauthorized: false,
 			};
 
-			const req = request(options, (res) => {
+			const req = https.request(options, (res) => {
 				if (res.headers["x-csrf-token"]) {
 					resolve({
 						isUnifiOS: true,
@@ -301,11 +302,11 @@ class UnifiProtect extends utils.Adapter {
 				headers: headers,
 			};
 
-			const req = request(options, (res) => {
+			const req = https.request(options, (res) => {
 				if (res.statusCode == 200) {
 					if (this.isUnifiOS) {
 						this.updateCookie(
-							res.headers["set-cookie"][0].replace(/(;.*)/i, ""),
+							typeof res.headers["set-cookie"] !== "undefined" ? res.headers["set-cookie"][0].replace(/(;.*)/i, "") : reject(),
 						);
 					}
 					resolve(res.headers["authorization"]);
@@ -343,7 +344,7 @@ class UnifiProtect extends utils.Adapter {
 				},
 			};
 
-			const req = request(options, (res) => {
+			const req = https.request(options, (res) => {
 				let data = "";
 				res.on("data", (d) => {
 					data += d;
@@ -393,7 +394,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			let data = "";
 			this.camerasDone = false;
 			res.on("data", (d) => {
@@ -403,7 +404,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUnifiOS) {
 						this.updateCookie(
-							res.headers["set-cookie"][0].replace(/(;.*)/i, ""),
+							typeof res.headers["set-cookie"] !== "undefined" ? res.headers["set-cookie"][0].replace(/(;.*)/i, "") : this.log.silly("Couldnt update cookie"),
 						);
 					}
 					const cameras = JSON.parse(data);
@@ -553,7 +554,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			let data = "";
 			res.on("data", (d) => {
 				data += d;
@@ -562,7 +563,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUnifiOS) {
 						this.updateCookie(
-							res.headers["set-cookie"][0].replace(/(;.*)/i, ""),
+							typeof res.headers["set-cookie"] !== "undefined" ? res.headers["set-cookie"][0].replace(/(;.*)/i, "") : this.log.silly("Couldnt update cookie"),
 						);
 					}
 					const motionEvents = JSON.parse(data);
@@ -650,7 +651,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			let data = "";
 			res.on("data", (d) => {
 				data += d;
@@ -659,7 +660,7 @@ class UnifiProtect extends utils.Adapter {
 				if (res.statusCode == 200) {
 					if (this.isUnifiOS) {
 						this.updateCookie(
-							res.headers["set-cookie"][0].replace(/(;.*)/i, ""),
+							typeof res.headers["set-cookie"] !== "undefined" ? res.headers["set-cookie"][0].replace(/(;.*)/i, "") : this.log.silly("Couldnt update cookie"),
 						);
 					}
 					const motionEvents = JSON.parse(data);
@@ -746,7 +747,7 @@ class UnifiProtect extends utils.Adapter {
 				`${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			const data = new Stream();
 			res.on("data", (d) => {
 				data.push(d);
@@ -761,7 +762,7 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						writeFileSync(path, data.read());
+						fs.writeFileSync(path, data.read());
 						that.log.debug(
 							`[getThumbnail] thumb stored successfully -> ${path}`,
 						);
@@ -854,7 +855,7 @@ class UnifiProtect extends utils.Adapter {
 			options.path = `/api/cameras/${camera}/snapshot?accessKey=${apiAccessKey}&ts=${ts}`;
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			const data = new Stream();
 			res.on("data", (d) => {
 				data.push(d);
@@ -869,7 +870,7 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						writeFileSync(path, data.read());
+						fs.writeFileSync(path, data.read());
 						that.log.debug(
 							`[getSnapshot] thumb stored successfully -> ${path}`,
 						);
@@ -908,7 +909,7 @@ class UnifiProtect extends utils.Adapter {
 			headers: {},
 		};
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			const data = new Stream();
 			res.on("data", (d) => {
 				data.push(d);
@@ -923,7 +924,7 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						writeFileSync(path, data.read());
+						fs.writeFileSync(path, data.read());
 						that.log.debug(
 							`[getSnapshotFromCam] thumb stored successfully -> ${path}`,
 						);
@@ -1005,7 +1006,7 @@ class UnifiProtect extends utils.Adapter {
 			};
 		}
 
-		const req = request(options, (res) => {
+		const req = https.request(options, (res) => {
 			if (res.statusCode == 200) {
 				this.log.debug(
 					`Camera setting ${parent}.${setting} set to ${val}`,
@@ -1187,6 +1188,7 @@ class UnifiProtect extends utils.Adapter {
 					};
 				}
 
+				// @ts-ignore
 				this.setObjectNotExists(name, {
 					type: "state",
 					common: common,
@@ -1397,6 +1399,7 @@ class UnifiProtect extends utils.Adapter {
 	}
 }
 
+// @ts-ignore
 if (module.parent) {
 	// Export the constructor in compact mode
 	/**

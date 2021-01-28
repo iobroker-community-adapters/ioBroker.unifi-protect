@@ -1,29 +1,33 @@
-  
+// Root tsconfig to set the settings and power editor support for all TS files
 {
 	"compileOnSave": true,
 	"compilerOptions": {
-		"plugins": [
-			{
-				"name": "@fimbul/mithotyn",
-				"displayErrorsAsWarnings": true
-			}
-		],
+		// do not compile anything, this file is just to configure type checking
 		"noEmit": true,
-		"noEmitOnError": true,
+
+		// check JS files
+		"allowJs": true,
+		"checkJs": true,
+
 		"module": "commonjs",
 		"moduleResolution": "node",
-		"outDir": "./build/",
-		"removeComments": false,
-		"strict": true,
-		"strictFunctionTypes": false,
+		"esModuleInterop": true,
+		// this is necessary for the automatic typing of the adapter config
 		"resolveJsonModule": true,
-		"sourceMap": true,
-		"inlineSourceMap": false,
-		"target": "es2017",
-		"watch": false,
-		// Fix enquirer typings
-		"typeRoots": ["./src/@types/", "./node_modules/@types"]
+
+		// Set this to false if you want to disable the very strict rules (not recommended)
+		"strict": true,
+		// Or enable some of those features for more fine-grained control
+		// "strictNullChecks": true,
+		// "strictPropertyInitialization": true,
+		// "strictBindCallApply": true,
+		"noImplicitAny": false,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
+
+		// Consider targetting es2019 or higher if you only support Node.js 12+
+		"target": "es2018"
 	},
-	"include": ["**/*.ts"],
-	"exclude": ["build/**", "node_modules/**", "test/baselines/**"]
+	"include": ["**/*.js", "**/*.d.ts"],
+	"exclude": ["node_modules/**"]
 }
