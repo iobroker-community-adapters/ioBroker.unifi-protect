@@ -206,7 +206,7 @@ class UnifiProtect extends utils.Adapter {
 			force
 		) {
 			const opt = await this.determineEndpointStyle().catch(() => {
-				this.log.error("Couldn't determin Endpoint Style.");
+				this.log.error("Couldn't determine Endpoint Style.");
 			});
 			if (typeof opt === "undefined") {
 				return;
