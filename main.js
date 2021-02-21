@@ -82,7 +82,7 @@ class UnifiProtect extends utils.Adapter {
 					(systemConfig &&
 						systemConfig.native &&
 						systemConfig.native.secret) ||
-						"Y5JQ6qCfnhysf9NG",
+					"Y5JQ6qCfnhysf9NG",
 					this.config.password,
 				);
 			}
@@ -169,7 +169,7 @@ class UnifiProtect extends utils.Adapter {
 						that.getSnapshot(
 							camId,
 							`/unifi-protect/lastMotion/${camId}_snapshot.jpg`,
-							function () {},
+							function () { },
 							that.config.takeSnapshotForLastMotionWidth || 640,
 							true,
 						);
@@ -180,7 +180,7 @@ class UnifiProtect extends utils.Adapter {
 				this.getThumbnail(
 					state.val,
 					`/unifi-protect/lastMotion/${camId}.jpg`,
-					function () {},
+					function () { },
 					30,
 					this.config.downloadLastMotionThumbWidth || 640,
 					true,
@@ -574,9 +574,9 @@ class UnifiProtect extends utils.Adapter {
 							([key, value]) => {
 								stateArray = this.createOwnState(
 									"cameras." +
-										cameraId +
-										".lastMotion." +
-										key,
+									cameraId +
+									".lastMotion." +
+									key,
 									value,
 									key,
 									stateArray,
@@ -620,7 +620,7 @@ class UnifiProtect extends utils.Adapter {
 			(this.config.getMotions
 				? this.config.secMotions
 				: this.config.interval + 10) *
-				1000;
+			1000;
 		const eventEnd = now + 10 * 1000;
 
 		const options = {
@@ -1061,6 +1061,9 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	createOwnState(name, value, desc, stateArray, statesFilter, onReady) {
 		if (typeof desc === "undefined") desc = name;
+		if (desc == "smartDetectEvents" || desc == "smartDetectTypes") {
+			value = value.toString();
+		}
 
 		if (
 			Array.isArray(value) &&
@@ -1200,7 +1203,7 @@ class UnifiProtect extends utils.Adapter {
 				stateArray.push({ name: name, val: value });
 			}
 		} else {
-			if (onReady) this.delObject(name, function () {});
+			if (onReady) this.delObject(name, function () { });
 		}
 
 		return stateArray;
