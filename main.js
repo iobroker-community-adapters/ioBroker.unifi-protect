@@ -1061,9 +1061,6 @@ class UnifiProtect extends utils.Adapter {
 	 */
 	createOwnState(name, value, desc, stateArray, statesFilter, onReady) {
 		if (typeof desc === "undefined") desc = name;
-		if (desc == "smartDetectEvents" || desc == "smartDetectTypes") {
-			value = value.toString();
-		}
 
 		if (
 			Array.isArray(value) &&
@@ -1274,7 +1271,7 @@ class UnifiProtect extends utils.Adapter {
 						key,
 						stateArray,
 						this.config.statesFilter["motions"],
-						onReady,
+						true,
 					);
 				},
 			);
@@ -1286,7 +1283,7 @@ class UnifiProtect extends utils.Adapter {
 						key,
 						stateArray,
 						this.config.statesFilter["motions"],
-						onReady,
+						true,
 					);
 				});
 			});
