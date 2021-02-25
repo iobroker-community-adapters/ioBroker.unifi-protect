@@ -533,7 +533,7 @@ class UnifiProtect extends utils.Adapter {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
 			path: (this.isUnifiOS
-				? this.paths.eventsUnifiOS + `?end=${eventEnd}&start=${eventStart}&types=` +
+				? this.paths.eventsUnifiOS + `?limit=1&camera=${cameraId}&types=` +
 				Object.keys(this.config.motionTypes)
 					.filter((key) => this.config.motionTypes[key] === true)
 					.join("&types=")
