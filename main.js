@@ -439,7 +439,7 @@ class UnifiProtect extends utils.Adapter {
 						}
 
 						if (onReady) {
-							const thumbnailUrlId = `cameras.${camera.id}.lastMotion.thumbnailUrl`;
+							const thumbnailUrlId = `cameras.${camera.id}.lastMotionEvent.thumbnailUrl`;
 							const that = this;
 							if (this.config.downloadLastMotionThumb) {
 								this.setObjectNotExists(
@@ -1138,7 +1138,7 @@ class UnifiProtect extends utils.Adapter {
 		let idForFilter = name.split(".").slice(2).join(".");
 		const idForFilterSplitted = idForFilter.split(".");
 
-		if (!isNaN(idForFilterSplitted[1])) {
+		if (!isNaN(idForFilterSplitted[1]) || !isNaN(idForFilterSplitted[2])) {
 			// if we have an array - number on pos 1, e.g. 'channels.0.bitrate' transform to 'channels.bitrate' for statesFilter
 			idForFilter = idForFilterSplitted.filter((f) => isNaN(f)).join(".");
 		}
