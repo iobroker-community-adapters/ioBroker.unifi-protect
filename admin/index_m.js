@@ -34,6 +34,9 @@ async function loadHelper(settings, onChange) {
 				$key.append(`<option` + (value == true ? " selected" : "") + ` value="${key}">${key}</option>`);
 			});
 			$key.select();
+			$key.change(function () {
+				onChange();
+			});
 		} else {
 			// do not call onChange direct, because onChange could expect some arguments
 			$key.val(settings[id]).change(function () {
