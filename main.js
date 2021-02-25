@@ -1247,6 +1247,10 @@ class UnifiProtect extends utils.Adapter {
 					motionEvent.score,
 				);
 
+			if (typeof motionEvent.smartDetectEvents !== undefined && Array.isArray(motionEvent.smartDetectEvents) && motionEvent.smartDetectEvents != "") {
+				//
+			}
+
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
 					stateArray = this.createOwnState(
