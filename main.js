@@ -532,11 +532,12 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path:
-				(this.isUnifiOS
-					? this.paths.eventsUnifiOS
-					: this.paths.events) +
-				`?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`,
+			path: (this.isUnifiOS
+				? this.paths.eventsUnifiOS + `?end=${eventEnd}&start=${eventStart}&types=` +
+				Object.keys(this.config.motionTypes)
+					.filter((key) => this.config.motionTypes[key] === true)
+					.join("&types=")
+				: this.paths.events + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -626,14 +627,12 @@ class UnifiProtect extends utils.Adapter {
 		const options = {
 			hostname: this.config.protectip,
 			port: this.config.protectport,
-			path:
-				(this.isUnifiOS
-					? this.paths.eventsUnifiOS
-					: this.paths.events) +
-				`?end=${eventEnd}&start=${eventStart}&types=` +
+			path: (this.isUnifiOS
+				? this.paths.eventsUnifiOS + `?end=${eventEnd}&start=${eventStart}&types=` +
 				Object.keys(this.config.motionTypes)
 					.filter((key) => this.config.motionTypes[key] === true)
-					.join("&types="),
+					.join("&types=")
+				: this.paths.events + `?type=motion&end=${eventEnd}&start=${eventStart}`),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
@@ -1238,18 +1237,12 @@ class UnifiProtect extends utils.Adapter {
 
 	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
-		const lastMotionPerCamera = {};
-		let i = 0;
 		motionEvents.forEach((motionEvent) => {
 			if (onReady)
 				this.createOwnChannel(
 					"motions." + motionEvent.id,
 					motionEvent.score,
 				);
-
-			if (typeof motionEvent.smartDetectEvents !== undefined && Array.isArray(motionEvent.smartDetectEvents) && motionEvent.smartDetectEvents != "") {
-				//
-			}
 
 			Object.entries(motionEvent).forEach(([key, value]) => {
 				if (this.config.getMotions) {
@@ -1263,8 +1256,6 @@ class UnifiProtect extends utils.Adapter {
 					);
 				}
 			});
-			lastMotionPerCamera[motionEvent.camera] = i;
-			i++;
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1279,18 +1270,6 @@ class UnifiProtect extends utils.Adapter {
 					);
 				},
 			);
-			Object.entries(lastMotionPerCamera).forEach(([camera, id]) => {
-				Object.entries(motionEvents[id]).forEach(([key, value]) => {
-					stateArray = this.createOwnState(
-						"cameras." + camera + ".lastMotion." + key,
-						value,
-						key,
-						stateArray,
-						this.config.statesFilter["motions"],
-						true,
-					);
-				});
-			});
 		}
 		this.processStateChanges(stateArray, this, () => {
 			this.motionsDone = true;
