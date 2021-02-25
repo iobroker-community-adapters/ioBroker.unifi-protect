@@ -295,7 +295,7 @@
         ]
     },
     {
-        "channel": "lastMotion",
+        "channel": "lastMotionEvent",
         "states": [
             {
                 "channel": "metadata",

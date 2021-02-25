@@ -44,7 +44,7 @@ class UnifiProtect extends utils.Adapter {
 			"recordingSettings.mode",
 		];
 
-		this.cameraSubscribleStates = ["lastMotion.thumbnail"];
+		this.cameraSubscribleStates = ["lastMotionEvent.thumbnail"];
 
 		this.paths = {
 			login: "/api/auth",
@@ -148,13 +148,13 @@ class UnifiProtect extends utils.Adapter {
 			const idSplitted = id.split(".");
 			if (
 				id.includes(`${this.namespace}.cameras.`) &&
-				idSplitted[idSplitted.length - 2] === "lastMotion" &&
+				idSplitted[idSplitted.length - 2] === "lastMotionEvent" &&
 				idSplitted[idSplitted.length - 1] === "thumbnail" &&
 				this.config.downloadLastMotionThumb
 			) {
 				const camId = id
 					.replace(`${this.namespace}.cameras.`, "")
-					.replace(".lastMotion.thumbnail", "");
+					.replace(".lastMotionEvent.thumbnail", "");
 
 				if (this.config.takeSnapshotForLastMotion) {
 					const that = this;
@@ -429,9 +429,9 @@ class UnifiProtect extends utils.Adapter {
 
 						const channelFilter = this.config.statesFilter[
 							"cameras"
-						].filter((x) => x.includes("lastMotion"));
+						].filter((x) => x.includes("lastMotionEvent"));
 						if (channelFilter.length > 0) {
-							this.getLastMotionForCam(
+							this.getLastMotionEventForCam(
 								camera.id,
 								camera.lastMotion,
 								onReady,
@@ -467,7 +467,7 @@ class UnifiProtect extends utils.Adapter {
 								this.delObject(thumbnailUrlId);
 							}
 
-							const snapshotUrl = `cameras.${camera.id}.lastMotion.snapshotUrl`;
+							const snapshotUrl = `cameras.${camera.id}.lastMotionEvent.snapshotUrl`;
 							if (this.config.takeSnapshotForLastMotion) {
 								this.setObjectNotExists(
 									snapshotUrl,
@@ -525,7 +525,7 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
-	getLastMotionForCam(cameraId, lastMotitionTimestamp, onReady) {
+	getLastMotionEventForCam(cameraId, lastMotitionTimestamp, onReady) {
 		const eventStart = lastMotitionTimestamp - 10 * 1000;
 		const eventEnd = lastMotitionTimestamp + 10 * 1000;
 
@@ -576,7 +576,7 @@ class UnifiProtect extends utils.Adapter {
 								stateArray = this.createOwnState(
 									"cameras." +
 									cameraId +
-									".lastMotion." +
+									".lastMotionEvent." +
 									key,
 									value,
 									key,
@@ -1148,7 +1148,7 @@ class UnifiProtect extends utils.Adapter {
 			statesFilter &&
 			(statesFilter.includes(idForFilter) ||
 				(name.includes("cameras") &&
-					name.includes("lastMotion") &&
+					name.includes("lastMotionEvent") &&
 					this.config.statesFilter["cameras"].includes(idForFilter))) // lastMotion -> also add to cameras
 		) {
 			if (Array.isArray(value)) value = value.toString();
