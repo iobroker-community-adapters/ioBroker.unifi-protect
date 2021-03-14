@@ -59,6 +59,11 @@ sendTo('unifi-protect.0', 'getSnapshot', { "cameraid": "5e4a861c01d12503870003f9
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* added smart detections
+* fixed some lastMotion stuff
+* added UnifiOs Support for CloudKey
+
 ### 0.0.11 (2020-02-27)
 * changed Admin interface a little
 * added description for port

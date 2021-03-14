@@ -74,7 +74,8 @@
     "test:integration": "mocha test/integration --exit",
     "test": "npm run test:js && npm run test:package",
     "check": "tsc --noEmit -p tsconfig.check.json",
-    "lint": "eslint --ext .js,.jsx"
+    "lint": "eslint --ext .js,.jsx",
+    "release": "release-script"
   },
   "bugs": {
     "url": "https://github.com/peterbaumert/ioBroker.unifi-protect/issues"
