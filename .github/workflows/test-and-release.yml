@@ -137,7 +137,7 @@ jobs:
           export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           export SENTRY_ORG=peterbaumert
           export SENTRY_PROJECT=unifi-protect
-          export SENTRY_VERSION=unifi-protect@${{ env.VERSION }}
+          export SENTRY_VERSION=unifi-protect@${{ steps.extract_release.outputs.VERSION }}
           sentry-cli releases new $SENTRY_VERSION
           sentry-cli releases finalize $SENTRY_VERSION
 
