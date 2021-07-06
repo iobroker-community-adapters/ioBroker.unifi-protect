@@ -537,7 +537,7 @@ class UnifiProtect extends utils.Adapter {
 				Object.keys(this.config.motionTypes)
 					.filter((key) => this.config.motionTypes[key] === true)
 					.join("&types=")
-				: this.paths.events + `?type=motion&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`),
+				: this.paths.events + `?type=motion&orderDirection=DESC&camera=${cameraId}&end=${eventEnd}&start=${eventStart}`),
 			method: "GET",
 			rejectUnauthorized: false,
 			resolveWithFullResponse: true,
