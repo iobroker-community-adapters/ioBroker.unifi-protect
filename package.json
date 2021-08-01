@@ -22,7 +22,7 @@
     "url": "https://github.com/peterbaumert/ioBroker.unifi-protect"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.5.0"
+    "@iobroker/adapter-core": "^2.5.1"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^1.10.0",
