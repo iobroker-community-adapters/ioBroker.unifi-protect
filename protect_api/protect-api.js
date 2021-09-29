@@ -204,7 +204,7 @@ class ProtectApi {
 
 		const params = new URLSearchParams({ lastUpdateId: this.lastUpdateId });
 
-		this.log.debug("Update listener: ${this.paths.updates}?${params.toString()}");
+		this.log.debug(`Update listener: ${this.paths.updates}?${params.toString()}`);
 
 		try {
 			const ws = new WebSocket(this.paths.updates + "?" + params.toString(), {
@@ -240,7 +240,7 @@ class ProtectApi {
 
 				// If we're closing before fully established it's because we're shutting down the API - ignore it.
 				if (error.message !== "WebSocket was closed before the connection was established") {
-					this.log.error("${this.config.protectip}: ${error}");
+					this.log.error(`${this.config.protectip}: ${error}`);
 				}
 
 				this.eventListener.terminate();
@@ -260,9 +260,9 @@ class ProtectApi {
 				} catch (error) {
 
 					if (error instanceof SyntaxError) {
-						this.log.error("${this.config.protectip}: Unable to process message from the realtime system events API: \"${event}\". Error: ${error.message}.");
+						this.log.error(`${this.config.protectip}: Unable to process message from the realtime system events API: "${event}". Error: ${error.message}.`);
 					} else {
-						this.log.error("${this.config.protectip}: Unknown error has occurred: ${error}.");
+						this.log.error(`${this.config.protectip}: Unknown error has occurred: ${error}.`);
 					}
 
 					// Errors mean that we're done now.
@@ -277,9 +277,9 @@ class ProtectApi {
 
 			});
 
-			this.log.info("${this.config.protectip}: Connected to the UniFi realtime update events API.");
+			this.log.info(`${this.config.protectip}: Connected to the UniFi realtime update events API.`);
 		} catch (error) {
-			this.log.error("${this.config.protectip}: Error connecting to the realtime update events API: ${error}");
+			this.log.error(`${this.config.protectip}: Error connecting to the realtime update events API: ${error}`);
 		}
 	}
 
