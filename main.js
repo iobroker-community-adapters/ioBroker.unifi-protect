@@ -11,6 +11,7 @@ const tools = require(utils.controllerDir + "/lib/tools");
 const https = require("https");
 const Stream = require("stream").Transform;
 const fs = require("fs");
+const ProtectApi = require("./protect_api/protect-api");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -86,6 +87,8 @@ class UnifiProtect extends utils.Adapter {
 					this.config.password,
 				);
 			}
+			this.api = new ProtectApi(this.config, this.log);
+			this.api.startWs();
 			this.updateData(true);
 		});
 	}
