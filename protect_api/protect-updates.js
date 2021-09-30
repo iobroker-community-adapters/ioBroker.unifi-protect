@@ -25,7 +25,6 @@ const UpdatePayloadType = {
 function decodeUpdatePacket(log, packet) {
 
 	// What we need to do here is to split this packet into the header and payload, and decode them.
-
 	let dataOffset;
 
 	try {
@@ -41,7 +40,7 @@ function decodeUpdatePacket(log, packet) {
 
 	} catch (error) {
 
-		log.error("Realtime update API: error decoding update packet: %s.", error);
+		log.error(`Realtime update API: error decoding update packet: ${error}.`, error);
 		return null;
 
 	}

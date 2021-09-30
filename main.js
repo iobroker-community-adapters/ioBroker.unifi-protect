@@ -87,9 +87,8 @@ class UnifiProtect extends utils.Adapter {
 					this.config.password,
 				);
 			}
-			this.api = new ProtectApi(this.config, this.log);
-			this.api.startWs();
 			this.updateData(true);
+			this.api = new ProtectApi(this.config, this.log);
 		});
 	}
 
@@ -242,6 +241,9 @@ class UnifiProtect extends utils.Adapter {
 			() => this.updateData(),
 			this.config.interval * 1000,
 		);
+		if (this.api != null && !(await this.api.refreshDevices())) {
+			//
+		}
 	}
 
 	determineEndpointStyle() {

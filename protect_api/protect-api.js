@@ -3,7 +3,10 @@
 const WebSocket = require("ws");
 const https = require("https");
 const settings = require("./settings");
+const fetch = require("node-fetch");
+const AbortController = require("abort-controller").AbortController;
 const decodeUpdatePacket = require("./protect-updates");
+const util = require("util");
 
 class ProtectApi {
 
@@ -13,11 +16,14 @@ class ProtectApi {
 		this.log = log;
 		this.isUnifiOS = false;
 		this.csrfToken = null;
-		this.cookies = null;
 		this.camerasDone = true;
 		this.motionsDone = true;
 		this.gotToken = false;
-		this.lastUpdateId = "";
+		this.loginAge = 0;
+		this.headers = new fetch.Headers();
+		this.apiErrorCount = 0;
+		this.apiLastSuccess = 0;
+		this.eventListenerConfigured = false;
 		this.paths = {
 			login: "/api/auth",
 			loginUnifiOS: "/api/auth/login",
@@ -34,183 +40,165 @@ class ProtectApi {
 			updates: "/proxy/protect/ws/updates",
 			system: "/api/ws/system",
 		};
+		this.clearLoginCredentials();
 	}
 
-	async renewToken(force = false) {
-		if (
-			(!this.apiAuthBearerToken && !this.isUnifiOS) ||
-			(!this.csrfToken && this.isUnifiOS) ||
-			force
-		) {
-			const opt = await this.determineEndpointStyle().catch(() => {
-				this.log.error("Couldn't determine Endpoint Style.");
-			});
-			if (typeof opt === "undefined") {
-				return;
-			}
-			this.isUnifiOS = opt.isUnifiOS;
-			this.csrfToken = opt.csrfToken;
-			this.apiAuthBearerToken = await this.login().catch(() => {
-				this.log.error("Couldn't login.");
-			});
-			this.gotToken = true;
+	async acquireToken() {
+
+		// We only need to acquire a token if we aren't already logged in, or we don't already have a token,
+		// or don't know which device type we're on.
+		if (this.loggedIn || this.headers.has("X-CSRF-Token") || this.headers.has("Authorization")) {
+			return true;
 		}
-	}
 
-	updateCookie(cookie) {
-		this.cookies = cookie;
-		this.csrfToken = JSON.parse(
-			new Buffer(cookie.split(".")[1], "base64").toString("ascii"),
-		).csrfToken;
-	}
+		// UniFi OS has cross-site request forgery protection built into it's web management UI.
+		// We use this fact to fingerprint it by connecting directly to the supplied NVR address
+		// and see ifing there's a CSRF token waiting for us.
+		const response = await this.fetch("https://" + this.config.protectip, { method: "GET" }, true);
 
-	determineEndpointStyle() {
-		return new Promise((resolve, reject) => {
-			const options = {
-				hostname: this.config.protectip,
-				port: this.config.protectport,
-				resolveWithFullResponse: true,
-				rejectUnauthorized: false,
-			};
+		if (response != null && response.ok) {
+			const csrfToken = response.headers.get("X-CSRF-Token");
 
-			const req = https.request(options, (res) => {
-				if (res.headers["x-csrf-token"]) {
-					resolve({
-						isUnifiOS: true,
-						csrfToken: res.headers["x-csrf-token"],
-					});
-				} else {
-					resolve({
-						isUnifiOS: false,
-						csrfToken: null,
-						cookies: null,
-					});
-				}
-			});
+			// We found a token.
+			if (csrfToken) {
+				this.headers.set("X-CSRF-Token", csrfToken);
 
-			req.on("error", (e) => {
-				this.log.error("determineEndpointStyle " + JSON.stringify(e));
-				reject();
-			});
-			req.end();
-		});
-	}
-
-	login() {
-		return new Promise((resolve, reject) => {
-			const data = JSON.stringify({
-				username: this.config.username,
-				password: this.config.password,
-			});
-			let headers = {
-				"Content-Type": "application/json; charset=utf-8",
-				"Content-Length": Buffer.byteLength(data, "utf8"),
-			};
-			if (this.isUnifiOS) {
-				headers = {
-					"Content-Type": "application/json; charset=utf-8",
-					"Content-Length": Buffer.byteLength(data, "utf8"),
-					"X-CSRF-Token": this.csrfToken,
-				};
+				// UniFi OS has support for keepalive. Let's take advantage of that and reduce the workload on controllers.
+				this.httpsAgent = new https.Agent({ keepAlive: true, maxFreeSockets: 5, maxSockets: 10, rejectUnauthorized: false, timeout: 60 * 1000 });
+				return true;
 			}
-			const options = {
-				hostname: this.config.protectip,
-				port: this.config.protectport,
-				path: this.isUnifiOS
-					? this.paths.loginUnifiOS
-					: this.paths.login,
-				method: "POST",
-				rejectUnauthorized: false,
-				resolveWithFullResponse: true,
-				headers: headers,
-			};
+		}
 
-			const req = https.request(options, (res) => {
-				if (res.statusCode == 200) {
-					if (this.isUnifiOS) {
-						this.updateCookie(
-							typeof res.headers["set-cookie"] !== "undefined" ? res.headers["set-cookie"][0].replace(/(;.*)/i, "") : reject(),
-						);
-					}
-					resolve(res.headers["authorization"]);
-				} else if (res.statusCode == 401 || res.statusCode == 403) {
-					this.log.error(
-						"getApiAuthBearerToken: Unifi Protect reported authorization failure",
-					);
-					reject();
-				}
-			});
-
-			req.on("error", (e) => {
-				this.log.error("login " + JSON.stringify(e));
-				if (e["code"] == "ECONNRESET") {
-					this.renewToken(true);
-				}
-				reject();
-			});
-			req.write(data);
-			req.end();
-		});
+		// Couldn't deduce what type of NVR device we were connecting to.
+		return false;
 	}
 
-	// 		this.apiAccessKey = await this.getApiAccessKey();
-	getApiAccessKey() {
-		return new Promise((resolve, reject) => {
-			const options = {
-				hostname: this.config.protectip,
-				port: this.config.protectport,
-				path: `/api/auth/access-key`,
-				method: "POST",
-				rejectUnauthorized: false,
-				headers: {
-					Authorization: "Bearer " + this.apiAuthBearerToken,
-				},
-			};
 
-			const req = https.request(options, (res) => {
-				let data = "";
-				res.on("data", (d) => {
-					data += d;
-				});
-				res.on("end", () => {
-					if (res.statusCode == 200) {
-						resolve(JSON.parse(data).accessKey);
-					} else if (res.statusCode == 401 || res.statusCode == 403) {
-						this.log.error(
-							"getApiAccessKey: Unifi Protect reported authorization failure",
-						);
-						this.renewToken(true);
-						reject();
-					}
-				});
-			});
 
-			req.on("error", (e) => {
-				this.log.error(e.toString());
-				reject();
-			});
-			req.end();
+	async login() {
+		const now = Date.now();
+
+		// Is it time to renew our credentials?
+		if (now > (this.loginAge + (settings.PROTECT_LOGIN_REFRESH_INTERVAL * 1000))) {
+			this.loggedIn = false;
+			this.headers = new fetch.Headers();
+			this.headers.set("Content-Type", "application/json");
+		}
+
+		// If we're already logged in, and it's not time to renew our credentials, we're done.
+		if (this.loggedIn) {
+			return true;
+		}
+
+		// Make sure we have a token, or get one if needed.
+		if (!(await this.acquireToken())) {
+			return false;
+		}
+
+		// Log us in.
+		const response = await this.fetch(this.authUrl(), {
+			body: JSON.stringify({ password: this.config.password, username: this.config.username }),
+			method: "POST"
 		});
+
+		if (!response.ok) {
+			return false;
+		}
+
+		// We're logged in.
+		this.loggedIn = true;
+		this.loginAge = now;
+
+		// Configure headers.
+		const csrfToken = response.headers.get("X-CSRF-Token");
+		const cookie = response.headers.get("Set-Cookie");
+
+		if (csrfToken && cookie && this.headers.has("X-CSRF-Token")) {
+
+			this.headers.set("Cookie", cookie);
+			this.headers.set("X-CSRF-Token", csrfToken);
+			return true;
+		}
+
+		// Clear out our login credentials and reset for another try.
+		this.clearLoginCredentials();
+
+		return false;
 	}
 
-	startWs() {
+	async bootstrapProtect() {
 		// Log us in if needed.
-		this.renewToken();
+		if (!(await this.login())) {
+			return false;
+		}
+
+		const response = await this.fetch(this.bootstrapUrl(), { method: "GET" });
+
+		if (response != null && !response.ok) {
+			this.log.error(`${this.config.protectip}: Unable to retrieve NVR configuration information from UniFi Protect. Will retry again later.`);
+
+			// Clear out our login credentials and reset for another try.
+			this.clearLoginCredentials();
+			return false;
+		}
+
+		// Now let's get our NVR configuration information.
+		let data = null;
+
+		try {
+			data = await response.json();
+		} catch (error) {
+			data = null;
+			this.log.error(`${this.config.protectip}: Unable to parse response from UniFi Protect. Will retry again later.`);
+		}
+
+		// No camera information returned.
+		if (data != null && !data.cameras) {
+			this.log.error(`${this.config.protectip}: Unable to retrieve camera information from UniFi Protect. Will retry again later.`);
+
+			// Clear out our login credentials and reset for another try.
+			this.clearLoginCredentials();
+			return false;
+		}
+
+		// On launch, let the user know we made it.
+		const firstRun = this.bootstrap ? false : true;
+		this.bootstrap = data;
+
+		if (firstRun) {
+			this.log.info(`${this.config.protectip}: Connected to the Protect controller API (address: ${data.nvr.host} mac: ${data.nvr.mac}).`);
+		}
+
+		// Capture the bootstrap if we're debugging.
+		this.log.debug(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
+
+		// Check for admin user privileges or role changes.
+		//this.checkAdminUserStatus(firstRun);
+
+		// We're good. Now connect to the event listener API.
+		return this.launchUpdatesListener();
+	}
+
+	async launchUpdatesListener() {
+
+		// Log us in if needed.
+		if (!(await this.login())) {
+			return false;
+		}
 
 		// If we already have a listener, we're already all set.
 		if (this.eventListener) {
 			return true;
 		}
 
-		const params = new URLSearchParams({ lastUpdateId: this.lastUpdateId });
+		const params = new URLSearchParams({ lastUpdateId: this.bootstrap.lastUpdateId });
 
-		this.log.debug(`Update listener: ${this.paths.updates}?${params.toString()}`);
+		this.log.debug(`Update listener: ${this.updatesUrl()}?${params.toString()}`);
 
 		try {
-			const ws = new WebSocket(this.paths.updates + "?" + params.toString(), {
+			const ws = new WebSocket(this.updatesUrl() + "?" + params.toString(), {
 				headers: {
-					"X-CSRF-Token": this.csrfToken,
-					Cookie: this.cookies
+					Cookie: this.headers.get("Cookie")
 				},
 				rejectUnauthorized: false
 			});
@@ -226,13 +214,96 @@ class ProtectApi {
 
 			// Setup our heartbeat to ensure we can revive our connection if needed.
 			this.eventListener.on("message", this.heartbeatEventListener.bind(this));
+			this.eventListener.on("message", event => {
+
+				const updatePacket = decodeUpdatePacket(this.log, event);
+
+				if (!updatePacket) {
+					this.log.error(`${this.config.protectip}: Unable to process message from the realtime update events API.`);
+					return;
+				}
+				this.log.debug(util.inspect(updatePacket, { colors: true, depth: null, sorted: true }));
+
+				// The update actions that we care about (doorbell rings, motion detection) look like this:
+				//
+				// action: "update"
+				// id: "someCameraId"
+				// modelKey: "camera"
+				// newUpdateId: "ignorethis"
+				//
+				// The payloads are what differentiate them - one updates lastMotion and the other lastRing.
+				switch (updatePacket.action.modelKey) {
+
+					case "camera": {
+
+						// We listen for the following camera update actions:
+						//   doorbell LCD updates
+						//   doorbell rings
+						//   motion detection
+
+						// We're only interested in update actions.
+						if (updatePacket.action.action !== "update") {
+							return;
+						}
+
+						// Grab the right payload type, camera update payloads.
+						const payload = updatePacket.payload;
+
+						// Now filter out payloads we aren't interested in. We only want motion detection and doorbell rings for now.
+						if (!payload.isMotionDetected && !payload.lastRing && !payload.lcdMessage) {
+							return;
+						}
+
+						// It's a motion event - process it accordingly, but only if we're not configured for smart motion events - we handle those elsewhere.
+						if (payload.isMotionDetected) {
+							//
+						}
+
+						// It's a ring event - process it accordingly.
+						if (payload.lastRing) {
+							//
+						}
+
+						// It's a doorbell LCD message event - process it accordingly.
+						if (payload.lcdMessage) {
+							//
+						}
+
+						break;
+					}
+
+					case "event": {
+
+						// We listen for the following event actions:
+						//   smart motion detection
+
+						// We're only interested in add events.
+						if (updatePacket.action.action !== "add") {
+							return;
+						}
+
+						// Grab the right payload type, for event add payloads.
+						const payload = updatePacket.payload;
+
+						// We're only interested in smart motion detection events.
+						if (payload.type !== "smartDetectZone") {
+							return;
+						}
+						return;
+					}
+
+					default:
+
+						// It's not a modelKey we're interested in. We're done.
+						return;
+				}
+			});
 			this.eventListener.on("open", this.heartbeatEventListener.bind(this));
 			this.eventListener.on("ping", this.heartbeatEventListener.bind(this));
 			this.eventListener.on("close", () => {
 
-				if (this.eventHeartbeatTimer) {
+				if (this.eventHeartbeatTimer)
 					clearTimeout(this.eventHeartbeatTimer);
-				}
 
 			});
 
@@ -249,44 +320,70 @@ class ProtectApi {
 
 			});
 
-			this.eventListener.on("message", event => {
-
-				let nvrEvent;
-
-				try {
-
-					nvrEvent = decodeUpdatePacket(this.log, event);
-
-				} catch (error) {
-
-					if (error instanceof SyntaxError) {
-						this.log.error(`${this.config.protectip}: Unable to process message from the realtime system events API: "${event}". Error: ${error.message}.`);
-					} else {
-						this.log.error(`${this.config.protectip}: Unknown error has occurred: ${error}.`);
-					}
-
-					// Errors mean that we're done now.
-					return;
-
-				}
-
-				// We're interested in device state change events.
-				if (nvrEvent != null && nvrEvent.type !== "DEVICE_STATE_CHANGED") {
-					return;
-				}
-
-			});
-
 			this.log.info(`${this.config.protectip}: Connected to the UniFi realtime update events API.`);
 		} catch (error) {
 			this.log.error(`${this.config.protectip}: Error connecting to the realtime update events API: ${error}`);
 		}
+
+		return true;
+	}
+
+	async refreshDevices() {
+		// Refresh the configuration from the NVR.
+		if (!(await this.bootstrapProtect())) {
+			return false;
+		}
+
+		this.log.debug(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
+
+		const newDeviceList = this.bootstrap.cameras ? this.bootstrap.cameras : undefined;
+
+		// Notify the user about any new devices that we've discovered.
+		if (newDeviceList) {
+			for (const newDevice of newDeviceList) {
+				// We already know about this device.
+				if (this.Cameras != null && this.Cameras.some(x => x.mac === newDevice.mac)) {
+					continue;
+				}
+
+				// We only want to discover managed devices.
+				if (!newDevice.isManaged) {
+					continue;
+				}
+
+				// We've discovered a new device.
+				this.log.info(`${this.config.protectip}: Discovered ${newDevice.modelKey}: ${this.getDeviceName(newDevice, newDevice.name, true)}.`);
+
+				this.log.debug(util.inspect(newDevice, { colors: true, depth: null, sorted: true }));
+			}
+		}
+
+		// Notify the user about any devices that have disappeared.
+		if (this.Cameras) {
+			for (const existingDevice of this.Cameras) {
+
+				// This device still is visible.
+				if (newDeviceList != null && newDeviceList.some(x => x.mac === existingDevice.mac)) {
+					continue;
+				}
+
+				// We've had a device disappear.
+				this.log.debug(`${this.getFullName(existingDevice)}: Detected ${existingDevice.modelKey} removal.`);
+
+				this.log.debug(util.inspect(existingDevice, { colors: true, depth: null, sorted: true }));
+			}
+		}
+
+		// Save the updated list of devices.
+		this.Cameras = newDeviceList;
+		return true;
 	}
 
 	heartbeatEventListener() {
 
 		// Clear out our last timer and set a new one.
 		if (this.eventHeartbeatTimer) {
+			this.log.debug("Clear Heartbeat Timer");
 			clearTimeout(this.eventHeartbeatTimer);
 		}
 
@@ -296,6 +393,169 @@ class ProtectApi {
 			this.eventListener = null;
 			this.eventListenerConfigured = false;
 		}, settings.PROTECT_EVENTS_HEARTBEAT_INTERVAL * 1000);
+	}
+
+	async fetch(url, options = { method: "GET" }, logErrors = true, decodeResponse = true) {
+		let response;
+
+		const controller = new AbortController();
+
+		// Ensure API responsiveness and guard against hung connections.
+		const timeout = setTimeout(() => {
+			controller.abort();
+		}, 1000 * settings.PROTECT_API_TIMEOUT);
+
+		options.agent = this.httpsAgent;
+		options.headers = this.headers;
+		options.signal = controller.signal;
+
+		try {
+
+			const now = Date.now();
+
+			// Throttle this after PROTECT_API_ERROR_LIMIT attempts.
+			if (this.apiErrorCount >= settings.PROTECT_API_ERROR_LIMIT) {
+
+				// Let the user know we've got an API problem.
+				if (this.apiErrorCount === settings.PROTECT_API_ERROR_LIMIT) {
+
+					this.log.info(`${this.config.protectip}: Throttling API calls due to errors with the ${this.apiErrorCount} previous attempts. I'll retry again in ${settings.PROTECT_API_RETRY_INTERVAL / 60} minutes.`);
+					this.apiErrorCount++;
+					this.apiLastSuccess = now;
+					return null;
+				}
+
+				// Throttle our API calls.
+				if ((this.apiLastSuccess + (settings.PROTECT_API_RETRY_INTERVAL * 1000)) > now) {
+					return null;
+				}
+
+				// Inform the user that we're out of the penalty box and try again.
+				this.log.info(`${this.config.protectip}: Resuming connectivity to the UniFi Protect API after throttling for ${settings.PROTECT_API_RETRY_INTERVAL / 60} minutes.`);
+				this.apiErrorCount = 0;
+			}
+
+			response = await fetch(url, options);
+
+			// The caller will sort through responses instead of us.
+			if (!decodeResponse) {
+				return response;
+			}
+
+			// Bad username and password.
+			if (response.status === 401) {
+				this.log.error("Invalid login credentials given. Please check your login and password.");
+				this.apiErrorCount++;
+				return null;
+			}
+
+			// Insufficient privileges.
+			if (response.status === 403) {
+				this.apiErrorCount++;
+				this.log.error("Insufficient privileges for this user. Please check the roles assigned to this user and ensure it has sufficient privileges.");
+				return null;
+			}
+
+			// Some other unknown error occurred.
+			if (!response.ok) {
+				this.apiErrorCount++;
+				this.log.error("API access error: %s - %s", response.status, response.statusText);
+				return null;
+			}
+
+			this.apiLastSuccess = Date.now();
+			this.apiErrorCount = 0;
+			return response;
+
+		} catch (error) {
+
+			this.apiErrorCount++;
+
+			if (error instanceof fetch.FetchError) {
+
+				switch (error.code) {
+					case "ECONNREFUSED":
+						this.log.error(`${this.config.protectip}: Controller API connection refused.`);
+						break;
+
+					case "ECONNRESET":
+						this.log.error(`${this.config.protectip}: Controller API connection reset.`);
+						break;
+
+					case "ENOTFOUND":
+						this.log.error(`${this.config.protectip}: Hostname or IP address not found. Please ensure the address you configured for this UniFi Protect controller is correct.`);
+						break;
+
+					default:
+						if (logErrors) {
+							this.log.error(error.message);
+						}
+				}
+			} else {
+				this.log.error(`${this.config.protectip}: Controller API connection terminated because it was taking too long. This error can usually be safely ignored.`);
+			}
+
+			return null;
+
+		} finally {
+
+			// Clear out our response timeout if needed.
+			clearTimeout(timeout);
+		}
+	}
+
+	getDeviceName(camera, name = camera.name, cameraInfo = false) {
+
+		// Validate our inputs.
+		if (!camera) {
+			return "";
+		}
+
+		// A completely enumerated device will appear as:
+		// Camera [Camera Type] (address: IP address, mac: MAC address).
+		return name + " [" + camera.type + "]" +
+			(cameraInfo ? " (address: " + camera.host + " mac: " + camera.mac + ")" : "");
+	}
+
+	// Utility to generate a nicely formatted NVR and device string.
+	getFullName(camera) {
+		const cameraName = this.getDeviceName(camera);
+
+		// Returns: NVR [NVR Type] Camera [Camera Type]
+		return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
+	}
+
+	bootstrapUrl() {
+		return "https://" + this.config.protectip + "/proxy/protect/api/bootstrap";
+	}
+
+	authUrl() {
+		return "https://" + this.config.protectip + "/api/auth/login";
+	}
+
+	updatesUrl() {
+		return "wss://" + this.config.protectip + "/proxy/protect/ws/updates";
+	}
+
+	clearLoginCredentials() {
+		this.isAdminUser = false;
+		this.loggedIn = false;
+		this.loginAge = 0;
+
+		// Shutdown any event listeners, if we have them.
+		if (this.eventListener) this.eventListener.terminate();
+		this.eventListener = null;
+		this.eventListenerConfigured = false;
+
+		// Initialize the headers we need.
+		this.headers = new fetch.Headers();
+		this.headers.set("Content-Type", "application/json");
+
+		// We want the initial agent to be connection-agnostic, except for certificate validate since Protect uses self-signed certificates.
+		// and we want to disable TLS validation, at a minimum. We want to take advantage of the fact that it supports keepalives to reduce
+		// workloads, but we deal with that elsewhere in acquireToken.
+		if (this.httpsAgent) this.httpsAgent.destroy();
+		this.httpsAgent = new https.Agent({ rejectUnauthorized: false });
 	}
 
 }
