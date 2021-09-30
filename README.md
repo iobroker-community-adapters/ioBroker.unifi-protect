@@ -110,6 +110,11 @@ When the adapter crashes or an other Code error happens, this error message that
 ### 0.0.1
 * (Peter Baumert) initial release
 
+## Code Usage
+The code in [protect_api](./protect_api) is mostly copied from [hjdhjd's homebridge-unifi-protect](https://github.com/hjdhjd/homebridge-unifi-protect).
+Thank you very much for providing this code. His codes license you can find [here](https://github.com/hjdhjd/homebridge-unifi-protect/blob/master/LICENSE.md).
+
+
 ## License
 MIT License
 
