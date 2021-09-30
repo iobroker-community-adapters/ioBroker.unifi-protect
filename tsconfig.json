@@ -28,6 +28,6 @@
 		// Consider targetting es2019 or higher if you only support Node.js 12+
 		"target": "es2018"
 	},
-	"include": ["**/*.js", "**/*.d.ts"],
+	"include": ["**/*.js", "**/*.d.ts", "protect_api/protect-api.mjs"],
 	"exclude": ["node_modules/**"]
 }
