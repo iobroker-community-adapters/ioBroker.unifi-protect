@@ -12,6 +12,7 @@ const https = require("https");
 const Stream = require("stream").Transform;
 const fs = require("fs");
 const ProtectApi = require("./protect_api/protect-api");
+const ProtectEvents = require("./protect_api/protect-events");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -241,8 +242,10 @@ class UnifiProtect extends utils.Adapter {
 			() => this.updateData(),
 			this.config.interval * 1000,
 		);
-		if (this.api != null && !(await this.api.refreshDevices())) {
-			//
+		if (this.api != null) {
+			this.events = new ProtectEvents(this);
+			await this.api.refreshDevices();
+			this.events.update();
 		}
 	}
 

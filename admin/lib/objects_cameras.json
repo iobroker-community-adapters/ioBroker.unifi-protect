@@ -834,6 +834,10 @@
         "id": "lastMotion",
         "name": "lastMotion"
     },
+	{
+        "id": "realTimeLastMotion",
+        "name": "realTimeLastMotion"
+    },
     {
         "id": "lastRing",
         "name": "lastRing"

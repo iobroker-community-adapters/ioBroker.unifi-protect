@@ -1,13 +1,34 @@
+const decodeUpdatePacket = require("./protect-updates");
+const util = require("util");
+
+class ProtectEvents {
+	constructor(protect) {
+		this.lastMotion = {};
+		this.lastRing = {};
+		this.eventTimers = {};
+		this.unsupportedDevices = {};
+		this.config = protect.config;
+		this.log = protect.log;
+		this.protectApi = protect.api;
+		this.protect = protect;
+	}
+
+	update() {
+
+		// Configure the updates API listener, if needed. This needs to be called
+		// regularly because the connection to the update events websocket can be shutdown and reopened.
+		this.configureUpdatesListener();
+
+		return true;
+	}
+
 
 	configureUpdatesListener() {
-
-		// Only configure the event listener if it exists and it's not already configured.
-		if (!this.eventListener || this.eventListenerConfigured) {
+		if (!this.protectApi.eventListener || this.protectApi.eventListenerConfigured) {
 			return true;
 		}
 
-		// Listen for any messages coming in from our listener.
-		this.eventListener.on("message", event => {
+		this.protectApi.eventListener.on("message", event => {
 
 			const updatePacket = decodeUpdatePacket(this.log, event);
 
@@ -48,17 +69,17 @@
 
 					// It's a motion event - process it accordingly, but only if we're not configured for smart motion events - we handle those elsewhere.
 					if (payload.isMotionDetected) {
-						//
+						this.motionEventHandler(updatePacket.action.id, payload);
 					}
 
 					// It's a ring event - process it accordingly.
 					if (payload.lastRing) {
-						//
+						this.doorbellEventHandler(payload.lastRing);
 					}
 
 					// It's a doorbell LCD message event - process it accordingly.
 					if (payload.lcdMessage) {
-						//
+						this.lcdMessageEventHandler(payload.lcdMessage);
 					}
 
 					break;
@@ -91,7 +112,53 @@
 			}
 		});
 
-		// Mark the listener as configured.
-		this.eventListenerConfigured = true;
+		this.protectApi.eventListenerConfigured = true;
 		return true;
 	}
+
+	motionEventHandler(cameraid, motionEvent) {
+		const camera = this.protectApi.Cameras.some(x => x.id = cameraid);
+		if (!camera) { return; }
+
+		if (this.lastMotion[camera.mac] >= motionEvent.lastMotion) {
+
+			this.log.debug(`${this.protectApi.getFullName(camera)}: Skipping duplicate motion event.`);
+			return;
+		}
+
+		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullName(camera)}`);
+
+		let stateArray = [];
+		stateArray = this.protect.createOwnState(
+			"motions.realTimeLastMotion.camera",
+			cameraid,
+			"camera",
+			stateArray,
+			this.config.statesFilter["motions"],
+			true,
+		);
+		stateArray = this.protect.createOwnState(
+			"motions.realTimeLastMotion.start",
+			motionEvent.lastMotion,
+			"start",
+			stateArray,
+			this.config.statesFilter["motions"],
+			true,
+		);
+
+		this.log.debug(util.inspect(stateArray, { colors: true, depth: null, sorted: true }));
+
+		this.lastMotion[camera.mac] = motionEvent.lastMotion;
+	}
+
+	doorbellEventHandler(lastring) {
+		return lastring;
+	}
+
+	lcdMessageEventHandler(lcdMessage) {
+		return lcdMessage;
+	}
+
+}
+
+module.exports = ProtectEvents;

@@ -5,41 +5,24 @@ const https = require("https");
 const settings = require("./settings");
 const fetch = require("node-fetch");
 const AbortController = require("abort-controller").AbortController;
-const decodeUpdatePacket = require("./protect-updates");
 const util = require("util");
 
 class ProtectApi {
 
 	// Initialize this instance with our login information.
+	/**
+	 * @param {ioBroker.AdapterConfig} config
+	 * @param {ioBroker.Logger} log
+	 */
 	constructor(config, log) {
 		this.config = config;
 		this.log = log;
-		this.isUnifiOS = false;
-		this.csrfToken = null;
-		this.camerasDone = true;
-		this.motionsDone = true;
-		this.gotToken = false;
+		this.Cameras = null;
 		this.loginAge = 0;
 		this.headers = new fetch.Headers();
 		this.apiErrorCount = 0;
 		this.apiLastSuccess = 0;
 		this.eventListenerConfigured = false;
-		this.paths = {
-			login: "/api/auth",
-			loginUnifiOS: "/api/auth/login",
-			bootstrap: "/api/bootstrap",
-			bootstrapUnifiOS: "/proxy/protect/api/bootstrap",
-			events: "/api/events",
-			eventsUnifiOS: "/proxy/protect/api/events",
-			cameras: "/api/cameras/",
-			camerasUnifiOS: "/proxy/protect/api/cameras/",
-			thumb: "/api/thumbnails/",
-			thumbUnifiOS: "/proxy/protect/api/thumbnails/",
-			heatmap: "/api/heatmaps/",
-			heatmapUnifiOS: "/proxy/protect/api/heatmaps/",
-			updates: "/proxy/protect/ws/updates",
-			system: "/api/ws/system",
-		};
 		this.clearLoginCredentials();
 	}
 
@@ -170,7 +153,7 @@ class ProtectApi {
 		}
 
 		// Capture the bootstrap if we're debugging.
-		this.log.debug(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
+		this.log.silly(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
 
 		// Check for admin user privileges or role changes.
 		//this.checkAdminUserStatus(firstRun);
@@ -214,90 +197,6 @@ class ProtectApi {
 
 			// Setup our heartbeat to ensure we can revive our connection if needed.
 			this.eventListener.on("message", this.heartbeatEventListener.bind(this));
-			this.eventListener.on("message", event => {
-
-				const updatePacket = decodeUpdatePacket(this.log, event);
-
-				if (!updatePacket) {
-					this.log.error(`${this.config.protectip}: Unable to process message from the realtime update events API.`);
-					return;
-				}
-				this.log.debug(util.inspect(updatePacket, { colors: true, depth: null, sorted: true }));
-
-				// The update actions that we care about (doorbell rings, motion detection) look like this:
-				//
-				// action: "update"
-				// id: "someCameraId"
-				// modelKey: "camera"
-				// newUpdateId: "ignorethis"
-				//
-				// The payloads are what differentiate them - one updates lastMotion and the other lastRing.
-				switch (updatePacket.action.modelKey) {
-
-					case "camera": {
-
-						// We listen for the following camera update actions:
-						//   doorbell LCD updates
-						//   doorbell rings
-						//   motion detection
-
-						// We're only interested in update actions.
-						if (updatePacket.action.action !== "update") {
-							return;
-						}
-
-						// Grab the right payload type, camera update payloads.
-						const payload = updatePacket.payload;
-
-						// Now filter out payloads we aren't interested in. We only want motion detection and doorbell rings for now.
-						if (!payload.isMotionDetected && !payload.lastRing && !payload.lcdMessage) {
-							return;
-						}
-
-						// It's a motion event - process it accordingly, but only if we're not configured for smart motion events - we handle those elsewhere.
-						if (payload.isMotionDetected) {
-							//
-						}
-
-						// It's a ring event - process it accordingly.
-						if (payload.lastRing) {
-							//
-						}
-
-						// It's a doorbell LCD message event - process it accordingly.
-						if (payload.lcdMessage) {
-							//
-						}
-
-						break;
-					}
-
-					case "event": {
-
-						// We listen for the following event actions:
-						//   smart motion detection
-
-						// We're only interested in add events.
-						if (updatePacket.action.action !== "add") {
-							return;
-						}
-
-						// Grab the right payload type, for event add payloads.
-						const payload = updatePacket.payload;
-
-						// We're only interested in smart motion detection events.
-						if (payload.type !== "smartDetectZone") {
-							return;
-						}
-						return;
-					}
-
-					default:
-
-						// It's not a modelKey we're interested in. We're done.
-						return;
-				}
-			});
 			this.eventListener.on("open", this.heartbeatEventListener.bind(this));
 			this.eventListener.on("ping", this.heartbeatEventListener.bind(this));
 			this.eventListener.on("close", () => {
@@ -334,7 +233,7 @@ class ProtectApi {
 			return false;
 		}
 
-		this.log.debug(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
+		this.log.silly(util.inspect(this.bootstrap, { colors: true, depth: null, sorted: true }));
 
 		const newDeviceList = this.bootstrap.cameras ? this.bootstrap.cameras : undefined;
 
@@ -354,7 +253,7 @@ class ProtectApi {
 				// We've discovered a new device.
 				this.log.info(`${this.config.protectip}: Discovered ${newDevice.modelKey}: ${this.getDeviceName(newDevice, newDevice.name, true)}.`);
 
-				this.log.debug(util.inspect(newDevice, { colors: true, depth: null, sorted: true }));
+				this.log.silly(util.inspect(newDevice, { colors: true, depth: null, sorted: true }));
 			}
 		}
 
@@ -370,7 +269,7 @@ class ProtectApi {
 				// We've had a device disappear.
 				this.log.debug(`${this.getFullName(existingDevice)}: Detected ${existingDevice.modelKey} removal.`);
 
-				this.log.debug(util.inspect(existingDevice, { colors: true, depth: null, sorted: true }));
+				this.log.silly(util.inspect(existingDevice, { colors: true, depth: null, sorted: true }));
 			}
 		}
 
@@ -459,7 +358,7 @@ class ProtectApi {
 			// Some other unknown error occurred.
 			if (!response.ok) {
 				this.apiErrorCount++;
-				this.log.error("API access error: %s - %s", response.status, response.statusText);
+				this.log.error(`API access error: ${response.status} - ${response.statusText}`);
 				return null;
 			}
 
