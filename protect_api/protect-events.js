@@ -1,5 +1,5 @@
 const decodeUpdatePacket = require("./protect-updates");
-const util = require("util");
+//const util = require("util");
 
 class ProtectEvents {
 	constructor(protect) {
@@ -46,6 +46,17 @@ class ProtectEvents {
 			common: {
 				name: "timestamp",
 				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.smartDetectZone", {
+			type: "state",
+			common: {
+				name: "smartDetectZone",
+				type: "boolean",
 				role: "value",
 				read: true,
 				write: true,
@@ -156,6 +167,8 @@ class ProtectEvents {
 					if (payload.type !== "smartDetectZone") {
 						return;
 					}
+
+					this.motionEventHandler(updatePacket.action.id, payload, true);
 					return;
 				}
 
@@ -170,7 +183,7 @@ class ProtectEvents {
 		return true;
 	}
 
-	async motionEventHandler(cameraid, motionEvent) {
+	async motionEventHandler(cameraid, motionEvent, smartDetectZone = false) {
 		if (this.lastMotion[cameraid] >= motionEvent.lastMotion) {
 
 			this.log.debug(`${this.protectApi.getFullNameById(cameraid)}: Skipping duplicate motion event.`);
@@ -180,6 +193,7 @@ class ProtectEvents {
 		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullNameById(cameraid)}`);
 
 		this.protect.setState("realTimeEvents.lastMotion.camera", cameraid, true);
+		this.protect.setState("realTimeEvents.lastMotion.smartDetectZone", smartDetectZone, true);
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
