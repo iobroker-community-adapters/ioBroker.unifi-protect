@@ -11,6 +11,47 @@ class ProtectEvents {
 		this.log = protect.log;
 		this.protectApi = protect.api;
 		this.protect = protect;
+
+		this.init();
+	}
+
+	async init() {
+		await this.protect.extendObjectAsync("realTimeEvents", {
+			type: "device",
+			common: {
+				name: "realTimeEvents"
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents", {
+			type: "channel",
+			common: {
+				name: "lastMotion"
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.camera", {
+			type: "state",
+			common: {
+				name: "camera",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.timestamp", {
+			type: "state",
+			common: {
+				name: "camera",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
 	}
 
 	update() {
@@ -116,39 +157,19 @@ class ProtectEvents {
 		return true;
 	}
 
-	motionEventHandler(cameraid, motionEvent) {
-		const camera = this.protectApi.Cameras.some(x => x.id = cameraid);
-		if (!camera) { return; }
+	async motionEventHandler(cameraid, motionEvent) {
+		if (this.lastMotion[cameraid] >= motionEvent.lastMotion) {
 
-		if (this.lastMotion[camera.mac] >= motionEvent.lastMotion) {
-
-			this.log.debug(`${this.protectApi.getFullName(camera)}: Skipping duplicate motion event.`);
+			this.log.debug(`${this.protectApi.getFullNameById(cameraid)}: Skipping duplicate motion event.`);
 			return;
 		}
 
-		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullName(camera)}`);
+		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullNameById(cameraid)}`);
 
-		let stateArray = [];
-		stateArray = this.protect.createOwnState(
-			"motions.realTimeLastMotion.camera",
-			cameraid,
-			"camera",
-			stateArray,
-			this.config.statesFilter["motions"],
-			true,
-		);
-		stateArray = this.protect.createOwnState(
-			"motions.realTimeLastMotion.start",
-			motionEvent.lastMotion,
-			"start",
-			stateArray,
-			this.config.statesFilter["motions"],
-			true,
-		);
+		this.protect.setState("realTimeEvents.lastMotion.camera", cameraid, true);
+		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 
-		this.log.debug(util.inspect(stateArray, { colors: true, depth: null, sorted: true }));
-
-		this.lastMotion[camera.mac] = motionEvent.lastMotion;
+		this.lastMotion[cameraid] = motionEvent.lastMotion;
 	}
 
 	doorbellEventHandler(lastring) {

@@ -231,22 +231,24 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async updateData(onReady = false) {
-		await this.renewToken();
-		if (this.camerasDone && this.gotToken) {
-			this.getCameraList(onReady);
-		}
-		if (this.motionsDone && this.gotToken) {
-			this.getMotionEvents(onReady);
+		if (this.config.protectip != "127.0.0.1") {
+			await this.renewToken();
+			if (this.camerasDone && this.gotToken) {
+				this.getCameraList(onReady);
+			}
+			if (this.motionsDone && this.gotToken) {
+				this.getMotionEvents(onReady);
+			}
+			if (this.api != null) {
+				this.events = new ProtectEvents(this);
+				await this.api.refreshDevices();
+				this.events.update();
+			}
 		}
 		this.timer = setTimeout(
 			() => this.updateData(),
 			this.config.interval * 1000,
 		);
-		if (this.api != null) {
-			this.events = new ProtectEvents(this);
-			await this.api.refreshDevices();
-			this.events.update();
-		}
 	}
 
 	determineEndpointStyle() {

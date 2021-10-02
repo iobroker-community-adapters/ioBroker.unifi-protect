@@ -424,6 +424,14 @@ class ProtectApi {
 		return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
 	}
 
+	getFullNameById(cameraid) {
+		const camera = this.Cameras.find(x => x.id = cameraid);
+		const cameraName = this.getDeviceName(camera);
+
+		// Returns: NVR [NVR Type] Camera [Camera Type]
+		return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
+	}
+
 	bootstrapUrl() {
 		return "https://" + this.config.protectip + "/proxy/protect/api/bootstrap";
 	}
