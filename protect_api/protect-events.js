@@ -44,8 +44,19 @@ class ProtectEvents {
 		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.timestamp", {
 			type: "state",
 			common: {
-				name: "camera",
+				name: "timestamp",
 				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.raw", {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
 				role: "value",
 				read: true,
 				write: true,
@@ -72,6 +83,8 @@ class ProtectEvents {
 		this.protectApi.eventListener.on("message", event => {
 
 			const updatePacket = decodeUpdatePacket(this.log, event);
+
+			//this.log.debug(util.inspect(updatePacket, { colors: true, depth: null, sorted: true }));
 
 			if (!updatePacket) {
 				this.log.error(`${this.config.protectip}: Unable to process message from the realtime update events API.`);
@@ -168,6 +181,7 @@ class ProtectEvents {
 
 		this.protect.setState("realTimeEvents.lastMotion.camera", cameraid, true);
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
+		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
 		this.lastMotion[cameraid] = motionEvent.lastMotion;
 	}

@@ -114,6 +114,9 @@ class UnifiProtect extends utils.Adapter {
 			if (this.timer) {
 				clearTimeout(this.timer);
 			}
+			if (this.api) {
+				this.api.unload();
+			}
 			this.log.info("cleaned everything up...");
 			callback();
 		} catch (e) {

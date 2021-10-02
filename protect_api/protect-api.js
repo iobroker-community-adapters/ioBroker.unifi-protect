@@ -282,7 +282,6 @@ class ProtectApi {
 
 		// Clear out our last timer and set a new one.
 		if (this.eventHeartbeatTimer) {
-			this.log.debug("Clear Heartbeat Timer");
 			clearTimeout(this.eventHeartbeatTimer);
 		}
 
@@ -463,6 +462,13 @@ class ProtectApi {
 		// workloads, but we deal with that elsewhere in acquireToken.
 		if (this.httpsAgent) this.httpsAgent.destroy();
 		this.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+	}
+
+	unload() {
+		this.clearLoginCredentials();
+		if (this.eventHeartbeatTimer) {
+			clearTimeout(this.eventHeartbeatTimer);
+		}
 	}
 
 }
