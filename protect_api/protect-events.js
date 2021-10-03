@@ -74,6 +74,61 @@ class ProtectEvents {
 			},
 			native: {},
 		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastRing.doorbell", {
+			type: "state",
+			common: {
+				name: "doorbell",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastRing.timestamp", {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lastRing.raw", {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lcdMessage.someId", {
+			type: "state",
+			common: {
+				name: "someId",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.extendObjectAsync("realTimeEvents.lcdMessage.raw", {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
 	}
 
 	update() {
@@ -139,12 +194,12 @@ class ProtectEvents {
 
 					// It's a ring event - process it accordingly.
 					if (payload.lastRing) {
-						this.doorbellEventHandler(payload.lastRing);
+						this.doorbellEventHandler(updatePacket.action.id, payload);
 					}
 
 					// It's a doorbell LCD message event - process it accordingly.
 					if (payload.lcdMessage) {
-						this.lcdMessageEventHandler(payload.lcdMessage);
+						this.lcdMessageEventHandler(updatePacket.action.id, payload);
 					}
 
 					break;
@@ -183,29 +238,36 @@ class ProtectEvents {
 		return true;
 	}
 
-	async motionEventHandler(cameraid, motionEvent, smartDetectZone = false) {
-		if (this.lastMotion[cameraid] >= motionEvent.lastMotion) {
+	async motionEventHandler(cameraId, motionEvent, smartDetectZone = false) {
+		if (this.lastMotion[cameraId] >= motionEvent.lastMotion) {
 
-			this.log.debug(`${this.protectApi.getFullNameById(cameraid)}: Skipping duplicate motion event.`);
+			this.log.debug(`${this.protectApi.getFullNameById(cameraId)}: Skipping duplicate motion event.`);
 			return;
 		}
 
-		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullNameById(cameraid)}`);
+		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullNameById(cameraId)}`);
 
-		this.protect.setState("realTimeEvents.lastMotion.camera", cameraid, true);
+		this.protect.setState("realTimeEvents.lastMotion.camera", cameraId, true);
 		this.protect.setState("realTimeEvents.lastMotion.smartDetectZone", smartDetectZone, true);
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
-		this.lastMotion[cameraid] = motionEvent.lastMotion;
+		this.lastMotion[cameraId] = motionEvent.lastMotion;
 	}
 
-	doorbellEventHandler(lastring) {
-		return lastring;
+	doorbellEventHandler(doorbellId, ringEvent) {
+		this.log.debug(`Ring at ${ringEvent.lastRing} for ${doorbellId}`);
+
+		this.protect.setState("realTimeEvents.lastRing.doorbell", doorbellId, true);
+		this.protect.setState("realTimeEvents.lastRing.timestamp", ringEvent.lastRing, true);
+		this.protect.setState("realTimeEvents.lastRing.raw", JSON.stringify(ringEvent), true);
 	}
 
-	lcdMessageEventHandler(lcdMessage) {
-		return lcdMessage;
+	lcdMessageEventHandler(someId, lcdEvent) {
+		this.log.debug(`LcdMessage ${lcdEvent.lcdMessage} for ${someId}`);
+
+		this.protect.setState("realTimeEvents.lcdMessage.someId", someId, true);
+		this.protect.setState("realTimeEvents.lcdMessage.raw", JSON.stringify(lcdEvent), true);
 	}
 
 }
