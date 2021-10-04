@@ -1,9 +1,10 @@
 const decodeUpdatePacket = require("./protect-updates");
 //const util = require("util");
 
-class ProtectEvents {
+class ProtectUpdateEvents {
 	constructor(protect) {
 		this.lastMotion = {};
+		this.smartDetectZone = {};
 		this.lastRing = {};
 		this.eventTimers = {};
 		this.unsupportedDevices = {};
@@ -16,21 +17,21 @@ class ProtectEvents {
 	}
 
 	async init() {
-		await this.protect.extendObjectAsync("realTimeEvents", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents", {
 			type: "device",
 			common: {
 				name: "realTimeEvents"
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastMotion", {
 			type: "channel",
 			common: {
 				name: "lastMotion"
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.camera", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastMotion.camera", {
 			type: "state",
 			common: {
 				name: "camera",
@@ -41,7 +42,7 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.timestamp", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastMotion.timestamp", {
 			type: "state",
 			common: {
 				name: "timestamp",
@@ -52,18 +53,7 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.smartDetectZone", {
-			type: "state",
-			common: {
-				name: "smartDetectZone",
-				type: "boolean",
-				role: "value",
-				read: true,
-				write: true,
-			},
-			native: {},
-		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastMotion.raw", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastMotion.raw", {
 			type: "state",
 			common: {
 				name: "raw",
@@ -74,7 +64,14 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastRing.doorbell", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastRing", {
+			type: "channel",
+			common: {
+				name: "lastRing"
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastRing.doorbell", {
 			type: "state",
 			common: {
 				name: "doorbell",
@@ -85,7 +82,7 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastRing.timestamp", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastRing.timestamp", {
 			type: "state",
 			common: {
 				name: "timestamp",
@@ -96,7 +93,7 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lastRing.raw", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lastRing.raw", {
 			type: "state",
 			common: {
 				name: "raw",
@@ -107,7 +104,14 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lcdMessage.someId", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage", {
+			type: "channel",
+			common: {
+				name: "lcdMessage"
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage.doorbell", {
 			type: "state",
 			common: {
 				name: "someId",
@@ -118,7 +122,113 @@ class ProtectEvents {
 			},
 			native: {},
 		});
-		await this.protect.extendObjectAsync("realTimeEvents.lcdMessage.raw", {
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage.raw", {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage.resetAt", {
+			type: "state",
+			common: {
+				name: "resetAt",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage.text", {
+			type: "state",
+			common: {
+				name: "text",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.lcdMessage.type", {
+			type: "state",
+			common: {
+				name: "type",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone", {
+			type: "channel",
+			common: {
+				name: "smartDetectZone"
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.camera", {
+			type: "state",
+			common: {
+				name: "camera",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.eventId", {
+			type: "state",
+			common: {
+				name: "eventId",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.timestamp", {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.score", {
+			type: "state",
+			common: {
+				name: "score",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.smartDetectTypes", {
+			type: "state",
+			common: {
+				name: "smartDetectTypes",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.protect.setObjectNotExistsAsync("realTimeEvents.smartDetectZone.raw", {
 			type: "state",
 			common: {
 				name: "raw",
@@ -223,7 +333,7 @@ class ProtectEvents {
 						return;
 					}
 
-					this.motionEventHandler(updatePacket.action.id, payload, true);
+					this.smartDetectZoneEventHandler(payload.camera, payload);
 					return;
 				}
 
@@ -238,8 +348,8 @@ class ProtectEvents {
 		return true;
 	}
 
-	async motionEventHandler(cameraId, motionEvent, smartDetectZone = false) {
-		if (this.lastMotion[cameraId] >= motionEvent.lastMotion) {
+	async motionEventHandler(cameraId, motionEvent) {
+		if (this.lastMotion[cameraId] >= motionEvent.id) {
 
 			this.log.debug(`${this.protectApi.getFullNameById(cameraId)}: Skipping duplicate motion event.`);
 			return;
@@ -248,11 +358,29 @@ class ProtectEvents {
 		this.log.debug(`Motion at ${motionEvent.lastMotion} for ${this.protectApi.getFullNameById(cameraId)}`);
 
 		this.protect.setState("realTimeEvents.lastMotion.camera", cameraId, true);
-		this.protect.setState("realTimeEvents.lastMotion.smartDetectZone", smartDetectZone, true);
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
-		this.lastMotion[cameraId] = motionEvent.lastMotion;
+		this.lastMotion[cameraId] = motionEvent.id;
+	}
+
+	async smartDetectZoneEventHandler(cameraId, smartDetectZoneEvent) {
+		if (this.smartDetectZone[cameraId] >= smartDetectZoneEvent.id) {
+
+			this.log.debug(`${this.protectApi.getFullNameById(cameraId)}: Skipping duplicate smartDetectZone event.`);
+			return;
+		}
+
+		this.log.debug(`smartDetectTypes: ${smartDetectZoneEvent.smartDetectTypes} for ${this.protectApi.getFullNameById(cameraId)}`);
+
+		this.protect.setState("realTimeEvents.smartDetectZone.camera", cameraId, true);
+		this.protect.setState("realTimeEvents.smartDetectZone.timestamp", smartDetectZoneEvent.start, true);
+		this.protect.setState("realTimeEvents.smartDetectZone.score", smartDetectZoneEvent.score, true);
+		this.protect.setState("realTimeEvents.smartDetectZone.eventId", smartDetectZoneEvent.id, true);
+		this.protect.setState("realTimeEvents.smartDetectZone.raw", JSON.stringify(smartDetectZoneEvent), true);
+		this.protect.setState("realTimeEvents.smartDetectZone.smartDetectTypes", JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
+
+		this.smartDetectZone[cameraId] = smartDetectZoneEvent.id;
 	}
 
 	doorbellEventHandler(doorbellId, ringEvent) {
@@ -263,13 +391,18 @@ class ProtectEvents {
 		this.protect.setState("realTimeEvents.lastRing.raw", JSON.stringify(ringEvent), true);
 	}
 
-	lcdMessageEventHandler(someId, lcdEvent) {
-		this.log.debug(`LcdMessage ${lcdEvent.lcdMessage} for ${someId}`);
+	lcdMessageEventHandler(doorbellId, lcdEvent) {
+		this.log.debug(`LcdMessage ${lcdEvent.lcdMessage} for ${doorbellId}`);
 
-		this.protect.setState("realTimeEvents.lcdMessage.someId", someId, true);
+		this.protect.setState("realTimeEvents.lcdMessage.doorbell", doorbellId, true);
 		this.protect.setState("realTimeEvents.lcdMessage.raw", JSON.stringify(lcdEvent), true);
+		if (lcdEvent.lcdMessage.type) {
+			this.protect.setState("realTimeEvents.lcdMessage.type", lcdEvent.lcdMessage.type, true);
+			this.protect.setState("realTimeEvents.lcdMessage.text", lcdEvent.lcdMessage.text, true);
+			this.protect.setState("realTimeEvents.lcdMessage.resetAt", lcdEvent.lcdMessage.resetAt, true);
+		}
 	}
 
 }
 
-module.exports = ProtectEvents;
+module.exports = ProtectUpdateEvents;
