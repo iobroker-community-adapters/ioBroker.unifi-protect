@@ -66,6 +66,15 @@ When the adapter crashes or an other Code error happens, this error message that
 
 ## Changelog
 
+<!--
+    Placeholder for the next version (at the beginning of the line):
+    ## **WORK IN PROGRESS**
+-->
+
+## **WORK IN PROGRESS**
+* first implementation of realtime updates api
+* lastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents
+
 ### 0.0.12 (2021-03-14)
 * added smart detections
 * fixed some lastMotion stuff

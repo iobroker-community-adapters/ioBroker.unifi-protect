@@ -198,6 +198,7 @@
         "numMotions": 10,
         "secMotions": 600,
         "interval": 60,
+		"wsCheck": 15,
         "motionTypes": {
             "motion": true,
             "smartDetectZone": false,

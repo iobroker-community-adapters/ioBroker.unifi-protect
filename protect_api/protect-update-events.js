@@ -239,6 +239,7 @@ class ProtectUpdateEvents {
 			},
 			native: {},
 		});
+		this.checkTimer();
 	}
 
 	update() {
@@ -252,11 +253,17 @@ class ProtectUpdateEvents {
 
 
 	configureUpdatesListener() {
-		if (!this.protectApi.eventListener || this.protectApi.eventListenerConfigured) {
+		if (this.protectApi.updatesWebsocketConfigured) {
+			this.log.debug("Websocket: Updates Listener already configured, nothing to do.");
 			return true;
 		}
+		if (!this.protectApi.updatesWebsocket) {
+			this.log.debug("Websocket: Waiting for websocket to be open.");
+			this.protectApi.bootstrapProtect();
+			return false;
+		}
 
-		this.protectApi.eventListener.on("message", event => {
+		this.protectApi.updatesWebsocket.on("message", event => {
 
 			const updatePacket = decodeUpdatePacket(this.log, event);
 
@@ -344,7 +351,7 @@ class ProtectUpdateEvents {
 			}
 		});
 
-		this.protectApi.eventListenerConfigured = true;
+		this.protectApi.updatesWebsocketConfigured = true;
 		return true;
 	}
 
@@ -400,6 +407,26 @@ class ProtectUpdateEvents {
 			this.protect.setState("realTimeEvents.lcdMessage.type", lcdEvent.lcdMessage.type, true);
 			this.protect.setState("realTimeEvents.lcdMessage.text", lcdEvent.lcdMessage.text, true);
 			this.protect.setState("realTimeEvents.lcdMessage.resetAt", lcdEvent.lcdMessage.resetAt, true);
+		}
+	}
+
+	checkTimer() {
+		// Clear out our last timer and set a new one.
+		if (this.eventsTimer) {
+			clearTimeout(this.eventsTimer);
+		}
+
+		this.update();
+
+		// We use terminate() to immediately destroy the connection, instead of close(), which waits for the close timer.
+		this.eventsTimer = setTimeout(() => {
+			this.checkTimer();
+		}, this.protect.config.wsCheck * 1000);
+	}
+
+	unload() {
+		if (this.eventsTimer) {
+			clearTimeout(this.eventsTimer);
 		}
 	}
 

@@ -90,6 +90,7 @@ class UnifiProtect extends utils.Adapter {
 			}
 			this.updateData(true);
 			this.api = new ProtectApi(this.config, this.log);
+			this.events = new ProtectUpdateEvents(this);
 		});
 	}
 
@@ -116,6 +117,9 @@ class UnifiProtect extends utils.Adapter {
 			}
 			if (this.api) {
 				this.api.unload();
+			}
+			if (this.events) {
+				this.events.unload();
 			}
 			this.log.info("cleaned everything up...");
 			callback();
@@ -242,11 +246,9 @@ class UnifiProtect extends utils.Adapter {
 			if (this.motionsDone && this.gotToken) {
 				this.getMotionEvents(onReady);
 			}
-			if (this.api != null) {
-				this.events = new ProtectUpdateEvents(this);
-				await this.api.refreshDevices();
-				this.events.update();
-			}
+		}
+		if (this.api) {
+			this.api.refreshDevices();
 		}
 		this.timer = setTimeout(
 			() => this.updateData(),

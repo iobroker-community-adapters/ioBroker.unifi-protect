@@ -22,7 +22,7 @@ class ProtectApi {
 		this.headers = new fetch.Headers();
 		this.apiErrorCount = 0;
 		this.apiLastSuccess = 0;
-		this.eventListenerConfigured = false;
+		this.updatesWebsocketConfigured = false;
 		this.clearLoginCredentials();
 	}
 
@@ -37,7 +37,7 @@ class ProtectApi {
 		// UniFi OS has cross-site request forgery protection built into it's web management UI.
 		// We use this fact to fingerprint it by connecting directly to the supplied NVR address
 		// and see ifing there's a CSRF token waiting for us.
-		const response = await this.fetch("https://" + this.config.protectip, { method: "GET" }, true);
+		const response = await this.fetch("https://" + this.config.protectip, { method: "GET" });
 
 		if (response != null && response.ok) {
 			const csrfToken = response.headers.get("X-CSRF-Token");
@@ -164,14 +164,14 @@ class ProtectApi {
 
 	async launchUpdatesListener() {
 
+		// If we already have a listener, we're already all set.
+		if (this.updatesWebsocket) {
+			return true;
+		}
+
 		// Log us in if needed.
 		if (!(await this.login())) {
 			return false;
-		}
-
-		// If we already have a listener, we're already all set.
-		if (this.eventListener) {
-			return true;
 		}
 
 		const params = new URLSearchParams({ lastUpdateId: this.bootstrap.lastUpdateId });
@@ -188,34 +188,33 @@ class ProtectApi {
 
 			if (!ws) {
 				this.log.error("Unable to connect to the realtime update events API. Will retry again later.");
-				this.eventListener = null;
-				this.eventListenerConfigured = false;
+				this.updatesWebsocket = null;
+				this.updatesWebsocketConfigured = false;
 				return false;
 			}
 
-			this.eventListener = ws;
+			this.updatesWebsocket = ws;
 
 			// Setup our heartbeat to ensure we can revive our connection if needed.
-			this.eventListener.on("message", this.heartbeatEventListener.bind(this));
-			this.eventListener.on("open", this.heartbeatEventListener.bind(this));
-			this.eventListener.on("ping", this.heartbeatEventListener.bind(this));
-			this.eventListener.on("close", () => {
+			this.updatesWebsocket.on("message", this.heartbeatUpdatesWebsocket.bind(this));
+			this.updatesWebsocket.on("open", this.heartbeatUpdatesWebsocket.bind(this));
+			this.updatesWebsocket.on("ping", this.heartbeatUpdatesWebsocket.bind(this));
+			this.updatesWebsocket.on("close", () => {
 
-				if (this.eventHeartbeatTimer)
-					clearTimeout(this.eventHeartbeatTimer);
+				if (this.updatesWebsocketHeartbeatTimer)
+					clearTimeout(this.updatesWebsocketHeartbeatTimer);
+				this.disconnect();
 
 			});
 
-			this.eventListener.on("error", (error) => {
+			this.updatesWebsocket.on("error", (error) => {
 
 				// If we're closing before fully established it's because we're shutting down the API - ignore it.
 				if (error.message !== "WebSocket was closed before the connection was established") {
 					this.log.error(`${this.config.protectip}: ${error}`);
 				}
 
-				this.eventListener.terminate();
-				this.eventListener = null;
-				this.eventListenerConfigured = false;
+				this.disconnect();
 
 			});
 
@@ -278,18 +277,16 @@ class ProtectApi {
 		return true;
 	}
 
-	heartbeatEventListener() {
+	heartbeatUpdatesWebsocket() {
 
 		// Clear out our last timer and set a new one.
-		if (this.eventHeartbeatTimer) {
-			clearTimeout(this.eventHeartbeatTimer);
+		if (this.updatesWebsocketHeartbeatTimer) {
+			clearTimeout(this.updatesWebsocketHeartbeatTimer);
 		}
 
 		// We use terminate() to immediately destroy the connection, instead of close(), which waits for the close timer.
-		this.eventHeartbeatTimer = setTimeout(() => {
-			this.eventListener.terminate();
-			this.eventListener = null;
-			this.eventListenerConfigured = false;
+		this.updatesWebsocketHeartbeatTimer = setTimeout(() => {
+			this.disconnect();
 		}, settings.PROTECT_EVENTS_HEARTBEAT_INTERVAL * 1000);
 	}
 
@@ -444,14 +441,13 @@ class ProtectApi {
 	}
 
 	clearLoginCredentials() {
+		this.log.debug(`${this.config.protectip}: Clearing Login Credentials!`);
 		this.isAdminUser = false;
 		this.loggedIn = false;
 		this.loginAge = 0;
 
 		// Shutdown any event listeners, if we have them.
-		if (this.eventListener) this.eventListener.terminate();
-		this.eventListener = null;
-		this.eventListenerConfigured = false;
+		this.disconnect();
 
 		// Initialize the headers we need.
 		this.headers = new fetch.Headers();
@@ -464,10 +460,17 @@ class ProtectApi {
 		this.httpsAgent = new https.Agent({ rejectUnauthorized: false });
 	}
 
+	disconnect() {
+		this.log.debug(`${this.config.protectip}: Disconnecting websocket!`);
+		if (this.updatesWebsocket) this.updatesWebsocket.terminate();
+		this.updatesWebsocket = null;
+		this.updatesWebsocketConfigured = false;
+	}
+
 	unload() {
 		this.clearLoginCredentials();
-		if (this.eventHeartbeatTimer) {
-			clearTimeout(this.eventHeartbeatTimer);
+		if (this.updatesWebsocketHeartbeatTimer) {
+			clearTimeout(this.updatesWebsocketHeartbeatTimer);
 		}
 	}
 
