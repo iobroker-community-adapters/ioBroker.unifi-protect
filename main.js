@@ -89,8 +89,10 @@ class UnifiProtect extends utils.Adapter {
 				);
 			}
 			this.updateData(true);
-			this.api = new ProtectApi(this.config, this.log);
-			this.events = new ProtectUpdateEvents(this);
+			if (this.isUnifiOS) {
+				this.api = new ProtectApi(this.config, this.log);
+				this.events = new ProtectUpdateEvents(this);
+			}
 		});
 	}
 

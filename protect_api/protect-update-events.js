@@ -254,7 +254,7 @@ class ProtectUpdateEvents {
 
 	configureUpdatesListener() {
 		if (this.protectApi.updatesWebsocketConfigured) {
-			this.log.debug("Websocket: Updates Listener already configured, nothing to do.");
+			this.log.silly("Websocket: Updates Listener already configured, nothing to do.");
 			return true;
 		}
 		if (!this.protectApi.updatesWebsocket) {
