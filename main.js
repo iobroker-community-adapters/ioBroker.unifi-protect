@@ -74,7 +74,7 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		this.getForeignObject("system.config", (err, systemConfig) => {
+		await this.getForeignObjectAsync("system.config", (err, systemConfig) => {
 			if (
 				this.config.password &&
 				(!this.supportsFeature ||
@@ -88,12 +88,12 @@ class UnifiProtect extends utils.Adapter {
 					this.config.password,
 				);
 			}
-			this.updateData(true);
-			if (this.isUnifiOS) {
-				this.api = new ProtectApi(this.config, this.log);
-				this.events = new ProtectUpdateEvents(this);
-			}
 		});
+		await this.updateData(true);
+		if (this.isUnifiOS) {
+			this.api = new ProtectApi(this.config, this.log);
+			this.events = new ProtectUpdateEvents(this);
+		}
 	}
 
 	async errorHandling(codePart, error) {
