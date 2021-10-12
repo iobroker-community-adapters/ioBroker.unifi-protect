@@ -74,7 +74,7 @@ class UnifiProtect extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		await this.getForeignObjectAsync("system.config", (err, systemConfig) => {
+		this.getForeignObject("system.config", (err, systemConfig) => {
 			if (
 				this.config.password &&
 				(!this.supportsFeature ||
