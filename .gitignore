@@ -5,6 +5,8 @@ node_modules
 nbproject
 launch.json
 
+.dev-server/
+
 # Sourcemaps
 maps/
 

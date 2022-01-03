@@ -11,6 +11,8 @@ const tools = require(utils.controllerDir + "/lib/tools");
 const https = require("https");
 const Stream = require("stream").Transform;
 const fs = require("fs");
+const ProtectApi = require("./protect_api/protect-api");
+const ProtectUpdateEvents = require("./protect_api/protect-update-events");
 
 // Load your modules here, e.g.:
 // const fs = require("fs");
@@ -86,8 +88,12 @@ class UnifiProtect extends utils.Adapter {
 					this.config.password,
 				);
 			}
-			this.updateData(true);
 		});
+		await this.updateData(true);
+		if (this.isUnifiOS) {
+			this.api = new ProtectApi(this.config, this.log);
+			this.events = new ProtectUpdateEvents(this);
+		}
 	}
 
 	async errorHandling(codePart, error) {
@@ -110,6 +116,12 @@ class UnifiProtect extends utils.Adapter {
 		try {
 			if (this.timer) {
 				clearTimeout(this.timer);
+			}
+			if (this.api) {
+				this.api.unload();
+			}
+			if (this.events) {
+				this.events.unload();
 			}
 			this.log.info("cleaned everything up...");
 			callback();
@@ -228,12 +240,17 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	async updateData(onReady = false) {
-		await this.renewToken();
-		if (this.camerasDone && this.gotToken) {
-			this.getCameraList(onReady);
+		if (this.config.protectip != "127.0.0.1") {
+			await this.renewToken();
+			if (this.camerasDone && this.gotToken) {
+				this.getCameraList(onReady);
+			}
+			if (this.motionsDone && this.gotToken) {
+				this.getMotionEvents(onReady);
+			}
 		}
-		if (this.motionsDone && this.gotToken) {
-			this.getMotionEvents(onReady);
+		if (this.api) {
+			this.api.refreshDevices();
 		}
 		this.timer = setTimeout(
 			() => this.updateData(),
