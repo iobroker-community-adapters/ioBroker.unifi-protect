@@ -24,7 +24,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.5.1",
     "abort-controller": "^3.0.0",
-    "node-fetch": "^2.6.6",
+    "node-fetch": "^2.6.7",
     "ws": "^8.4.0"
   },
   "devDependencies": {
