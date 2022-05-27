@@ -72,6 +72,7 @@ When the adapter crashes or an other Code error happens, this error message that
 -->
 
 ## **WORK IN PROGRESS**
+* dependencies updates
 * first implementation of realtime updates api
 * lastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents
 
