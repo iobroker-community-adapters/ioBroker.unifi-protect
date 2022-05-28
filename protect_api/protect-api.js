@@ -84,7 +84,7 @@ class ProtectApi {
 			method: "POST"
 		});
 
-		if (!response.ok) {
+		if (response != null && !response.ok) {
 			return false;
 		}
 
@@ -352,7 +352,7 @@ class ProtectApi {
 			}
 
 			// Some other unknown error occurred.
-			if (!response.ok) {
+			if (response !=null && !response.ok) {
 				this.apiErrorCount++;
 				this.log.error(`API access error: ${response.status} - ${response.statusText}`);
 				return null;
@@ -421,6 +421,7 @@ class ProtectApi {
 	}
 
 	getFullNameById(cameraid) {
+		if (this.Cameras == null) return "Not initialized propery";
 		const camera = this.Cameras.find(x => x.id = cameraid);
 		const cameraName = this.getDeviceName(camera);
 
