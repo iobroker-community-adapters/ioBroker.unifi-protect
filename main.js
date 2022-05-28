@@ -1199,7 +1199,7 @@ class UnifiProtect extends utils.Adapter {
 						states: {
 							always: "always",
 							never: "never",
-							motion: "motion",
+							detections: "detections",
 						},
 					};
 				}
