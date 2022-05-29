@@ -421,12 +421,17 @@ class ProtectApi {
 	}
 
 	getFullNameById(cameraid) {
+		try {
+            		this.log.debug(`[getFullNameById][CAMERAID: ${cameraid}]`);
 		if (this.Cameras == null) return "Not initialized propery";
 		const camera = this.Cameras.find(x => x.id = cameraid);
 		const cameraName = this.getDeviceName(camera);
 
 		// Returns: NVR [NVR Type] Camera [Camera Type]
 		return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
+		} catch (error) {
+            		this.log.error(`[getFullNameById] <${error}>, [CAMERAID: ${cameraid}]`);
+        	};
 	}
 
 	bootstrapUrl() {
