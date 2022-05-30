@@ -89,7 +89,11 @@ class UnifiProtect extends utils.Adapter {
 				);
 			}
 		});
-		await this.updateData(true);
+		try {
+            		await this.updateData(true);
+        	} catch (error) {
+            		this.log.error(`[onReady: <updateData>] ${error}`);
+        	};
 		if (this.isUnifiOS) {
 			this.api = new ProtectApi(this.config, this.log);
 			this.events = new ProtectUpdateEvents(this);
