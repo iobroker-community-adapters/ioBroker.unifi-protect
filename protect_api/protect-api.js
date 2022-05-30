@@ -352,7 +352,7 @@ class ProtectApi {
 			}
 
 			// Some other unknown error occurred.
-			if (response !=null && !response.ok) {
+			if (response != null && !response.ok) {
 				this.apiErrorCount++;
 				this.log.error(`API access error: ${response.status} - ${response.statusText}`);
 				return null;
@@ -422,16 +422,16 @@ class ProtectApi {
 
 	getFullNameById(cameraid) {
 		try {
-            		this.log.debug(`[getFullNameById][CAMERAID: ${cameraid}]`);
-		if (this.Cameras == null) return "Not initialized propery";
-		const camera = this.Cameras.find(x => x.id = cameraid);
-		const cameraName = this.getDeviceName(camera);
+			this.log.debug(`[getFullNameById][CAMERAID: ${cameraid}]`);
+			if (this.Cameras == null) return "Not initialized properly";
+			const camera = this.Cameras.find(x => x.id = cameraid);
+			const cameraName = this.getDeviceName(camera);
 
-		// Returns: NVR [NVR Type] Camera [Camera Type]
-		return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
+			// Returns: NVR [NVR Type] Camera [Camera Type]
+			return this.config.protectip + (cameraName.length > 0 ? " " + cameraName : "");
 		} catch (error) {
-            		this.log.error(`[getFullNameById] <${error}>, [CAMERAID: ${cameraid}]`);
-        	};
+			this.log.error(`[getFullNameById] <${error}>, [CAMERAID: ${cameraid}]`);
+		};
 	}
 
 	bootstrapUrl() {
