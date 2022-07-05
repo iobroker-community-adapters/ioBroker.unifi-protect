@@ -579,6 +579,8 @@ class UnifiProtect extends utils.Adapter {
 									native: {},
 								}
 							);
+
+							this.createCameraRealTimeStates(camera.id);
 						}
 					});
 
@@ -1310,6 +1312,109 @@ class UnifiProtect extends utils.Adapter {
 			type: "device",
 			common: {
 				name: desc.toString(),
+			},
+			native: {},
+		});
+	}
+
+	async createCameraRealTimeStates(cameraId){
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents`, {
+			type: "channel",
+			common: {
+				name: "realTimeEvents"
+			},
+			native: {},
+		});
+
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion`, {
+			type: "channel",
+			common: {
+				name: "motion"
+			},
+			native: {},
+		});		
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.raw`, {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect`, {
+			type: "channel",
+			common: {
+				name: "smartDetect"
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, {
+			type: "state",
+			common: {
+				name: "eventId",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});	
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, {
+			type: "state",
+			common: {
+				name: "score",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, {
+			type: "state",
+			common: {
+				name: "detectTypes",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});										
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
 			},
 			native: {},
 		});

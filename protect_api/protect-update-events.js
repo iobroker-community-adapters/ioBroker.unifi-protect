@@ -368,7 +368,16 @@ class ProtectUpdateEvents {
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
-		this.lastMotion[cameraId] = motionEvent.id;
+		if(motionEvent.id) {
+			this.lastMotion[cameraId] = motionEvent.id;
+		}
+
+		this.motionEventHandlerForCam(cameraId, motionEvent);
+	}
+
+	async motionEventHandlerForCam(cameraId, motionEvent) {
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, motionEvent.lastMotion, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.raw`, JSON.stringify(motionEvent), true);
 	}
 
 	async smartDetectZoneEventHandler(cameraId, smartDetectZoneEvent) {
@@ -388,6 +397,16 @@ class ProtectUpdateEvents {
 		this.protect.setState("realTimeEvents.smartDetectZone.smartDetectTypes", JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
 
 		this.smartDetectZone[cameraId] = smartDetectZoneEvent.id;
+
+		this.smartDetectZoneEventHandlerForCam(cameraId, smartDetectZoneEvent);
+	}
+
+	async smartDetectZoneEventHandlerForCam(cameraId, smartDetectZoneEvent) {
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, smartDetectZoneEvent.start, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, smartDetectZoneEvent.score, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, smartDetectZoneEvent.id, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, JSON.stringify(smartDetectZoneEvent), true);
 	}
 
 	doorbellEventHandler(doorbellId, ringEvent) {
