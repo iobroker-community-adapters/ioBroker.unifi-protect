@@ -387,11 +387,12 @@ class ProtectUpdateEvents {
 				that.protect.getSnapshot(
 					cameraId,
 					snapshotUrl,
-					function () {
-						that.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.snapshotUrl`, snapshotUrl, true);
+					function (base64ImgString) {
+						that.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, base64ImgString, true);
 					},
 					that.config.takeSnapshotForLastMotionWidth || 640,
-					true,
+					false,
+					true
 				);
 			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 		}
@@ -433,11 +434,12 @@ class ProtectUpdateEvents {
 				that.protect.getSnapshot(
 					cameraId,
 					snapshotUrl,
-					function () {
-						that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshotUrl`, snapshotUrl, true);
+					function (base64ImgString) {
+						that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, base64ImgString, true);
 					},
 					that.config.takeSnapshotForLastMotionWidth || 640,
-					true,
+					false,
+					true
 				);
 			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 		}
@@ -447,11 +449,12 @@ class ProtectUpdateEvents {
 			this.protect.getThumbnail(
 				`e-${smartDetectZoneEvent.id}`,
 				thumbnailUrl,
-				function () {
-					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, thumbnailUrl, true);
+				function (base64ImgString) {
+					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, base64ImgString, true);
 				},
-				30,
+				60,
 				this.config.downloadLastMotionThumbWidth || 640,
+				false,
 				true
 			)
 		}

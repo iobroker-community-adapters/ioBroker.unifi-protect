@@ -798,6 +798,7 @@ class UnifiProtect extends utils.Adapter {
 		retries = 5,
 		width = 640,
 		visCompatible = false,
+		base64 = false
 	) {
 		const height = width / 1.8;
 		const that = this;
@@ -843,11 +844,20 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						fs.writeFileSync(path, data.read());
-						that.log.debug(
-							`[getThumbnail] thumb stored successfully -> ${path}`,
-						);
-						callback(path);
+						if (base64) {
+							let jpgDataUrlPrefix = 'data:image/png;base64,';
+							let imageBuffer = Buffer.from(data.read());
+							let imageBase64 = imageBuffer.toString('base64');
+							let base64ImgString = jpgDataUrlPrefix + imageBase64;
+
+							callback(base64ImgString);
+						} else {
+							fs.writeFileSync(path, data.read());
+							that.log.debug(
+								`[getThumbnail] thumb stored successfully -> ${path}`,
+							);
+							callback(path);
+						}
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error(
@@ -863,20 +873,26 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
+								base64
 							);
 						}, 1000);
 					}
 				} else {
 					if (!visCompatible) {
-						this.log.error(
-							"[getThumbnail]: Status Code: " + res.statusCode,
-						);
+						if (res.statusCode !== 404) {
+							this.log.error(
+								"[getThumbnail]: Status Code: " + res.statusCode,
+							);
+						}
 					} else {
 						// if refresh interval is very low -> protect needs time to save the image -> supress error message
-						this.log.debug(
-							"[getThumbnail]: Status Code: " + res.statusCode,
-						);
+						if (res.statusCode !== 404) {
+							this.log.error(
+								"[getThumbnail]: Status Code: " + res.statusCode,
+							);
+						}
 					}
+
 					if (retries > 0) {
 						setTimeout(() => {
 							this.getThumbnail(
@@ -886,6 +902,7 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
+								base64
 							);
 						}, 1000);
 					}
@@ -908,6 +925,7 @@ class UnifiProtect extends utils.Adapter {
 		callback,
 		width = 640,
 		visCompatible = false,
+		base64 = false
 	) {
 		const ts = Date.now() * 1000;
 		const height = width / 1.8;
@@ -951,11 +969,20 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						fs.writeFileSync(path, data.read());
-						that.log.debug(
-							`[getSnapshot] thumb stored successfully -> ${path}`,
-						);
-						callback(path);
+						if (base64) {
+							let jpgDataUrlPrefix = 'data:image/png;base64,';
+							let imageBuffer = Buffer.from(data.read());
+							let imageBase64 = imageBuffer.toString('base64');
+							let base64ImgString = jpgDataUrlPrefix + imageBase64;
+
+							callback(base64ImgString);
+						} else {
+							fs.writeFileSync(path, data.read());
+							that.log.debug(
+								`[getSnapshot] thumb stored successfully -> ${path}`,
+							);
+							callback(path);
+						}
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error(
@@ -1355,7 +1382,7 @@ class UnifiProtect extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.snapshotUrl`, {
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, {
 			type: "state",
 			common: {
 				name: "snapshotUrl",
@@ -1429,7 +1456,7 @@ class UnifiProtect extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshotUrl`, {
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, {
 			type: "state",
 			common: {
 				name: "snapshotUrl",
