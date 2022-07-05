@@ -155,6 +155,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
+		
 		if (state) {
 			// The state was changed
 			this.log.silly(
@@ -201,12 +202,31 @@ class UnifiProtect extends utils.Adapter {
 					this.config.downloadLastMotionThumbWidth || 640,
 					true,
 				);
-			} else {
+			} else {				
 				for (let i = 0; i < this.writeables.length; i++) {
 					if (id.match(this.writeables[i])) {
 						this.changeSetting(id, state.val);
 						continue;
 					}
+				}
+
+				if (id.includes(`${this.namespace}.cameras.`) && id.includes(`.manualSnapshot`)) {
+					const that = this;
+					
+					const camId = id
+					.replace(`${this.namespace}.cameras.`, "")
+					.replace(".manualSnapshot", "");
+
+					const snapshotUrl = `/unifi-protect/manual/${camId}/${new Date().getTime().toString()}.jpg`;
+					this.getSnapshot (
+						camId,
+						snapshotUrl,
+						function () { 
+							that.setStateAsync(id.replace(`.manualSnapshot`, `.manualSnapshotUrl`), snapshotUrl, true);
+						},
+						this.config.takeSnapshotManualWidth || 640,
+						true,
+					);
 				}
 			}
 		} else {
@@ -459,6 +479,8 @@ class UnifiProtect extends utils.Adapter {
 							);
 						}
 
+
+
 						if (onReady) {
 							const thumbnailUrlId = `cameras.${camera.id}.lastMotionEvent.thumbnailUrl`;
 							const that = this;
@@ -520,6 +542,43 @@ class UnifiProtect extends utils.Adapter {
 									`cameras.${camera.id}.${sub}`,
 								);
 							}
+
+							// Create Button to take a snapshot
+							const manualSnapshotBtnId = `cameras.${camera.id}.manualSnapshot`;
+							this.setObjectNotExists(
+								manualSnapshotBtnId,
+								{
+									type: "state",
+									common: {
+										name: "take a manual snapshot",
+										type: "boolean",
+										role: "button",
+										read: false,
+										write: true,
+										desc: "Take a snapshot and store it in /vis.0/unifi-protect/"
+									},
+									native: {},
+								},
+								function() {
+									that.subscribeStates(manualSnapshotBtnId)
+								}
+							)
+
+							const manualSnapshotURL = `cameras.${camera.id}.manualSnapshotUrl`;
+							this.setObjectNotExists(
+								manualSnapshotURL,
+								{
+									type: "state",
+									common: {
+										name: "manual snapshot url",
+										type: "string",
+										read: true,
+										write: false,
+										role: "value",
+									},
+									native: {},
+								}
+							);
 						}
 					});
 

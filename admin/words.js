@@ -397,6 +397,18 @@ const dictionary = {
 		"es": "retraso para la instantánea del último movimiento",
 		"pl": "opóźnienie migawki ostatniego ruchu",
 		"zh-cn": "最后动作快照的延迟"
+	},
+	"image width of manual snapshot": {
+		"en": "image width of manual snapshot",
+		"de": "Bildbreite des manuellen Schnappschuss",
+		"ru": "ширина изображения ручной снимок",
+		"pt": "largura de imagem do instantâneo manual",
+		"nl": "beeld width de handmatige foto",
+		"fr": "largeur d'image du snapshot manuel",
+		"it": "larghezza immagine di snapshot manuale",
+		"es": "ancho de imagen de instantánea manual",
+		"pl": "szerokość obrazu ręcznego",
+		"zh-cn": "手册摘录图像"
 	}
 };
 
