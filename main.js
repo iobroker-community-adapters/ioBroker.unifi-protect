@@ -1482,6 +1482,7 @@ class UnifiProtect extends utils.Adapter {
 
 	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
+		let that = this;
 		motionEvents.forEach((motionEvent) => {
 			if (onReady)
 				this.createOwnChannel(
@@ -1501,6 +1502,35 @@ class UnifiProtect extends utils.Adapter {
 					);
 				}
 			});
+
+			const thumbnailImage = `motions.${motionEvent.id}.thumbnail_image`;
+			this.setObjectNotExists(
+				thumbnailImage,
+				{
+					type: "state",
+					common: {
+						name: "manual snapshot url",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+				function () {
+					that.getThumbnail(
+						`e-${motionEvent.id}`,
+						undefined,
+						function (base64ImgString) {
+							that.setState(`motions.${motionEvent.id}.thumbnail_image`, base64ImgString, true);
+						},
+						60,
+						that.config.downloadLastMotionThumbWidth || 640,
+						false,
+						true
+					)
+				}
+			);
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1514,6 +1544,35 @@ class UnifiProtect extends utils.Adapter {
 						true,
 					);
 				},
+			);
+
+			const thumbnailImage = `motions.lastMotion.thumbnail_image`;
+			this.setObjectNotExists(
+				thumbnailImage,
+				{
+					type: "state",
+					common: {
+						name: "manual snapshot url",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+				function () {
+					that.getThumbnail(
+						motionEvents[motionEvents.length - 1].thumbnail,
+						undefined,
+						function (base64ImgString) {
+							that.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
+						},
+						60,
+						that.config.downloadLastMotionThumbWidth || 640,
+						false,
+						true
+					)
+				}
 			);
 		}
 		this.processStateChanges(stateArray, this, () => {
