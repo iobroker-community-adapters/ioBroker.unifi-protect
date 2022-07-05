@@ -155,7 +155,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
-		
+
 		if (state) {
 			// The state was changed
 			this.log.silly(
@@ -202,7 +202,7 @@ class UnifiProtect extends utils.Adapter {
 					this.config.downloadLastMotionThumbWidth || 640,
 					true,
 				);
-			} else {				
+			} else {
 				for (let i = 0; i < this.writeables.length; i++) {
 					if (id.match(this.writeables[i])) {
 						this.changeSetting(id, state.val);
@@ -212,16 +212,16 @@ class UnifiProtect extends utils.Adapter {
 
 				if (id.includes(`${this.namespace}.cameras.`) && id.includes(`.manualSnapshot`)) {
 					const that = this;
-					
+
 					const camId = id
-					.replace(`${this.namespace}.cameras.`, "")
-					.replace(".manualSnapshot", "");
+						.replace(`${this.namespace}.cameras.`, "")
+						.replace(".manualSnapshot", "");
 
 					const snapshotUrl = `/unifi-protect/manual/${camId}/${new Date().getTime().toString()}.jpg`;
-					this.getSnapshot (
+					this.getSnapshot(
 						camId,
 						snapshotUrl,
-						function () { 
+						function () {
 							that.setStateAsync(id.replace(`.manualSnapshot`, `.manualSnapshotUrl`), snapshotUrl, true);
 						},
 						this.config.takeSnapshotManualWidth || 640,
@@ -559,7 +559,7 @@ class UnifiProtect extends utils.Adapter {
 									},
 									native: {},
 								},
-								function() {
+								function () {
 									that.subscribeStates(manualSnapshotBtnId)
 								}
 							)
@@ -1317,7 +1317,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	async createCameraRealTimeStates(cameraId){
+	async createCameraRealTimeStates(cameraId) {
 		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents`, {
 			type: "channel",
 			common: {
@@ -1332,7 +1332,7 @@ class UnifiProtect extends utils.Adapter {
 				name: "motion"
 			},
 			native: {},
-		});		
+		});
 		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, {
 			type: "state",
 			common: {
@@ -1349,6 +1349,17 @@ class UnifiProtect extends utils.Adapter {
 			common: {
 				name: "raw",
 				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.snapshotUrl`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
 				role: "value",
 				read: true,
 				write: true,
@@ -1384,7 +1395,7 @@ class UnifiProtect extends utils.Adapter {
 				write: true,
 			},
 			native: {},
-		});	
+		});
 		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, {
 			type: "state",
 			common: {
@@ -1406,12 +1417,34 @@ class UnifiProtect extends utils.Adapter {
 				write: true,
 			},
 			native: {},
-		});										
+		});
 		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, {
 			type: "state",
 			common: {
 				name: "timestamp",
 				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshotUrl`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
 				role: "value",
 				read: true,
 				write: true,
