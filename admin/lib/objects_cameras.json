@@ -295,7 +295,7 @@
         ]
     },
     {
-        "channel": "lastMotion",
+        "channel": "lastMotionEvent",
         "states": [
             {
                 "channel": "metadata",
@@ -333,6 +333,14 @@
             {
                 "id": "score",
                 "name": "score"
+            },
+            {
+                "id": "smartDetectEvents",
+                "name": "smartDetectEvents"
+            },
+            {
+                "id": "smartDetectTypes",
+                "name": "smartDetectTypes"
             },
             {
                 "id": "id",

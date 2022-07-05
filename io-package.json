@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "unifi-protect",
-        "version": "0.0.11",
+        "version": "0.0.12",
         "news": {
+            "0.0.12": {
+                "en": "added smart detections\nfixed some lastMotion stuff\nadded UnifiOs Support for CloudKey",
+                "de": "intelligente Erkennungen hinzugefügt\nEinige lastMotion-Probleme wurden behoben\nUnifiOs-Unterstützung für CloudKey hinzugefügt",
+                "ru": "добавлены умные детекции\nисправлены некоторые вещи lastMotion\nдобавлена поддержка UnifiOs для CloudKey",
+                "pt": "adicionou detecções inteligentes\nconsertou algumas coisas do lastMotion\nadicionado Suporte UnifiOs para CloudKey",
+                "nl": "slimme detecties toegevoegd\nwat lastMotion-dingen opgelost\nUnifiOs-ondersteuning toegevoegd voor CloudKey",
+                "fr": "ajout de détections intelligentes\ncorrigé des trucs lastMotion\nAjout de la prise en charge UnifiOs pour CloudKey",
+                "it": "aggiunto rilevamenti intelligenti\nrisolto alcune cose lastMotion\naggiunto il supporto UnifiOs per CloudKey",
+                "es": "agregadas detecciones inteligentes\narreglado algunas cosas de lastMotion\nSe agregó soporte UnifiOs para CloudKey",
+                "pl": "dodano inteligentne wykrywanie\nnaprawiono kilka rzeczy w lastMotion\ndodano obsługę UnifiOs dla CloudKey",
+                "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持"
+            },
             "0.0.11": {
                 "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
                 "de": "* Admin-Oberfläche ein wenig geändert\r\n* Beschreibung für Port hinzugefügt\r\n* UDM Pro beschreibbare Zustände behoben",
@@ -162,10 +174,21 @@
         "materialize": true,
         "dependencies": [
             {
-                "js-controller": ">=1.4.2"
+                "js-controller": ">=3.0.0"
             }
-        ]
+        ],
+        "plugins": {
+            "sentry": {
+                "dsn": "https://f9c90a6b3ae0400eaa85e8e2bb198693@o508406.ingest.sentry.io/5606859"
+            }
+        }
     },
+    "encryptedNative": [
+        "password"
+    ],
+    "protectedNative": [
+        "password"
+    ],
     "native": {
         "protectip": "127.0.0.1",
         "protectport": 7443,
@@ -175,6 +198,12 @@
         "numMotions": 10,
         "secMotions": 600,
         "interval": 60,
+		"wsCheck": 15,
+        "motionTypes": {
+            "motion": true,
+            "smartDetectZone": false,
+            "ring": false
+        },
         "statesFilter": {
             "cameras": [
                 "channels.enabled",

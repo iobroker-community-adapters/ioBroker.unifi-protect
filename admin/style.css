@@ -143,3 +143,7 @@ ul.fancytree-container ul {
 	font-size: 16px;
 	font-weight: 500;
 }
+
+.multiple-select-dropdown li span{
+    pointer-events: none;
+}

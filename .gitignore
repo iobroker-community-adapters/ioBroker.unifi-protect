@@ -3,6 +3,12 @@
 *.code-workspace
 node_modules
 nbproject
+launch.json
+
+.dev-server/
+
+# Sourcemaps
+maps/
 
 # npm package files
 iobroker.*.tgz
