@@ -59,6 +59,7 @@ class UnifiProtect extends utils.Adapter {
 			camerasUnifiOS: "/proxy/protect/api/cameras/",
 			thumb: "/api/thumbnails/",
 			thumbUnifiOS: "/proxy/protect/api/thumbnails/",
+			thumbSmallUnifiOS: "/proxy/protect/api/events/{0}/thumbnail",
 			heatmap: "/api/heatmaps/",
 			heatmapUnifiOS: "/proxy/protect/api/heatmaps/",
 		};
@@ -798,7 +799,8 @@ class UnifiProtect extends utils.Adapter {
 		retries = 5,
 		width = 640,
 		visCompatible = false,
-		base64 = false
+		base64 = false,
+		small = false
 	) {
 		const height = width / 1.8;
 		const that = this;
@@ -817,8 +819,14 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				Cookie: this.cookies,
 			};
-			options.path =
-				this.paths.thumbUnifiOS + `${thumb}?h=${height}&w=${width}`;
+			if (small) {
+				options.path =
+					this.paths.thumbSmallUnifiOS.replace('{0}', thumb);
+			} else {
+				options.path =
+					this.paths.thumbUnifiOS + `${thumb}?h=${height}&w=${width}`;
+			}
+
 		} else {
 			options.headers = {
 				Authorization: "Bearer " + this.apiAuthBearerToken,
@@ -828,6 +836,8 @@ class UnifiProtect extends utils.Adapter {
 				this.paths.thumb +
 				`${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
 		}
+
+		if (small && path === "test") this.log.warn(options.path);
 
 		const req = https.request(options, (res) => {
 			const data = new Stream();
@@ -1475,6 +1485,17 @@ class UnifiProtect extends utils.Adapter {
 			},
 			native: {},
 		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});		
 	}
 
 	addMotionEvents(motionEvents, onReady) {
@@ -1497,37 +1518,68 @@ class UnifiProtect extends utils.Adapter {
 						this.config.statesFilter["motions"],
 						true,
 					);
+
+					const thumbnailImage = `motions.${motionEvent.id}.thumbnail_image`;
+					this.setObjectNotExists(
+						thumbnailImage,
+						{
+							type: "state",
+							common: {
+								name: "manual snapshot url",
+								type: "string",
+								read: true,
+								write: false,
+								role: "value",
+							},
+							native: {},
+						},
+						function () {
+							that.getThumbnail(
+								`e-${motionEvent.id}`,
+								undefined,
+								function (base64ImgString) {
+									that.setState(thumbnailImage, base64ImgString, true);
+								},
+								60,
+								that.config.downloadLastMotionThumbWidth || 640,
+								false,
+								true
+							)
+						}
+					);
+
+					const thumbnailSmallImage = `motions.${motionEvent.id}.thumbnail_image_small`;
+					this.setObjectNotExists(
+						thumbnailSmallImage,
+						{
+							type: "state",
+							common: {
+								name: "manual snapshot url",
+								type: "string",
+								read: true,
+								write: false,
+								role: "value",
+							},
+							native: {},
+						},
+						function () {
+							that.getThumbnail(
+								motionEvent.id,
+								undefined,
+								function (base64ImgString) {
+									that.setState(thumbnailSmallImage, base64ImgString, true);
+								},
+								60,
+								that.config.downloadLastMotionThumbWidth || 640,
+								false,
+								true,
+								true
+							)
+						}
+					);
 				}
 			});
 
-			const thumbnailImage = `motions.${motionEvent.id}.thumbnail_image`;
-			this.setObjectNotExists(
-				thumbnailImage,
-				{
-					type: "state",
-					common: {
-						name: "manual snapshot url",
-						type: "string",
-						read: true,
-						write: false,
-						role: "value",
-					},
-					native: {},
-				},
-				function () {
-					that.getThumbnail(
-						`e-${motionEvent.id}`,
-						undefined,
-						function (base64ImgString) {
-							that.setState(`motions.${motionEvent.id}.thumbnail_image`, base64ImgString, true);
-						},
-						60,
-						that.config.downloadLastMotionThumbWidth || 640,
-						false,
-						true
-					)
-				}
-			);
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1562,11 +1614,41 @@ class UnifiProtect extends utils.Adapter {
 						motionEvents[motionEvents.length - 1].thumbnail,
 						undefined,
 						function (base64ImgString) {
-							that.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
+							that.setState(thumbnailImage, base64ImgString, true);
 						},
 						60,
 						that.config.downloadLastMotionThumbWidth || 640,
 						false,
+						true
+					)
+				}
+			);
+
+			const thumbnailSmallImage = `motions.lastMotion.thumbnail_image_small`;
+			this.setObjectNotExists(
+				thumbnailSmallImage,
+				{
+					type: "state",
+					common: {
+						name: "manual snapshot url",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+				function () {
+					that.getThumbnail(
+						motionEvents[motionEvents.length - 1].id,
+						undefined,
+						function (base64ImgString) {
+							that.setState(thumbnailSmallImage, base64ImgString, true);
+						},
+						60,
+						that.config.downloadLastMotionThumbWidth || 640,
+						false,
+						true,
 						true
 					)
 				}

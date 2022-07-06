@@ -430,10 +430,9 @@ class ProtectUpdateEvents {
 
 		if (this.config.takeSnapshotForLastMotion) {
 			setTimeout(function () {
-				const snapshotUrl = `/unifi-protect/realTimeEvents/smartDetect/${cameraId}_snapshot.jpg`;
 				that.protect.getSnapshot(
 					cameraId,
-					snapshotUrl,
+					undefined,
 					function (base64ImgString) {
 						that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, base64ImgString, true);
 					},
@@ -445,16 +444,28 @@ class ProtectUpdateEvents {
 		}
 
 		if (this.config.downloadLastMotionThumb) {
-			const thumbnailUrl = `/unifi-protect/realTimeEvents/smartDetect/${cameraId}_thumbnail.jpg`;
 			this.protect.getThumbnail(
 				`e-${smartDetectZoneEvent.id}`,
-				thumbnailUrl,
+				undefined,
 				function (base64ImgString) {
 					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, base64ImgString, true);
 				},
 				60,
 				this.config.downloadLastMotionThumbWidth || 640,
 				false,
+				true
+			)
+
+			this.protect.getThumbnail(
+				`${smartDetectZoneEvent.id}`,
+				"test",
+				function (base64ImgString) {
+					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, base64ImgString, true);
+				},
+				60,
+				this.config.downloadLastMotionThumbWidth || 640,
+				false,
+				true,
 				true
 			)
 		}
