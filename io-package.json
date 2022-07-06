@@ -237,7 +237,8 @@
         "downloadLastMotionThumbWidth": 640,
         "takeSnapshotForLastMotion": false,
         "takeSnapshotForLastMotionWidth": 640,
-        "takeSnapshotForLastMotionDelay": 0
+        "takeSnapshotForLastMotionDelay": 0,
+        "takeSnapshotManualWidth": 640
     },
     "objects": [],
     "instanceObjects": []

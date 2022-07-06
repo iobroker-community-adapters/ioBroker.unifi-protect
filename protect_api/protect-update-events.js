@@ -368,7 +368,34 @@ class ProtectUpdateEvents {
 		this.protect.setState("realTimeEvents.lastMotion.timestamp", motionEvent.lastMotion, true);
 		this.protect.setState("realTimeEvents.lastMotion.raw", JSON.stringify(motionEvent), true);
 
-		this.lastMotion[cameraId] = motionEvent.id;
+		if (motionEvent.id) {
+			this.lastMotion[cameraId] = motionEvent.id;
+		}
+
+		this.motionEventHandlerForCam(cameraId, motionEvent);
+	}
+
+	async motionEventHandlerForCam(cameraId, motionEvent) {
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, motionEvent.lastMotion, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.raw`, JSON.stringify(motionEvent), true);
+
+		if (this.config.takeSnapshotForLastMotion) {
+			const that = this;
+
+			setTimeout(function () {
+				const snapshotUrl = `/unifi-protect/realTimeEvents/motion/${cameraId}_snapshot.jpg`;
+				that.protect.getSnapshot(
+					cameraId,
+					snapshotUrl,
+					function (base64ImgString) {
+						that.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, base64ImgString, true);
+					},
+					that.config.takeSnapshotForLastMotionWidth || 640,
+					false,
+					true
+				);
+			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+		}
 	}
 
 	async smartDetectZoneEventHandler(cameraId, smartDetectZoneEvent) {
@@ -388,6 +415,49 @@ class ProtectUpdateEvents {
 		this.protect.setState("realTimeEvents.smartDetectZone.smartDetectTypes", JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
 
 		this.smartDetectZone[cameraId] = smartDetectZoneEvent.id;
+
+		this.smartDetectZoneEventHandlerForCam(cameraId, smartDetectZoneEvent);
+	}
+
+	async smartDetectZoneEventHandlerForCam(cameraId, smartDetectZoneEvent) {
+		const that = this;
+
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, smartDetectZoneEvent.start, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, smartDetectZoneEvent.score, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, smartDetectZoneEvent.id, true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
+		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, JSON.stringify(smartDetectZoneEvent), true);
+
+		if (this.config.takeSnapshotForLastMotion) {
+			setTimeout(function () {
+				const snapshotUrl = `/unifi-protect/realTimeEvents/smartDetect/${cameraId}_snapshot.jpg`;
+				that.protect.getSnapshot(
+					cameraId,
+					snapshotUrl,
+					function (base64ImgString) {
+						that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, base64ImgString, true);
+					},
+					that.config.takeSnapshotForLastMotionWidth || 640,
+					false,
+					true
+				);
+			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+		}
+
+		if (this.config.downloadLastMotionThumb) {
+			const thumbnailUrl = `/unifi-protect/realTimeEvents/smartDetect/${cameraId}_thumbnail.jpg`;
+			this.protect.getThumbnail(
+				`e-${smartDetectZoneEvent.id}`,
+				thumbnailUrl,
+				function (base64ImgString) {
+					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, base64ImgString, true);
+				},
+				60,
+				this.config.downloadLastMotionThumbWidth || 640,
+				false,
+				true
+			)
+		}
 	}
 
 	doorbellEventHandler(doorbellId, ringEvent) {

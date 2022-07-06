@@ -75,6 +75,11 @@ When the adapter crashes or an other Code error happens, this error message that
 * dependencies updates
 * first implementation of realtime updates api
 * lastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents
+* (Scrounger) Button to take manual snapshot added
+* (Scrounger) real time events datapoints for every cam added
+* (Scrounger) take snapshot and thumbnail for real time events added (base64 images)
+* (Scrounger) thumbnail image for list of motion events added (base64 images)
+
 
 ### 0.0.12 (2021-03-14)
 * added smart detections

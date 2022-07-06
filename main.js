@@ -155,6 +155,7 @@ class UnifiProtect extends utils.Adapter {
 	 * @param {ioBroker.State | null | undefined} state
 	 */
 	onStateChange(id, state) {
+
 		if (state) {
 			// The state was changed
 			this.log.silly(
@@ -207,6 +208,25 @@ class UnifiProtect extends utils.Adapter {
 						this.changeSetting(id, state.val);
 						continue;
 					}
+				}
+
+				if (id.includes(`${this.namespace}.cameras.`) && id.includes(`.manualSnapshot`)) {
+					const that = this;
+
+					const camId = id
+						.replace(`${this.namespace}.cameras.`, "")
+						.replace(".manualSnapshot", "");
+
+					const snapshotUrl = `/unifi-protect/manual/${camId}/${new Date().getTime().toString()}.jpg`;
+					this.getSnapshot(
+						camId,
+						snapshotUrl,
+						function () {
+							that.setStateAsync(id.replace(`.manualSnapshot`, `.manualSnapshotUrl`), snapshotUrl, true);
+						},
+						this.config.takeSnapshotManualWidth || 640,
+						true,
+					);
 				}
 			}
 		} else {
@@ -459,6 +479,8 @@ class UnifiProtect extends utils.Adapter {
 							);
 						}
 
+
+
 						if (onReady) {
 							const thumbnailUrlId = `cameras.${camera.id}.lastMotionEvent.thumbnailUrl`;
 							const that = this;
@@ -520,6 +542,45 @@ class UnifiProtect extends utils.Adapter {
 									`cameras.${camera.id}.${sub}`,
 								);
 							}
+
+							// Create Button to take a snapshot
+							const manualSnapshotBtnId = `cameras.${camera.id}.manualSnapshot`;
+							this.setObjectNotExists(
+								manualSnapshotBtnId,
+								{
+									type: "state",
+									common: {
+										name: "take a manual snapshot",
+										type: "boolean",
+										role: "button",
+										read: false,
+										write: true,
+										desc: "Take a snapshot and store it in /vis.0/unifi-protect/"
+									},
+									native: {},
+								},
+								function () {
+									that.subscribeStates(manualSnapshotBtnId)
+								}
+							)
+
+							const manualSnapshotURL = `cameras.${camera.id}.manualSnapshotUrl`;
+							this.setObjectNotExists(
+								manualSnapshotURL,
+								{
+									type: "state",
+									common: {
+										name: "manual snapshot url",
+										type: "string",
+										read: true,
+										write: false,
+										role: "value",
+									},
+									native: {},
+								}
+							);
+
+							this.createCameraRealTimeStates(camera.id);
 						}
 					});
 
@@ -737,6 +798,7 @@ class UnifiProtect extends utils.Adapter {
 		retries = 5,
 		width = 640,
 		visCompatible = false,
+		base64 = false
 	) {
 		const height = width / 1.8;
 		const that = this;
@@ -782,11 +844,20 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						fs.writeFileSync(path, data.read());
-						that.log.debug(
-							`[getThumbnail] thumb stored successfully -> ${path}`,
-						);
-						callback(path);
+						if (base64) {
+							let jpgDataUrlPrefix = 'data:image/png;base64,';
+							let imageBuffer = Buffer.from(data.read());
+							let imageBase64 = imageBuffer.toString('base64');
+							let base64ImgString = jpgDataUrlPrefix + imageBase64;
+
+							callback(base64ImgString);
+						} else {
+							fs.writeFileSync(path, data.read());
+							that.log.debug(
+								`[getThumbnail] thumb stored successfully -> ${path}`,
+							);
+							callback(path);
+						}
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error(
@@ -802,20 +873,26 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
+								base64
 							);
 						}, 1000);
 					}
 				} else {
 					if (!visCompatible) {
-						this.log.error(
-							"[getThumbnail]: Status Code: " + res.statusCode,
-						);
+						if (res.statusCode !== 404) {
+							this.log.error(
+								"[getThumbnail]: Status Code: " + res.statusCode,
+							);
+						}
 					} else {
 						// if refresh interval is very low -> protect needs time to save the image -> supress error message
-						this.log.debug(
-							"[getThumbnail]: Status Code: " + res.statusCode,
-						);
+						if (res.statusCode !== 404) {
+							this.log.error(
+								"[getThumbnail]: Status Code: " + res.statusCode,
+							);
+						}
 					}
+
 					if (retries > 0) {
 						setTimeout(() => {
 							this.getThumbnail(
@@ -825,6 +902,7 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
+								base64
 							);
 						}, 1000);
 					}
@@ -847,6 +925,7 @@ class UnifiProtect extends utils.Adapter {
 		callback,
 		width = 640,
 		visCompatible = false,
+		base64 = false
 	) {
 		const ts = Date.now() * 1000;
 		const height = width / 1.8;
@@ -890,11 +969,20 @@ class UnifiProtect extends utils.Adapter {
 							callback(path);
 						});
 					} else {
-						fs.writeFileSync(path, data.read());
-						that.log.debug(
-							`[getSnapshot] thumb stored successfully -> ${path}`,
-						);
-						callback(path);
+						if (base64) {
+							let jpgDataUrlPrefix = 'data:image/png;base64,';
+							let imageBuffer = Buffer.from(data.read());
+							let imageBase64 = imageBuffer.toString('base64');
+							let base64ImgString = jpgDataUrlPrefix + imageBase64;
+
+							callback(base64ImgString);
+						} else {
+							fs.writeFileSync(path, data.read());
+							that.log.debug(
+								`[getSnapshot] thumb stored successfully -> ${path}`,
+							);
+							callback(path);
+						}
 					}
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
 					this.log.error(
@@ -1256,8 +1344,145 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
+	async createCameraRealTimeStates(cameraId) {
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents`, {
+			type: "channel",
+			common: {
+				name: "realTimeEvents"
+			},
+			native: {},
+		});
+
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion`, {
+			type: "channel",
+			common: {
+				name: "motion"
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.raw`, {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect`, {
+			type: "channel",
+			common: {
+				name: "smartDetect"
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, {
+			type: "state",
+			common: {
+				name: "eventId",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, {
+			type: "state",
+			common: {
+				name: "raw",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, {
+			type: "state",
+			common: {
+				name: "score",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, {
+			type: "state",
+			common: {
+				name: "detectTypes",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, {
+			type: "state",
+			common: {
+				name: "timestamp",
+				type: "number",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+		await this.setObjectNotExistsAsync(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, {
+			type: "state",
+			common: {
+				name: "snapshotUrl",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+	}
+
 	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
+		let that = this;
 		motionEvents.forEach((motionEvent) => {
 			if (onReady)
 				this.createOwnChannel(
@@ -1277,6 +1502,35 @@ class UnifiProtect extends utils.Adapter {
 					);
 				}
 			});
+
+			const thumbnailImage = `motions.${motionEvent.id}.thumbnail_image`;
+			this.setObjectNotExists(
+				thumbnailImage,
+				{
+					type: "state",
+					common: {
+						name: "manual snapshot url",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+				function () {
+					that.getThumbnail(
+						`e-${motionEvent.id}`,
+						undefined,
+						function (base64ImgString) {
+							that.setState(`motions.${motionEvent.id}.thumbnail_image`, base64ImgString, true);
+						},
+						60,
+						that.config.downloadLastMotionThumbWidth || 640,
+						false,
+						true
+					)
+				}
+			);
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1290,6 +1544,35 @@ class UnifiProtect extends utils.Adapter {
 						true,
 					);
 				},
+			);
+
+			const thumbnailImage = `motions.lastMotion.thumbnail_image`;
+			this.setObjectNotExists(
+				thumbnailImage,
+				{
+					type: "state",
+					common: {
+						name: "manual snapshot url",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+				function () {
+					that.getThumbnail(
+						motionEvents[motionEvents.length - 1].thumbnail,
+						undefined,
+						function (base64ImgString) {
+							that.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
+						},
+						60,
+						that.config.downloadLastMotionThumbWidth || 640,
+						false,
+						true
+					)
+				}
 			);
 		}
 		this.processStateChanges(stateArray, this, () => {
