@@ -1385,7 +1385,6 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "raw",
-				type: "json",
 				role: "value",
 				read: true,
 				write: true,
@@ -1426,7 +1425,6 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "raw",
-				type: "json",
 				role: "value",
 				read: true,
 				write: true,
@@ -1448,7 +1446,6 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "detectTypes",
-				type: "json",
 				role: "value",
 				read: true,
 				write: true,
