@@ -1550,10 +1550,20 @@ class UnifiProtect extends utils.Adapter {
 				},
 			);
 
-			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
-			setTimeout(async function () {
-				await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
-			}, debounce);
+			let lastMotionId = await this.getStateAsync('motions.lastMotion.id');
+			if (lastMotionId && lastMotionId.val) {
+				if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
+					await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
+					setTimeout(async function () {
+						await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
+					}, debounce);
+				}
+			} else {
+				await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
+				setTimeout(async function () {
+					await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
+				}, debounce);
+			}
 		}
 		this.processStateChanges(stateArray, this, () => {
 			this.motionsDone = true;
@@ -1579,7 +1589,7 @@ class UnifiProtect extends utils.Adapter {
 
 			let state = await that.getStateAsync(stateId);
 			if (force || !state || state === null || (state && (!state.val || state.val === null))) {
-				that.log.debug(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
+				that.log.silly(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
 				await this.getThumbnail(
 					eventId,
 					undefined,
