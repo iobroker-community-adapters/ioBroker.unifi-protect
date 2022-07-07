@@ -883,7 +883,8 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
-								base64
+								base64,
+								small
 							);
 						}, 1000);
 					}
@@ -912,7 +913,8 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
-								base64
+								base64,
+								small
 							);
 						}, 1000);
 					}
@@ -1495,7 +1497,7 @@ class UnifiProtect extends utils.Adapter {
 				write: true,
 			},
 			native: {},
-		});		
+		});
 	}
 
 	addMotionEvents(motionEvents, onReady) {
