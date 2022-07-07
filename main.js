@@ -1505,6 +1505,8 @@ class UnifiProtect extends utils.Adapter {
 	async addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		let that = this;
+		let debounce = 200;
+
 		motionEvents.forEach(async (motionEvent) => {
 			if (onReady)
 				this.createOwnChannel(
@@ -1525,8 +1527,14 @@ class UnifiProtect extends utils.Adapter {
 				}
 			});
 
-			await this.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
-			await this.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
+			let counter = motionEvents.indexOf(motionEvent) + 1;
+
+			setTimeout(async function () {
+				await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
+				setTimeout(async function () {
+					await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
+				}, counter * (debounce + debounce / 2));
+			}, counter * debounce);
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1542,15 +1550,17 @@ class UnifiProtect extends utils.Adapter {
 				},
 			);
 
-			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail);
-			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
+			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
+			setTimeout(async function () {
+				await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
+			}, debounce);
 		}
 		this.processStateChanges(stateArray, this, () => {
 			this.motionsDone = true;
 		});
 	}
 
-	async getThumbnailBase64(stateId, eventId, small = false) {
+	async getThumbnailBase64(stateId, eventId, small = false, force = false) {
 		try {
 			let that = this;
 			await this.setObjectNotExistsAsync(stateId,
@@ -1568,7 +1578,7 @@ class UnifiProtect extends utils.Adapter {
 			)
 
 			let state = await that.getStateAsync(stateId);
-			if (!state || state === null || (state && (!state.val || state.val === null))) {
+			if (force || !state || state === null || (state && (!state.val || state.val === null))) {
 				that.log.debug(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}'`);
 				await this.getThumbnail(
 					eventId,
