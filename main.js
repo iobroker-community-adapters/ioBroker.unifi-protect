@@ -792,6 +792,8 @@ class UnifiProtect extends utils.Adapter {
 		req.end();
 	}
 
+
+
 	async getThumbnail(
 		thumb,
 		path,
@@ -1500,10 +1502,10 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	addMotionEvents(motionEvents, onReady) {
+	async addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		let that = this;
-		motionEvents.forEach((motionEvent) => {
+		motionEvents.forEach(async (motionEvent) => {
 			if (onReady)
 				this.createOwnChannel(
 					"motions." + motionEvent.id,
@@ -1520,68 +1522,11 @@ class UnifiProtect extends utils.Adapter {
 						this.config.statesFilter["motions"],
 						true,
 					);
-
-					const thumbnailImage = `motions.${motionEvent.id}.thumbnail_image`;
-					this.setObjectNotExists(
-						thumbnailImage,
-						{
-							type: "state",
-							common: {
-								name: "manual snapshot url",
-								type: "string",
-								read: true,
-								write: false,
-								role: "value",
-							},
-							native: {},
-						},
-						function () {
-							that.getThumbnail(
-								`e-${motionEvent.id}`,
-								undefined,
-								function (base64ImgString) {
-									that.setState(thumbnailImage, base64ImgString, true);
-								},
-								60,
-								that.config.downloadLastMotionThumbWidth || 640,
-								false,
-								true
-							)
-						}
-					);
-
-					const thumbnailSmallImage = `motions.${motionEvent.id}.thumbnail_image_small`;
-					this.setObjectNotExists(
-						thumbnailSmallImage,
-						{
-							type: "state",
-							common: {
-								name: "manual snapshot url",
-								type: "string",
-								read: true,
-								write: false,
-								role: "value",
-							},
-							native: {},
-						},
-						function () {
-							that.getThumbnail(
-								motionEvent.id,
-								undefined,
-								function (base64ImgString) {
-									that.setState(thumbnailSmallImage, base64ImgString, true);
-								},
-								60,
-								that.config.downloadLastMotionThumbWidth || 640,
-								false,
-								true,
-								true
-							)
-						}
-					);
 				}
 			});
 
+			await this.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
+			await this.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1597,68 +1542,52 @@ class UnifiProtect extends utils.Adapter {
 				},
 			);
 
-			const thumbnailImage = `motions.lastMotion.thumbnail_image`;
-			this.setObjectNotExists(
-				thumbnailImage,
-				{
-					type: "state",
-					common: {
-						name: "manual snapshot url",
-						type: "string",
-						read: true,
-						write: false,
-						role: "value",
-					},
-					native: {},
-				},
-				function () {
-					that.getThumbnail(
-						motionEvents[motionEvents.length - 1].thumbnail,
-						undefined,
-						function (base64ImgString) {
-							that.setState(thumbnailImage, base64ImgString, true);
-						},
-						60,
-						that.config.downloadLastMotionThumbWidth || 640,
-						false,
-						true
-					)
-				}
-			);
-
-			const thumbnailSmallImage = `motions.lastMotion.thumbnail_image_small`;
-			this.setObjectNotExists(
-				thumbnailSmallImage,
-				{
-					type: "state",
-					common: {
-						name: "manual snapshot url",
-						type: "string",
-						read: true,
-						write: false,
-						role: "value",
-					},
-					native: {},
-				},
-				function () {
-					that.getThumbnail(
-						motionEvents[motionEvents.length - 1].id,
-						undefined,
-						function (base64ImgString) {
-							that.setState(thumbnailSmallImage, base64ImgString, true);
-						},
-						60,
-						that.config.downloadLastMotionThumbWidth || 640,
-						false,
-						true,
-						true
-					)
-				}
-			);
+			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail);
+			await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
 		}
 		this.processStateChanges(stateArray, this, () => {
 			this.motionsDone = true;
 		});
+	}
+
+	async getThumbnailBase64(stateId, eventId, small = false) {
+		try {
+			let that = this;
+			await this.setObjectNotExistsAsync(stateId,
+				{
+					type: "state",
+					common: {
+						name: "motion small thumbnail image",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				}
+			)
+
+			let state = await that.getStateAsync(stateId);
+			if (!state || state === null || (state && (!state.val || state.val === null))) {
+				that.log.debug(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}'`);
+				await this.getThumbnail(
+					eventId,
+					undefined,
+					async function (base64ImgString) {
+						await that.setStateAsync(stateId, base64ImgString, true);
+					},
+					60,
+					this.config.downloadLastMotionThumbWidth || 640,
+					false,
+					true,
+					small
+				)
+			} else {
+				that.log.silly(`[getThumbnailBase64] eventId: ${eventId}: image still downloaded for '${stateId}'`);
+			}
+		} catch (error) {
+			this.log.error(`[getThumbnailBase64] stateId: ${stateId}, eventId: ${eventId}, error: ${error.message}, stack: ${error.stack}`)
+		}
 	}
 
 	deleteOldMotionEvents(motionEvents) {
