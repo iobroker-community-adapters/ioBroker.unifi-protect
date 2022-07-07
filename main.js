@@ -1535,6 +1535,30 @@ class UnifiProtect extends utils.Adapter {
 					await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
 				}, counter * (debounce + debounce / 2));
 			}, counter * debounce);
+
+
+			let cameraName = await this.getStateAsync(`cameras.${motionEvent.camera}.name`);
+			let cameraNameId = `motions.${motionEvent.id}.camera_name`;
+
+			if (cameraName && cameraName.val) {
+				await this.setObjectNotExistsAsync(cameraNameId,
+					{
+						type: "state",
+						common: {
+							name: "camera name",
+							type: "string",
+							read: true,
+							write: false,
+							role: "value",
+						},
+						native: {},
+					},
+					async function () {
+						await that.setStateAsync(cameraNameId, cameraName?.val, true);
+					}
+				)
+			}
+
 		});
 		if (motionEvents.length > 0) {
 			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
@@ -1563,6 +1587,28 @@ class UnifiProtect extends utils.Adapter {
 				setTimeout(async function () {
 					await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
 				}, debounce);
+			}
+
+			let cameraName = await this.getStateAsync(`cameras.${motionEvents[motionEvents.length - 1].camera}.name`);
+			let lastMotionNameId = `motions.lastMotion.camera_name`;
+
+			if (cameraName && cameraName.val) {
+				await this.setObjectNotExistsAsync(lastMotionNameId,
+					{
+						type: "state",
+						common: {
+							name: "camera name",
+							type: "string",
+							read: true,
+							write: false,
+							role: "value",
+						},
+						native: {},
+					},
+					async function () {
+						await that.setStateAsync(lastMotionNameId, cameraName?.val, true);
+					}
+				)
 			}
 		}
 		this.processStateChanges(stateArray, this, () => {
