@@ -1579,7 +1579,7 @@ class UnifiProtect extends utils.Adapter {
 
 			let state = await that.getStateAsync(stateId);
 			if (force || !state || state === null || (state && (!state.val || state.val === null))) {
-				that.log.debug(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}'`);
+				that.log.debug(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
 				await this.getThumbnail(
 					eventId,
 					undefined,

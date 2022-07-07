@@ -444,30 +444,8 @@ class ProtectUpdateEvents {
 		}
 
 		if (this.config.downloadLastMotionThumb) {
-			this.protect.getThumbnail(
-				`e-${smartDetectZoneEvent.id}`,
-				undefined,
-				function (base64ImgString) {
-					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, base64ImgString, true);
-				},
-				60,
-				this.config.downloadLastMotionThumbWidth || 640,
-				false,
-				true
-			)
-
-			this.protect.getThumbnail(
-				`${smartDetectZoneEvent.id}`,
-				"test",
-				function (base64ImgString) {
-					that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, base64ImgString, true);
-				},
-				60,
-				this.config.downloadLastMotionThumbWidth || 640,
-				false,
-				true,
-				true
-			)
+			await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, false, true);
+			await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, true);
 		}
 	}
 
