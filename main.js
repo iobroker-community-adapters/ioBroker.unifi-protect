@@ -1502,7 +1502,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	async addMotionEvents(motionEvents, onReady) {
+	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		let that = this;
 		let debounce = 200;
@@ -1529,35 +1529,14 @@ class UnifiProtect extends utils.Adapter {
 
 			let counter = motionEvents.indexOf(motionEvent) + 1;
 
-			setTimeout(async function () {
-				await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
-				setTimeout(async function () {
-					await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
-				}, counter * (debounce + debounce / 2));
-			}, counter * debounce);
+			// setTimeout(async function () {
+			// 	await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
+			// 	setTimeout(async function () {
+			// 		await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
+			// 	}, counter * (debounce + debounce / 2));
+			// }, counter * debounce);
 
-
-			let cameraName = await this.getStateAsync(`cameras.${motionEvent.camera}.name`);
-			let cameraNameId = `motions.${motionEvent.id}.camera_name`;
-
-			if (cameraName && cameraName.val) {
-				await this.setObjectNotExistsAsync(cameraNameId,
-					{
-						type: "state",
-						common: {
-							name: "camera name",
-							type: "string",
-							read: true,
-							write: false,
-							role: "value",
-						},
-						native: {},
-					},
-					async function () {
-						await that.setStateAsync(cameraNameId, cameraName?.val, true);
-					}
-				)
-			}
+			this.addMotionEventsCameraName(`motions.${motionEvent.id}.camera_name`, motionEvent.camera);
 
 		});
 		if (motionEvents.length > 0) {
@@ -1574,45 +1553,49 @@ class UnifiProtect extends utils.Adapter {
 				},
 			);
 
-			let lastMotionId = await this.getStateAsync('motions.lastMotion.id');
-			if (lastMotionId && lastMotionId.val) {
-				if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
-					await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
-					setTimeout(async function () {
-						await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
-					}, debounce);
-				}
-			} else {
-				await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
-				setTimeout(async function () {
-					await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
-				}, debounce);
-			}
+			// let lastMotionId = await this.getStateAsync('motions.lastMotion.id');
+			// if (lastMotionId && lastMotionId.val) {
+			// 	if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
+			// 		await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
+			// 		setTimeout(async function () {
+			// 			await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
+			// 		}, debounce);
+			// 	}
+			// } else {
+			// 	await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
+			// 	setTimeout(async function () {
+			// 		await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
+			// 	}, debounce);
+			// }
 
-			let cameraName = await this.getStateAsync(`cameras.${motionEvents[motionEvents.length - 1].camera}.name`);
-			let lastMotionNameId = `motions.lastMotion.camera_name`;
-
-			if (cameraName && cameraName.val) {
-				await this.setObjectNotExistsAsync(lastMotionNameId,
-					{
-						type: "state",
-						common: {
-							name: "camera name",
-							type: "string",
-							read: true,
-							write: false,
-							role: "value",
-						},
-						native: {},
-					},
-					async function () {
-						await that.setStateAsync(lastMotionNameId, cameraName?.val, true);
-					}
-				)
-			}
+			this.addMotionEventsCameraName('motions.lastMotion.camera_name', motionEvents[motionEvents.length - 1].camera);
 		}
 		this.processStateChanges(stateArray, this, () => {
 			this.motionsDone = true;
+		});
+	}
+
+	addMotionEventsCameraName(stateId, cameraId) {
+		let that = this;
+
+		this.getState(`cameras.${cameraId}.name`, function (error, cameraName) {
+			if (cameraName && cameraName.val) {
+				that.setObjectNotExists(stateId, {
+					type: "state",
+					common: {
+						name: "camera name",
+						type: "string",
+						read: true,
+						write: false,
+						role: "value",
+					},
+					native: {},
+				},
+					function () {
+						that.setState(stateId, cameraName, true);
+					}
+				)
+			}
 		});
 	}
 
