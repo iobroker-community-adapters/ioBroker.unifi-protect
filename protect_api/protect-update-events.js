@@ -443,10 +443,12 @@ class ProtectUpdateEvents {
 			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 		}
 
-		// if (this.config.downloadLastMotionThumb) {
-		// 	await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, false, true);
-		// 	await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, true);
-		// }
+		if (this.config.downloadLastMotionThumb) {
+			this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, true, function () {
+				// thumbnail small is only ready when thumbnail is ready
+				that.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, undefined);
+			});
+		}
 	}
 
 	doorbellEventHandler(doorbellId, ringEvent) {

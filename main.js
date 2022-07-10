@@ -1447,6 +1447,7 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "detectTypes",
+				type: "string",
 				role: "value",
 				read: true,
 				write: true,
@@ -1615,14 +1616,15 @@ class UnifiProtect extends utils.Adapter {
 				}, function () {
 					that.getState(stateId, function (err, state) {
 						if (force || !state || state === null || (state && (!state.val || state.val === null))) {
-							that.log.debug(`[getThumbnailBase64] download ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
+							that.log.silly(`[getThumbnailBase64] download ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
 
 							that.getThumbnail(
 								eventId,
 								undefined,
 								function (base64ImgString) {
-									that.log.debug(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
+									that.log.silly(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
 									that.setState(stateId, base64ImgString, true);
+
 
 									if (callback) callback(true);
 								},
