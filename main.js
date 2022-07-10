@@ -801,8 +801,7 @@ class UnifiProtect extends utils.Adapter {
 		retries = 5,
 		width = 640,
 		visCompatible = false,
-		base64 = false,
-		small = false
+		base64 = false
 	) {
 		const height = width / 1.8;
 		const that = this;
@@ -821,12 +820,12 @@ class UnifiProtect extends utils.Adapter {
 				"X-CSRF-Token": this.csrfToken,
 				Cookie: this.cookies,
 			};
-			if (small) {
-				options.path =
-					this.paths.thumbSmallUnifiOS.replace('{0}', thumb);
-			} else {
+			if (thumb.startsWith('e-')) {
 				options.path =
 					this.paths.thumbUnifiOS + `${thumb}?h=${height}&w=${width}`;
+			} else {
+				options.path =
+					this.paths.thumbSmallUnifiOS.replace('{0}', thumb);
 			}
 
 		} else {
@@ -838,8 +837,6 @@ class UnifiProtect extends utils.Adapter {
 				this.paths.thumb +
 				`${thumb}?accessKey=${apiAccessKey}&h=${height}&w=${width}`;
 		}
-
-		if (small && path === "test") this.log.warn(options.path);
 
 		const req = https.request(options, (res) => {
 			const data = new Stream();
@@ -885,8 +882,7 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
-								base64,
-								small
+								base64
 							);
 						}, 1000);
 					}
@@ -915,8 +911,7 @@ class UnifiProtect extends utils.Adapter {
 								retries - 1,
 								width,
 								visCompatible,
-								base64,
-								small
+								base64
 							);
 						}, 1000);
 					}
@@ -1529,12 +1524,10 @@ class UnifiProtect extends utils.Adapter {
 
 			let counter = motionEvents.indexOf(motionEvent) + 1;
 
-			// setTimeout(async function () {
-			// 	await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
-			// 	setTimeout(async function () {
-			// 		await that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, true);
-			// 	}, counter * (debounce + debounce / 2));
-			// }, counter * debounce);
+			this.setTimeout(function () {
+				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
+				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id);
+			}, counter * debounce);
 
 			this.addMotionEventsCameraName(`motions.${motionEvent.id}.camera_name`, motionEvent.camera);
 
@@ -1599,10 +1592,11 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	async getThumbnailBase64(stateId, eventId, small = false, force = false) {
+	getThumbnailBase64(stateId, eventId, force = false) {
 		try {
 			let that = this;
-			await this.setObjectNotExistsAsync(stateId,
+
+			this.setObjectNotExists(stateId,
 				{
 					type: "state",
 					common: {
@@ -1613,27 +1607,28 @@ class UnifiProtect extends utils.Adapter {
 						role: "value",
 					},
 					native: {},
+				}, function () {
+					that.getState(stateId, function (err, state) {
+						if (force || !state || state === null || (state && (!state.val || state.val === null))) {
+							that.log.debug(`[getThumbnailBase64] download ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
+
+							that.getThumbnail(
+								eventId,
+								undefined,
+								function (base64ImgString) {
+									that.setState(stateId, base64ImgString, true);
+								},
+								60,
+								that.config.downloadLastMotionThumbWidth || 640,
+								false,
+								true,
+							)
+						} else {
+							that.log.debug(`[getThumbnailBase64] eventId: ${eventId}: image still downloaded for '${stateId}'`);
+						}
+					})
 				}
 			)
-
-			let state = await that.getStateAsync(stateId);
-			if (force || !state || state === null || (state && (!state.val || state.val === null))) {
-				that.log.silly(`[getThumbnailBase64] download ${small ? 'small thumbnail' : 'thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
-				await this.getThumbnail(
-					eventId,
-					undefined,
-					async function (base64ImgString) {
-						await that.setStateAsync(stateId, base64ImgString, true);
-					},
-					60,
-					this.config.downloadLastMotionThumbWidth || 640,
-					false,
-					true,
-					small
-				)
-			} else {
-				that.log.silly(`[getThumbnailBase64] eventId: ${eventId}: image still downloaded for '${stateId}'`);
-			}
 		} catch (error) {
 			this.log.error(`[getThumbnailBase64] stateId: ${stateId}, eventId: ${eventId}, error: ${error.message}, stack: ${error.stack}`)
 		}
