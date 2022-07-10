@@ -1546,20 +1546,17 @@ class UnifiProtect extends utils.Adapter {
 				},
 			);
 
-			// let lastMotionId = await this.getStateAsync('motions.lastMotion.id');
-			// if (lastMotionId && lastMotionId.val) {
-			// 	if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
-			// 		await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
-			// 		setTimeout(async function () {
-			// 			await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
-			// 		}, debounce);
-			// 	}
-			// } else {
-			// 	await this.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, false, true);
-			// 	setTimeout(async function () {
-			// 		await that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, true);
-			// 	}, debounce);
-			// }
+			this.getState('motions.lastMotion.id', function (err, lastMotionId) {
+				if (lastMotionId && lastMotionId.val) {
+					if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
+						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true);
+						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
+					}
+				} else {
+					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true);
+					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
+				}
+			})
 
 			this.addMotionEventsCameraName('motions.lastMotion.camera_name', motionEvents[motionEvents.length - 1].camera);
 		}
@@ -1624,7 +1621,7 @@ class UnifiProtect extends utils.Adapter {
 								true,
 							)
 						} else {
-							that.log.debug(`[getThumbnailBase64] eventId: ${eventId}: image still downloaded for '${stateId}'`);
+							that.log.silly(`[getThumbnailBase64] eventId: ${eventId}: ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} still downloaded for '${stateId}'`);
 						}
 					})
 				}
