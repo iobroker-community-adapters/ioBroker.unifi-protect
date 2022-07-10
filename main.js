@@ -1625,8 +1625,7 @@ class UnifiProtect extends utils.Adapter {
 									that.log.silly(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
 									that.setState(stateId, base64ImgString, true);
 
-
-									if (callback) callback(true);
+									if (callback) callback(base64ImgString);
 								},
 								60,
 								that.config.downloadLastMotionThumbWidth || 640,
