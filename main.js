@@ -854,7 +854,7 @@ class UnifiProtect extends utils.Adapter {
 						});
 					} else {
 						if (base64) {
-							let jpgDataUrlPrefix = 'data:image/png;base64,';
+							let jpgDataUrlPrefix = `data:${res.headers["content-type"]};base64,`;
 							let imageBuffer = Buffer.from(data.read());
 							let imageBase64 = imageBuffer.toString('base64');
 							let base64ImgString = jpgDataUrlPrefix + imageBase64;
@@ -1384,6 +1384,7 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "raw",
+				type: "string",
 				role: "value",
 				read: true,
 				write: true,
@@ -1424,6 +1425,7 @@ class UnifiProtect extends utils.Adapter {
 			type: "state",
 			common: {
 				name: "raw",
+				type: "string",
 				role: "value",
 				read: true,
 				write: true,
@@ -1500,7 +1502,7 @@ class UnifiProtect extends utils.Adapter {
 	addMotionEvents(motionEvents, onReady) {
 		let stateArray = [];
 		let that = this;
-		let debounce = 200;
+		let debounce = 300;
 
 		motionEvents.forEach(async (motionEvent) => {
 			if (onReady)
@@ -1525,8 +1527,10 @@ class UnifiProtect extends utils.Adapter {
 			let counter = motionEvents.indexOf(motionEvent) + 1;
 
 			this.setTimeout(function () {
-				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail);
-				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id);
+				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail, false, function () {
+					// thumbnail small is only ready when thumbnail is ready
+					that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, false, undefined);
+				});
 			}, counter * debounce);
 
 			this.addMotionEventsCameraName(`motions.${motionEvent.id}.camera_name`, motionEvent.camera);
@@ -1549,14 +1553,18 @@ class UnifiProtect extends utils.Adapter {
 			this.getState('motions.lastMotion.id', function (err, lastMotionId) {
 				if (lastMotionId && lastMotionId.val) {
 					if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
-						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true);
-						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
+						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
+							// thumbnail small is only ready when thumbnail is ready
+							that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
+						});
 					}
 				} else {
-					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true);
-					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true);
+					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
+						// thumbnail small is only ready when thumbnail is ready
+						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
+					});
 				}
-			})
+			});
 
 			this.addMotionEventsCameraName('motions.lastMotion.camera_name', motionEvents[motionEvents.length - 1].camera);
 		}
@@ -1589,7 +1597,7 @@ class UnifiProtect extends utils.Adapter {
 		});
 	}
 
-	getThumbnailBase64(stateId, eventId, force = false) {
+	getThumbnailBase64(stateId, eventId, force, callback) {
 		try {
 			let that = this;
 
@@ -1613,12 +1621,15 @@ class UnifiProtect extends utils.Adapter {
 								eventId,
 								undefined,
 								function (base64ImgString) {
+									that.log.debug(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
 									that.setState(stateId, base64ImgString, true);
+
+									if (callback) callback(true);
 								},
 								60,
 								that.config.downloadLastMotionThumbWidth || 640,
 								false,
-								true,
+								true
 							)
 						} else {
 							that.log.silly(`[getThumbnailBase64] eventId: ${eventId}: ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} still downloaded for '${stateId}'`);

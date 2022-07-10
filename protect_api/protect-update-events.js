@@ -405,7 +405,7 @@ class ProtectUpdateEvents {
 			return;
 		}
 
-		this.log.debug(`smartDetectTypes: ${smartDetectZoneEvent.smartDetectTypes} for ${this.protectApi.getFullNameById(cameraId)}`);
+		this.log.debug(`smartDetectTypes: ${smartDetectZoneEvent.smartDetectTypes} for ${this.protectApi.getFullNameById(cameraId)} (eventId: ${smartDetectZoneEvent.id})`);
 
 		this.protect.setState("realTimeEvents.smartDetectZone.camera", cameraId, true);
 		this.protect.setState("realTimeEvents.smartDetectZone.timestamp", smartDetectZoneEvent.start, true);
@@ -443,10 +443,10 @@ class ProtectUpdateEvents {
 			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
 		}
 
-		if (this.config.downloadLastMotionThumb) {
-			await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, false, true);
-			await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, true);
-		}
+		// if (this.config.downloadLastMotionThumb) {
+		// 	await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, false, true);
+		// 	await this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, true);
+		// }
 	}
 
 	doorbellEventHandler(doorbellId, ringEvent) {
