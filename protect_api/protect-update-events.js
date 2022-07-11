@@ -376,25 +376,30 @@ class ProtectUpdateEvents {
 	}
 
 	async motionEventHandlerForCam(cameraId, motionEvent) {
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, motionEvent.lastMotion, true);
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.raw`, JSON.stringify(motionEvent), true);
+		try {
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.timestamp`, motionEvent.lastMotion, true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.raw`, JSON.stringify(motionEvent), true);
 
-		if (this.config.takeSnapshotForLastMotion) {
-			const that = this;
+			if (this.config.takeSnapshotForLastMotion) {
+				const that = this;
 
-			setTimeout(function () {
-				const snapshotUrl = `/unifi-protect/realTimeEvents/motion/${cameraId}_snapshot.jpg`;
-				that.protect.getSnapshot(
-					cameraId,
-					snapshotUrl,
-					function (base64ImgString) {
-						that.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, base64ImgString, true);
-					},
-					that.config.takeSnapshotForLastMotionWidth || 640,
-					false,
-					true
-				);
-			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+				setTimeout(function () {
+					const snapshotUrl = `/unifi-protect/realTimeEvents/motion/${cameraId}_snapshot.jpg`;
+					that.protect.getSnapshot(
+						cameraId,
+						snapshotUrl,
+						function (base64ImgString) {
+							that.protect.setState(`cameras.${cameraId}.realTimeEvents.motion.snapshot`, base64ImgString, true);
+							that.copySnapshotToLastMotion(base64ImgString);
+						},
+						that.config.takeSnapshotForLastMotionWidth || 640,
+						false,
+						true
+					);
+				}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+			}
+		} catch (error) {
+			this.log.error(`[motionEventHandlerForCam] error: ${error.message}, stack: ${error.stack}`)
 		}
 	}
 
@@ -420,38 +425,43 @@ class ProtectUpdateEvents {
 	}
 
 	async smartDetectZoneEventHandlerForCam(cameraId, smartDetectZoneEvent) {
-		const that = this;
+		try {
+			const that = this;
 
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, smartDetectZoneEvent.start, true);
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, smartDetectZoneEvent.score, true);
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, smartDetectZoneEvent.id, true);
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
-		this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, JSON.stringify(smartDetectZoneEvent), true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.timestamp`, smartDetectZoneEvent.start, true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.score`, smartDetectZoneEvent.score, true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.eventId`, smartDetectZoneEvent.id, true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.detectTypes`, JSON.stringify(smartDetectZoneEvent.smartDetectTypes), true);
+			this.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.raw`, JSON.stringify(smartDetectZoneEvent), true);
 
-		if (this.config.takeSnapshotForLastMotion) {
-			setTimeout(function () {
-				that.protect.getSnapshot(
-					cameraId,
-					undefined,
-					function (base64ImgString) {
-						that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, base64ImgString, true);
-					},
-					that.config.takeSnapshotForLastMotionWidth || 640,
-					false,
-					true
-				);
-			}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
-		}
+			if (this.config.takeSnapshotForLastMotion) {
+				setTimeout(function () {
+					that.protect.getSnapshot(
+						cameraId,
+						undefined,
+						function (base64ImgString) {
+							that.protect.setState(`cameras.${cameraId}.realTimeEvents.smartDetect.snapshot`, base64ImgString, true);
+							that.copySnapshotToLastMotion(base64ImgString);
+						},
+						that.config.takeSnapshotForLastMotionWidth || 640,
+						false,
+						true
+					);
+				}, that.config.takeSnapshotForLastMotionDelay * 1000 || 0);
+			}
 
-		if (this.config.downloadLastMotionThumb) {
-			this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, true, function (base64ImgString) {
-				that.protect.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
+			if (this.config.downloadLastMotionThumb) {
+				this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, true, function (base64ImgString) {
+					that.protect.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
 
-				// thumbnail small is only ready when thumbnail is ready
-				that.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, function (base64ImgString) {
-					that.protect.setState(`motions.lastMotion.thumbnail_image_small`, base64ImgString, true);
+					// thumbnail small is only ready when thumbnail is ready
+					that.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, function (base64ImgString) {
+						that.protect.setState(`motions.lastMotion.thumbnail_image_small`, base64ImgString, true);
+					});
 				});
-			});
+			}
+		} catch (error) {
+			this.log.error(`[smartDetectZoneEventHandlerForCam] error: ${error.message}, stack: ${error.stack}`)
 		}
 	}
 
@@ -493,6 +503,27 @@ class ProtectUpdateEvents {
 		if (this.eventsTimer) {
 			clearTimeout(this.eventsTimer);
 		}
+	}
+
+	async copySnapshotToLastMotion(base64Image) {
+		let lastMotionId = 'motions.lastMotion.snapshot';
+
+		await this.protect.setObjectNotExistsAsync(
+			lastMotionId,
+			{
+				type: "state",
+				common: {
+					name: "motion small thumbnail image",
+					type: "string",
+					read: true,
+					write: false,
+					role: "value",
+				},
+				native: {},
+			}
+		)
+
+		await this.protect.setStateAsync(lastMotionId, base64Image, true);
 	}
 
 }
