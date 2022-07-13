@@ -767,6 +767,7 @@ class UnifiProtect extends utils.Adapter {
 							}
 						});
 					newMotionEvents.reverse();
+
 					this.deleteOldMotionEvents(newMotionEvents);
 					this.addMotionEvents(newMotionEvents, onReady);
 				} else if (res.statusCode == 401 || res.statusCode == 403) {
@@ -885,6 +886,9 @@ class UnifiProtect extends utils.Adapter {
 								base64
 							);
 						}, 1000);
+					} else {
+						that.log.debug(`[getThumbnail] max. retries reached for ${thumb}`);
+						callback(null);
 					}
 				} else {
 					if (!visCompatible) {
@@ -914,6 +918,9 @@ class UnifiProtect extends utils.Adapter {
 								base64
 							);
 						}, 1000);
+					} else {
+						that.log.debug(`[getThumbnail] max. retries reached for ${thumb}`);
+						callback(null);
 					}
 				}
 			});
@@ -1501,77 +1508,95 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	addMotionEvents(motionEvents, onReady) {
-		let stateArray = [];
-		let that = this;
-		let debounce = 300;
+		try {
+			let stateArray = [];
+			let that = this;
+			let debounce = 300;
 
-		motionEvents.forEach(async (motionEvent) => {
-			if (onReady)
-				this.createOwnChannel(
-					"motions." + motionEvent.id,
-					motionEvent.score,
+			motionEvents.forEach(async (motionEvent) => {
+				if (onReady)
+					that.createOwnChannel(
+						"motions." + motionEvent.id,
+						motionEvent.score,
+					);
+
+				Object.entries(motionEvent).forEach(([key, value]) => {
+					if (that.config.getMotions) {
+						stateArray = that.createOwnState(
+							"motions." + motionEvent.id + "." + key,
+							value,
+							key,
+							stateArray,
+							that.config.statesFilter["motions"],
+							true,
+						);
+					}
+				});
+
+				let counter = motionEvents.indexOf(motionEvent) + 1;
+
+				that.setTimeout(function () {
+					that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail, false, function () {
+						// thumbnail small is only ready when thumbnail is ready
+						that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, false, undefined);
+					});
+				}, counter * debounce);
+
+				that.addMotionEventsCameraName(`motions.${motionEvent.id}.camera_name`, motionEvent.camera);
+
+			});
+			if (motionEvents.length > 0) {
+				Object.entries(motionEvents[motionEvents.length - 1]).forEach(
+					([key, value]) => {
+						stateArray = that.createOwnState(
+							"motions.lastMotion." + key,
+							value,
+							key,
+							stateArray,
+							that.config.statesFilter["motions"],
+							true,
+						);
+					},
 				);
 
-			Object.entries(motionEvent).forEach(([key, value]) => {
-				if (this.config.getMotions) {
-					stateArray = this.createOwnState(
-						"motions." + motionEvent.id + "." + key,
-						value,
-						key,
-						stateArray,
-						this.config.statesFilter["motions"],
-						true,
-					);
+				if (that.config.downloadLastMotionThumb) {
+					that.getState(`motions.lastMotion.thumbnail_image`, function (err, thumbState) {
+						if (thumbState && thumbState.val && thumbState.lc) {
+							if (thumbState.lc < motionEvents[motionEvents.length - 1].end || thumbState.lc < motionEvents[motionEvents.length - 1].timestamp || onReady) {
+								that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
+									// thumbnail small is only ready when thumbnail is ready
+									that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
+								});
+							} else {
+								that.getState(`motions.lastMotion.end`, function (err, endState) {
+									if (endState && endState.val && endState.lc) {
+										if (thumbState.ts < endState.lc || thumbState.ts < motionEvents[motionEvents.length - 1].timestamp) {
+											that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
+												// thumbnail small is only ready when thumbnail is ready
+												that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
+											});
+										}
+									}
+								});
+							}
+						} else {
+							that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
+								// thumbnail small is only ready when thumbnail is ready
+								that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
+							});
+						}
+					})
 				}
+
+				that.addMotionEventsCameraName('motions.lastMotion.camera_name', motionEvents[motionEvents.length - 1].camera);
+			}
+
+			that.processStateChanges(stateArray, that, () => {
+				that.motionsDone = true;
 			});
-
-			let counter = motionEvents.indexOf(motionEvent) + 1;
-
-			this.setTimeout(function () {
-				that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image`, motionEvent.thumbnail, false, function () {
-					// thumbnail small is only ready when thumbnail is ready
-					that.getThumbnailBase64(`motions.${motionEvent.id}.thumbnail_image_small`, motionEvent.id, false, undefined);
-				});
-			}, counter * debounce);
-
-			this.addMotionEventsCameraName(`motions.${motionEvent.id}.camera_name`, motionEvent.camera);
-
-		});
-		if (motionEvents.length > 0) {
-			Object.entries(motionEvents[motionEvents.length - 1]).forEach(
-				([key, value]) => {
-					stateArray = this.createOwnState(
-						"motions.lastMotion." + key,
-						value,
-						key,
-						stateArray,
-						this.config.statesFilter["motions"],
-						true,
-					);
-				},
-			);
-
-			this.getState('motions.lastMotion.id', function (err, lastMotionId) {
-				if (lastMotionId && lastMotionId.val) {
-					if (lastMotionId.val !== motionEvents[motionEvents.length - 1].id) {
-						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
-							// thumbnail small is only ready when thumbnail is ready
-							that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
-						});
-					}
-				} else {
-					that.getThumbnailBase64(`motions.lastMotion.thumbnail_image`, motionEvents[motionEvents.length - 1].thumbnail, true, function () {
-						// thumbnail small is only ready when thumbnail is ready
-						that.getThumbnailBase64(`motions.lastMotion.thumbnail_image_small`, motionEvents[motionEvents.length - 1].id, true, undefined);
-					});
-				}
-			});
-
-			this.addMotionEventsCameraName('motions.lastMotion.camera_name', motionEvents[motionEvents.length - 1].camera);
+		} catch (error) {
+			this.log.error(`[addMotionEvents] error: ${error.message}, stack: ${error.stack}`)
 		}
-		this.processStateChanges(stateArray, this, () => {
-			this.motionsDone = true;
-		});
 	}
 
 	addMotionEventsCameraName(stateId, cameraId) {
@@ -1616,16 +1641,18 @@ class UnifiProtect extends utils.Adapter {
 				}, function () {
 					that.getState(stateId, function (err, state) {
 						if (force || !state || state === null || (state && (!state.val || state.val === null))) {
-							that.log.silly(`[getThumbnailBase64] download ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
+							that.log.debug(`[getThumbnailBase64] download ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} for event '${eventId}' (stateId: '${stateId}')`);
 
 							that.getThumbnail(
 								eventId,
 								undefined,
 								function (base64ImgString) {
-									that.log.silly(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
-									that.setState(stateId, base64ImgString, true);
+									let result = base64ImgString;
 
-									if (callback) callback(base64ImgString);
+									that.log.silly(`[getThumbnailBase64] ${eventId.startsWith('e-') ? 'thumbnail' : 'small thumbnail'} downloaded for event '${eventId}' (stateId: '${stateId}')`);
+									that.setState(stateId, result, true);
+
+									if (callback) callback(result);
 								},
 								60,
 								that.config.downloadLastMotionThumbWidth || 640,

@@ -453,10 +453,13 @@ class ProtectUpdateEvents {
 			if (this.config.downloadLastMotionThumb) {
 				this.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail`, `e-${smartDetectZoneEvent.id}`, true, function (base64ImgString) {
 					that.protect.setState(`motions.lastMotion.thumbnail_image`, base64ImgString, true);
+					that.protect.log.debug(`[smartDetectZoneEventHandlerForCam] thumbnail for last motion set (event id: ${smartDetectZoneEvent.id})`);
 
 					// thumbnail small is only ready when thumbnail is ready
 					that.protect.getThumbnailBase64(`cameras.${cameraId}.realTimeEvents.smartDetect.thumbnail_small`, smartDetectZoneEvent.id, true, function (base64ImgString) {
 						that.protect.setState(`motions.lastMotion.thumbnail_image_small`, base64ImgString, true);
+
+						that.protect.log.debug(`[smartDetectZoneEventHandlerForCam] small thumbnail for last motion set (event id: ${smartDetectZoneEvent.id})`);
 					});
 				});
 			}
