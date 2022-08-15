@@ -38,7 +38,7 @@ class UnifiProtect extends utils.Adapter {
 		this.writeables = [
 			"name",
 			"isRtspEnabled",
-            "chimeDuration",
+			"chimeDuration",
 			"ledSettings.isEnabled",
 			"osdSettings.isNameEnabled",
 			"osdSettings.isDebugEnabled",
