@@ -1677,8 +1677,9 @@ class UnifiProtect extends utils.Adapter {
 			if (states !== undefined) {
 				states.forEach((state) => {
 					const found = state._id.match(
-						/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)*$/i,
+						/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9_]*)*$/i,
 					);
+
 					if (found != null && found.groups !== undefined) {
 						let isincur = false;
 						for (let i = 0; i < motionEvents.length; i++) {
@@ -1699,7 +1700,7 @@ class UnifiProtect extends utils.Adapter {
 			if (channels !== undefined) {
 				channels.forEach((channel) => {
 					const found = channel._id.match(
-						/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9]*)*$/i,
+						/motions\.(?<motionid>[a-z0-9]+)(\.[a-z0-9_]*)*$/i,
 					);
 					if (found != null && found.groups !== undefined) {
 						let isincur = false;
