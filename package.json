@@ -53,6 +53,7 @@
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit",
     "test:integration": "mocha test/integration --exit",
+	"lint": "eslint",
     "release": "release-script"
   },
   "bugs": {
