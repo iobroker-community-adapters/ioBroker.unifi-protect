@@ -7,7 +7,7 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
-const tools = require(utils.controllerDir + "/lib/tools");
+const tools = require("./lib/tools");
 const https = require("https");
 const Stream = require("stream").Transform;
 const fs = require("fs");
