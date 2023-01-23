@@ -1,6 +1,6 @@
 {
   "name": "iobroker.unifi-protect",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "unifi-protect",
   "author": {
     "name": "Peter Baumert",
@@ -49,11 +49,11 @@
   },
   "main": "main.js",
   "scripts": {
-	"test": "npm run test:package && npm run test:unit",
+    "test": "npm run test:package && npm run test:unit",
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit",
     "test:integration": "mocha test/integration --exit",
-	"lint": "eslint",
+    "lint": "eslint",
     "release": "release-script"
   },
   "bugs": {
