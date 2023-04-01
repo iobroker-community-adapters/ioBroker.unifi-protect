@@ -22,7 +22,7 @@
     "url": "https://github.com/peterbaumert/ioBroker.unifi-protect"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.6.7",
+    "@iobroker/adapter-core": "^2.6.8",
     "abort-controller": "^3.0.0",
     "node-fetch": "^2.6.8",
     "ws": "^8.12.1"
