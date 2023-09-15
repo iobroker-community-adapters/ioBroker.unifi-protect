@@ -1,245 +1,210 @@
 {
-    "common": {
-        "name": "unifi-protect",
-        "version": "0.0.12",
-        "news": {
-            "0.0.12": {
-                "en": "added smart detections\nfixed some lastMotion stuff\nadded UnifiOs Support for CloudKey",
-                "de": "intelligente Erkennungen hinzugefügt\nEinige lastMotion-Probleme wurden behoben\nUnifiOs-Unterstützung für CloudKey hinzugefügt",
-                "ru": "добавлены умные детекции\nисправлены некоторые вещи lastMotion\nдобавлена поддержка UnifiOs для CloudKey",
-                "pt": "adicionou detecções inteligentes\nconsertou algumas coisas do lastMotion\nadicionado Suporte UnifiOs para CloudKey",
-                "nl": "slimme detecties toegevoegd\nwat lastMotion-dingen opgelost\nUnifiOs-ondersteuning toegevoegd voor CloudKey",
-                "fr": "ajout de détections intelligentes\ncorrigé des trucs lastMotion\nAjout de la prise en charge UnifiOs pour CloudKey",
-                "it": "aggiunto rilevamenti intelligenti\nrisolto alcune cose lastMotion\naggiunto il supporto UnifiOs per CloudKey",
-                "es": "agregadas detecciones inteligentes\narreglado algunas cosas de lastMotion\nSe agregó soporte UnifiOs para CloudKey",
-                "pl": "dodano inteligentne wykrywanie\nnaprawiono kilka rzeczy w lastMotion\ndodano obsługę UnifiOs dla CloudKey",
-                "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持"
-            },
-            "0.0.11": {
-                "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
-                "de": "* Admin-Oberfläche ein wenig geändert\r\n* Beschreibung für Port hinzugefügt\r\n* UDM Pro beschreibbare Zustände behoben",
-                "ru": "* немного изменил интерфейс администратора\r\n* добавлено описание порта\r\n* исправлены состояния записи UDM Pro",
-                "pt": "* mudou a interface do administrador um pouco\r\n* descrição adicionada para a porta\r\n* estados graváveis do UDM Pro corrigidos",
-                "nl": "* Heeft de beheerdersinterface een beetje gewijzigd\r\n* Toegevoegde beschrijving voor poort\r\n* vaste UDM Pro beschrijfbare statussen",
-                "fr": "* interface d'administration un peu modifiée\r\n* description ajoutée pour le port\r\n* états inscriptibles UDM Pro fixes",
-                "it": "* ha cambiato leggermente l'interfaccia di amministrazione\r\n* aggiunta descrizione per la porta\r\n* stati scrivibili fissi di UDM Pro",
-                "es": "* Cambió un poco la interfaz de administrador\r\n* descripción agregada para el puerto\r\n* estados de escritura UDM Pro fijos",
-                "pl": "* zmieniono nieco interfejs administratora\r\n* dodano opis portu\r\n* naprawiono stany zapisu UDM Pro",
-                "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态"
-            },
-            "0.0.10": {
-                "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
-                "de": "* Travis CI für Integrationstests behoben\r\n* Verwenden Sie tatsächlich die letzte x-Bewegungseinstellung",
-                "ru": "* travis ci для интеграционных тестов исправлен\r\n* на самом деле использовать последнюю настройку движения х",
-                "pt": "* travis ci para testes de integração corrigidos\r\n* use realmente a última configuração de movimento x",
-                "nl": "* travis ci voor integratietests vastgesteld\r\n* gebruik eigenlijk de laatste x beweging instelling",
-                "fr": "* travis ci pour les tests d'intégration corrigé\r\n* utilise réellement le dernier paramètre de mouvement x",
-                "it": "* Travis ci per i test di integrazione corretti\r\n* utilizza effettivamente l'ultima impostazione di movimento x",
-                "es": "* travis ci para pruebas de integración arregladas\r\n* realmente usa la última configuración de movimiento x",
-                "pl": "* Naprawiono travis ci do testów integracyjnych\r\n* faktycznie używam ustawienia ostatniego x ruchu",
-                "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置"
-            },
-            "0.0.9": {
-                "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
-                "de": "* lastMotion der Kamera wird nur aktualisiert, wenn dies erforderlich ist\r\n* Erste UDM-Integrationen, Einstellungen ändern funktioniert noch NICHT",
-                "ru": "* lastMotion обновления камеры только при необходимости\r\n* первые UDM интеграции, изменение настроек еще не работает",
-                "pt": "* lastMotion da câmera atualizando apenas se necessário\r\n* primeiras integrações UDM, alterando configurações ainda não funcionando",
-                "nl": "* lastMotion van camera wordt alleen bijgewerkt indien nodig\r\n* eerste UDM-integraties, instellingen wijzigen werkt nog NIET",
-                "fr": "* lastMotion de la caméra uniquement mise à jour si nécessaire\r\n* premières intégrations UDM, la modification des paramètres ne fonctionne pas encore",
-                "it": "* lastMotion della telecamera si aggiorna solo se necessario\r\n* prime integrazioni UDM, la modifica delle impostazioni NON funziona ancora",
-                "es": "* lastMotion de cámara solo se actualiza si es necesario\r\n* primeras integraciones UDM, la configuración cambiante NO funciona todavía",
-                "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
-                "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用"
-            },
-            "0.0.8": {
-                "en": "* made motion Events optional (Last Motion is always stored)\r\n* made interval and \"last x seconds of motions\" adjustable\r\n* properly delete old motions",
-                "de": "* Bewegungsereignisse optional gemacht (Letzte Bewegung wird immer gespeichert)\r\n* Intervall und \"letzte x Sekunden der Bewegungen\" einstellbar gemacht\r\n* Alte Bewegungen ordnungsgemäß löschen",
-                "ru": "* сделал события движения необязательными (последнее движение всегда сохраняется)\r\n* сделал интервал и \"последние x секунд движений\" регулируемыми\r\n* правильно удалить старые движения",
-                "pt": "* Eventos de movimento opcionais (o último movimento é sempre armazenado)\r\n* intervalo ajustável e \"últimos x segundos de movimentos\" ajustáveis\r\n* excluir corretamente movimentos antigos",
-                "nl": "* maakte motion Events optioneel (Last Motion wordt altijd opgeslagen)\r\n* interval en \"laatste x seconden van bewegingen\" instelbaar\r\n* verwijder oude bewegingen correct",
-                "fr": "* fait des événements de mouvement en option (le dernier mouvement est toujours stocké)\r\n* intervalle et \"dernières x secondes de mouvements\" réglables\r\n* supprimer correctement les anciennes motions",
-                "it": "* reso motion Eventi facoltativi (Last Motion è sempre memorizzato)\r\n* intervallo regolato e \"ultimi x secondi di movimenti\" regolabili\r\n* elimina correttamente i vecchi movimenti",
-                "es": "* hecho movimiento Eventos opcional (Last Motion siempre se almacena)\r\n* intervalo y \"últimos x segundos de movimientos\" ajustables\r\n* eliminar correctamente movimientos antiguos",
-                "pl": "* wykonane zdarzenia ruchu opcjonalne (Last Motion jest zawsze zapisywany)\r\n* zmieniono interwał i „ostatnie x sekundy ruchów”\r\n* poprawnie usuwaj stare ruchy",
-                "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案"
-            },
-            "0.0.7": {
-                "en": "* continuosly refresh motion events\r\n* changed data structur\r\n* added lastMotion Datapoint to each camera",
-                "de": "* Kontinuierliche Aktualisierung von Bewegungsereignissen\r\n* geänderte Datenstruktur\r\n* lastMotion Datenpunkt zu jeder Kamera hinzugefügt",
-                "ru": "* постоянно обновлять события движения\r\n* изменена структура данных\r\n* добавлено lastMotion Datapoint для каждой камеры",
-                "pt": "* atualizar continuamente eventos de movimento\r\n* estrutura de dados alterada\r\n* adicionou lastMotion Datapoint a cada câmera",
-                "nl": "* continu bewegingsgebeurtenissen vernieuwen\r\n* veranderde gegevensstructuur\r\n* lastMotion Datapoint toegevoegd aan elke camera",
-                "fr": "* Rafraîchissez continuellement les événements de mouvement\r\n* structure de données modifiée\r\n* ajout du point de données lastMotion à chaque caméra",
-                "it": "* aggiorna continuamente gli eventi di movimento\r\n* modifica della struttura dei dati\r\n* aggiunto lastMotion Datapoint a ciascuna telecamera",
-                "es": "* actualiza continuamente eventos de movimiento\r\n* estructura de datos modificada\r\n* agregado lastMotion Datapoint a cada cámara",
-                "pl": "* ciągłe odświeżanie zdarzeń ruchu\r\n* zmieniono strukturę danych\r\n* Dodano lastMotion Datapoint do każdej kamery",
-                "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机"
-            },
-            "0.0.6": {
-                "en": "* make some settings changeable (name, osdSettings.*, recordingSettings.mode, ledSettings.isEnabled)",
-                "de": "* einige Einstellungen änderbar machen (name, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "ru": "* сделать некоторые настройки изменяемыми (name, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "pt": "* altere algumas configurações (nome, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "nl": "* maak sommige instellingen veranderlijk (naam, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "fr": "* rendre certains paramètres modifiables (nom, osdSettings. *, RecordingSettings.mode, ledSettings.isEnabled)",
-                "it": "* rendere alcune impostazioni modificabili (nome, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "es": "* hacer que algunas configuraciones cambien (nombre, osdSettings. *, grabaciónSettings.mode, ledSettings.isEnabled)",
-                "pl": "* zmien niektóre ustawienia (nazwa, osdSettings. *, recordingSettings.mode, ledSettings.isEnabled)",
-                "zh-cn": "*更改某些设置（名称，osdSettings。*，recordingSettings.mode，ledSettings.isEnabled）"
-            },
-            "0.0.5": {
-                "en": "* new logo\n* added motion event data points",
-                "de": "* neues Logo\n* Bewegungsereignisdatenpunkte hinzugefügt",
-                "ru": "* новый логотип\n* добавлены точки данных о движении",
-                "pt": "* novo logotipo\n* pontos de dados de eventos de movimento adicionados",
-                "nl": "* nieuw logo\n* toegevoegde punten voor bewegingsgebeurtenissen",
-                "fr": "* nouveau logo\n* ajout de points de données d'événement de mouvement",
-                "it": "* nuovo logo\n* aggiunti punti dati degli eventi di movimento",
-                "es": "* nuevo logo\n* puntos de datos de eventos de movimiento agregados",
-                "pl": "* nowe logo\n* dodano punkty danych zdarzenia ruchu",
-                "zh-cn": "*新徽标\n*添加运动事件数据点"
-            },
-            "0.0.4": {
-                "en": "* release-script test and some Readme changes",
-                "de": "* Release-Script-Test und einige Readme-Änderungen",
-                "ru": "* тест релиз-скрипта и некоторые изменения в Readme",
-                "pt": "* teste do release-script e algumas alterações do Leia-me",
-                "nl": "* release-script test en enkele Readme-wijzigingen",
-                "fr": "* test de version du script et quelques modifications du fichier Lisez-moi",
-                "it": "* test dello script di rilascio e alcune modifiche al file Leggimi",
-                "es": "* Prueba de lanzamiento de script y algunos cambios de Readme",
-                "pl": "* Test skryptu wydania i niektóre zmiany Readme",
-                "zh-cn": "*发布脚本测试和一些自述文件更改"
-            },
-            "0.0.1": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "zh-cn": "首次出版"
-            }
-        },
-        "title": "UniFi Protect",
-        "titleLang": {
-            "en": "UniFi Protect",
-            "de": "UniFi Protect",
-            "ru": "UniFi Protect",
-            "pt": "UniFi Protect",
-            "nl": "UniFi Protect",
-            "fr": "UniFi Protect",
-            "it": "UniFi Protect",
-            "es": "Proteger unifi",
-            "pl": "UniFi Protect",
-            "zh-cn": "UniFi保护"
-        },
-        "desc": {
-            "en": "unifi-protect",
-            "de": "unifi-protect",
-            "ru": "UniFi защиты",
-            "pt": "proteger uniformemente",
-            "nl": "UNIFI-protect",
-            "fr": "unifi-protect",
-            "it": "UniFi-protect",
-            "es": "protección unifi",
-            "pl": "unifi-protect",
-            "zh-cn": "统一保护"
-        },
-        "authors": [
-            "Peter Baumert <ioBroker.unifi-protect@outlook.com>"
-        ],
-        "keywords": [
-            "ioBroker",
-            "Smart Home",
-            "home automation"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "main.js",
-        "icon": "unifi-protect.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/peterbaumert/ioBroker.unifi-protect/master/admin/unifi-protect.png",
-        "readme": "https://github.com/peterbaumert/ioBroker.unifi-protect/blob/master/README.md",
-        "loglevel": "info",
-        "messagebox": true,
-        "mode": "daemon",
-        "type": "alarm",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "materialize": true,
-        "dependencies": [
-            {
-                "js-controller": ">=3.0.0"
-            }
-        ],
-        "plugins": {
-            "sentry": {
-                "dsn": "https://f9c90a6b3ae0400eaa85e8e2bb198693@o508406.ingest.sentry.io/5606859"
-            }
-        }
+  "common": {
+    "name": "unifi-protect",
+    "version": "0.0.13",
+    "news": {
+      "0.0.13": {
+        "en": "dependencies updates\nfirst implementation of realtime updates api\nlastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents\nButton to take manual snapshot added\nreal time events datapoints for every cam added\ntake snapshot and thumbnail for real time events added (base64 images)\nthumbnail image for list of motion events added (base64 images)\nsmall thumbnail image for list of motion events and real time events added (base64 images)\ncamera name for list of motion events added",
+        "de": "aktualisierung der abhängigkeiten\nerste implementierung von echtzeit-updates api\nlastMotion, lastRing, lcd Nachricht und smart DetectZone in realTimeEvents\nKnopf zum manuellen Snapshot hinzufügen\nechtzeit-ereignisse datenpunkte für jede cam hinzugefügt\nschnappschüsse und vorschau für echtzeit-ereignisse hinzugefügt (base64 bilder)\nminiaturbild für die liste der bewegungsereignisse hinzugefügt (base64 bilder)\nkleines miniaturbild für die liste der bewegungsereignisse und echtzeitereignisse hinzugefügt (base64 bilder)\nkameraname für die liste der bewegungsereignisse hinzugefügt",
+        "ru": "обновления зависимости\nпервая реализация api обновлений realtime\nlastMotion, lastRing, лкд Сообщение и умный DetectZone в realTimeEvents\nКнопка, чтобы принять ручной снимок добавлен\nдата-точки событий в реальном времени для каждого cam добавлены\nвзять снимок и миниатюру для событий в реальном времени (base64 изображения)\nизображение миниатюры для списка добавленных событий движения (base64 изображения)\nнебольшое изображение миниатюры для списка событий движения и событий в реальном времени (базов64 изображения)\nназвание камеры для списка мероприятий движения добавлено",
+        "pt": "atualizações de dependências\nprimeira implementação de atualizações em tempo real api\nlastMotion, lastRing, lcd Mensagem e inteligência DetectZone em tempo realEventos\nBotão para tirar instantâneo manual adicionado\ndatapoints de eventos em tempo real para cada câmera adicionada\ntirar instantâneo e miniatura para eventos em tempo real adicionado (base64 imagens)\nimagem miniatura para lista de eventos de movimento adicionado (base64 imagens)\npequena imagem miniatura para lista de eventos de movimento e eventos em tempo real adicionados (base64 imagens)\nnome da câmera para lista de eventos de movimento adicionado",
+        "nl": "afhankelijke updates\neerste implementatie van realtime updates\nlaatste beweging, laatste rij, Icdd Bericht en slim Vertaling:\nKnoop om handmatige foto's te nemen\nechte tijdsevenementen die datapoints voor elke camera toevoegen\nneem fotoshot en duimnail voor echte tijd evenementen toegevoegd (base64 beelden)\nduimafbeelding voor lijst van bewegingsevenementen toegevoegd (base64 beelden)\nkleine duimplaat voor lijst van bewegingsevenementen en echte tijdsevenementen voegde (base64 beelden)\ncameranaam voor lijst van bewegingsevenementen",
+        "fr": "mises à jour des dépendances\npremière mise en œuvre des mises à jour en temps réel api\nlastMotion, lastRing, lcd Message et smart DetectZone in realTimeEvents\nBouton pour prendre un instantané manuel ajouté\ntemps réel événements datapoints pour chaque came ajouté\nprendre un instantané et une miniature pour les événements en temps réel ajoutés (base64 images)\nimage miniature pour liste des événements de mouvement ajouté (base64 images)\npetite image pour liste d'événements de mouvement et d'événements en temps réel ajouté (images de base64)\nnom de la caméra pour liste d'événements de mouvement ajouté",
+        "it": "aggiornamenti sulle dipendenze\nprima implementazione di aggiornamenti in tempo reale api\nlastMotion, lastRing, lcd Messaggio e smart RilevaZone in tempo realeEventi\nPulsante per scattare l'istantanea manuale aggiunto\neventi in tempo reale datapoint per ogni cam aggiunto\nprendere snapshot e thumbnail per eventi in tempo reale aggiunto (fotografie base64)\nimmagine di anteprima per l'elenco degli eventi di movimento aggiunti (fotografie di base64)\npiccola immagine di miniatura per elenco di eventi di movimento e eventi in tempo reale aggiunto (fotografie base64)\nnome della fotocamera per elenco di eventi di movimento aggiunto",
+        "es": "actualizaciones de las dependencias\nprimera implementación de actualizaciones en tiempo real api\nlastMotion, lastRing, lcd Mensaje e inteligente DetectZone en tiempo realEventos\nBotón para tomar instantánea manual añadido\ntiempo real eventos datapoints para cada cámara añadido\ntomar instantáneas y miniaturas para eventos en tiempo real añadidos (imagenes de baño64)\nimagen de miniatura para lista de eventos de movimiento añadido (base64 imágenes)\nimagen miniatura pequeña para la lista de eventos de movimiento y eventos en tiempo real agregados (base64 imágenes)\nnombre de cámara para lista de eventos de movimiento añadido",
+        "pl": "aktualizacja\npierwsza implementacja aktualizacji api\nostatnia wersja, ostatnia, lcd. Pamięć i mądrość DetectZone w rzeczywistości\nButton dodał ręcznie dodać\ndane dotyczące każdej kamery są dodawane do rzeczywistego punktu czasowego\nposzukiwania i paznokci dla rzeczywistych wydarzeń (base64 obrazy)\nzdjęcie do listy zdarzeń ruchowych dodano (base64 obrazy)\nmały obraz kciukowy na listę zdarzeń ruchowych i rzeczywistych zdarzeń czasowych dodano (base64 obrazy)\nnazwę kamery dodano do listy wydarzeń",
+        "uk": "оновлення залежності\nперша реалізація оновлень в режимі реального часу\nlastMotion, lastRing, lcd Повідомлення та смарт DetectZone в режимі реального часуПодії\nКнопка, щоб взяти ручний знімок додано\nдані про події в режимі реального часу для кожного камери додано\nmake snapshot і thumbnail для реальних подій часу (base64 зображень)\nthumbnail зображення для списку доданих подій руху (base64 зображень)\nневеликий мініатюрний образ для списку подій руху і додано події реального часу (base64 зображень)\nдодано назву камери для списку заходів руху",
+        "zh-cn": "a. 依赖性更新\n首次执行实时更新版\n最后的推论,最后一点是: 导 言 实际制度中的障碍\n布托尔特加\n每个中心实时事件数据点增加\n实时事件增加(图64图像)\n举动事件清单的图象(图64图像)\n举动事件清单和实时事件的小声音(图64图像)\n动议名单的摄像"
+      },
+      "0.0.12": {
+        "en": "added smart detections\nfixed some lastMotion stuff\nadded UnifiOs Support for CloudKey",
+        "de": "intelligente Erkennungen hinzugefügt\nEinige lastMotion-Probleme wurden behoben\nUnifiOs-Unterstützung für CloudKey hinzugefügt",
+        "ru": "добавлены умные детекции\nисправлены некоторые вещи lastMotion\nдобавлена поддержка UnifiOs для CloudKey",
+        "pt": "adicionou detecções inteligentes\nconsertou algumas coisas do lastMotion\nadicionado Suporte UnifiOs para CloudKey",
+        "nl": "slimme detecties toegevoegd\nwat lastMotion-dingen opgelost\nUnifiOs-ondersteuning toegevoegd voor CloudKey",
+        "fr": "ajout de détections intelligentes\ncorrigé des trucs lastMotion\nAjout de la prise en charge UnifiOs pour CloudKey",
+        "it": "aggiunto rilevamenti intelligenti\nrisolto alcune cose lastMotion\naggiunto il supporto UnifiOs per CloudKey",
+        "es": "agregadas detecciones inteligentes\narreglado algunas cosas de lastMotion\nSe agregó soporte UnifiOs para CloudKey",
+        "pl": "dodano inteligentne wykrywanie\nnaprawiono kilka rzeczy w lastMotion\ndodano obsługę UnifiOs dla CloudKey",
+        "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持"
+      },
+      "0.0.11": {
+        "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
+        "de": "* Admin-Oberfläche ein wenig geändert\r\n* Beschreibung für Port hinzugefügt\r\n* UDM Pro beschreibbare Zustände behoben",
+        "ru": "* немного изменил интерфейс администратора\r\n* добавлено описание порта\r\n* исправлены состояния записи UDM Pro",
+        "pt": "* mudou a interface do administrador um pouco\r\n* descrição adicionada para a porta\r\n* estados graváveis do UDM Pro corrigidos",
+        "nl": "* Heeft de beheerdersinterface een beetje gewijzigd\r\n* Toegevoegde beschrijving voor poort\r\n* vaste UDM Pro beschrijfbare statussen",
+        "fr": "* interface d'administration un peu modifiée\r\n* description ajoutée pour le port\r\n* états inscriptibles UDM Pro fixes",
+        "it": "* ha cambiato leggermente l'interfaccia di amministrazione\r\n* aggiunta descrizione per la porta\r\n* stati scrivibili fissi di UDM Pro",
+        "es": "* Cambió un poco la interfaz de administrador\r\n* descripción agregada para el puerto\r\n* estados de escritura UDM Pro fijos",
+        "pl": "* zmieniono nieco interfejs administratora\r\n* dodano opis portu\r\n* naprawiono stany zapisu UDM Pro",
+        "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态"
+      },
+      "0.0.10": {
+        "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
+        "de": "* Travis CI für Integrationstests behoben\r\n* Verwenden Sie tatsächlich die letzte x-Bewegungseinstellung",
+        "ru": "* travis ci для интеграционных тестов исправлен\r\n* на самом деле использовать последнюю настройку движения х",
+        "pt": "* travis ci para testes de integração corrigidos\r\n* use realmente a última configuração de movimento x",
+        "nl": "* travis ci voor integratietests vastgesteld\r\n* gebruik eigenlijk de laatste x beweging instelling",
+        "fr": "* travis ci pour les tests d'intégration corrigé\r\n* utilise réellement le dernier paramètre de mouvement x",
+        "it": "* Travis ci per i test di integrazione corretti\r\n* utilizza effettivamente l'ultima impostazione di movimento x",
+        "es": "* travis ci para pruebas de integración arregladas\r\n* realmente usa la última configuración de movimiento x",
+        "pl": "* Naprawiono travis ci do testów integracyjnych\r\n* faktycznie używam ustawienia ostatniego x ruchu",
+        "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置"
+      },
+      "0.0.9": {
+        "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
+        "de": "* lastMotion der Kamera wird nur aktualisiert, wenn dies erforderlich ist\r\n* Erste UDM-Integrationen, Einstellungen ändern funktioniert noch NICHT",
+        "ru": "* lastMotion обновления камеры только при необходимости\r\n* первые UDM интеграции, изменение настроек еще не работает",
+        "pt": "* lastMotion da câmera atualizando apenas se necessário\r\n* primeiras integrações UDM, alterando configurações ainda não funcionando",
+        "nl": "* lastMotion van camera wordt alleen bijgewerkt indien nodig\r\n* eerste UDM-integraties, instellingen wijzigen werkt nog NIET",
+        "fr": "* lastMotion de la caméra uniquement mise à jour si nécessaire\r\n* premières intégrations UDM, la modification des paramètres ne fonctionne pas encore",
+        "it": "* lastMotion della telecamera si aggiorna solo se necessario\r\n* prime integrazioni UDM, la modifica delle impostazioni NON funziona ancora",
+        "es": "* lastMotion de cámara solo se actualiza si es necesario\r\n* primeras integraciones UDM, la configuración cambiante NO funciona todavía",
+        "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
+        "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用"
+      },
+      "0.0.8": {
+        "en": "* made motion Events optional (Last Motion is always stored)\r\n* made interval and \"last x seconds of motions\" adjustable\r\n* properly delete old motions",
+        "de": "* Bewegungsereignisse optional gemacht (Letzte Bewegung wird immer gespeichert)\r\n* Intervall und \"letzte x Sekunden der Bewegungen\" einstellbar gemacht\r\n* Alte Bewegungen ordnungsgemäß löschen",
+        "ru": "* сделал события движения необязательными (последнее движение всегда сохраняется)\r\n* сделал интервал и \"последние x секунд движений\" регулируемыми\r\n* правильно удалить старые движения",
+        "pt": "* Eventos de movimento opcionais (o último movimento é sempre armazenado)\r\n* intervalo ajustável e \"últimos x segundos de movimentos\" ajustáveis\r\n* excluir corretamente movimentos antigos",
+        "nl": "* maakte motion Events optioneel (Last Motion wordt altijd opgeslagen)\r\n* interval en \"laatste x seconden van bewegingen\" instelbaar\r\n* verwijder oude bewegingen correct",
+        "fr": "* fait des événements de mouvement en option (le dernier mouvement est toujours stocké)\r\n* intervalle et \"dernières x secondes de mouvements\" réglables\r\n* supprimer correctement les anciennes motions",
+        "it": "* reso motion Eventi facoltativi (Last Motion è sempre memorizzato)\r\n* intervallo regolato e \"ultimi x secondi di movimenti\" regolabili\r\n* elimina correttamente i vecchi movimenti",
+        "es": "* hecho movimiento Eventos opcional (Last Motion siempre se almacena)\r\n* intervalo y \"últimos x segundos de movimientos\" ajustables\r\n* eliminar correctamente movimientos antiguos",
+        "pl": "* wykonane zdarzenia ruchu opcjonalne (Last Motion jest zawsze zapisywany)\r\n* zmieniono interwał i „ostatnie x sekundy ruchów”\r\n* poprawnie usuwaj stare ruchy",
+        "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案"
+      },
+      "0.0.7": {
+        "en": "* continuosly refresh motion events\r\n* changed data structur\r\n* added lastMotion Datapoint to each camera",
+        "de": "* Kontinuierliche Aktualisierung von Bewegungsereignissen\r\n* geänderte Datenstruktur\r\n* lastMotion Datenpunkt zu jeder Kamera hinzugefügt",
+        "ru": "* постоянно обновлять события движения\r\n* изменена структура данных\r\n* добавлено lastMotion Datapoint для каждой камеры",
+        "pt": "* atualizar continuamente eventos de movimento\r\n* estrutura de dados alterada\r\n* adicionou lastMotion Datapoint a cada câmera",
+        "nl": "* continu bewegingsgebeurtenissen vernieuwen\r\n* veranderde gegevensstructuur\r\n* lastMotion Datapoint toegevoegd aan elke camera",
+        "fr": "* Rafraîchissez continuellement les événements de mouvement\r\n* structure de données modifiée\r\n* ajout du point de données lastMotion à chaque caméra",
+        "it": "* aggiorna continuamente gli eventi di movimento\r\n* modifica della struttura dei dati\r\n* aggiunto lastMotion Datapoint a ciascuna telecamera",
+        "es": "* actualiza continuamente eventos de movimiento\r\n* estructura de datos modificada\r\n* agregado lastMotion Datapoint a cada cámara",
+        "pl": "* ciągłe odświeżanie zdarzeń ruchu\r\n* zmieniono strukturę danych\r\n* Dodano lastMotion Datapoint do każdej kamery",
+        "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机"
+      }
     },
-    "encryptedNative": [
-        "password"
-    ],
-    "protectedNative": [
-        "password"
-    ],
-    "native": {
-        "protectip": "127.0.0.1",
-        "protectport": 7443,
-        "username": "admin",
-        "password": "",
-        "getMotions": false,
-        "numMotions": 10,
-        "secMotions": 600,
-        "interval": 60,
-		"wsCheck": 15,
-        "motionTypes": {
-            "motion": true,
-            "smartDetectZone": false,
-            "ring": false
-        },
-        "statesFilter": {
-            "cameras": [
-                "channels.enabled",
-                "channels.name",
-                "channels.rtspAlias",
-                "channels.width",
-                "connectedSince",
-                "connectionHost",
-                "firmwareVersion",
-                "host",
-                "isConnected",
-                "isMotionDetected",
-                "name",
-                "state",
-                "lastMotion",
-                "lastMotion.start",
-                "lastMotion.end",
-                "lastMotion.type",
-                "lastMotion.thumbnail",
-                "lastMotion.heatmap"
-            ],
-            "motions": [
-                "start",
-                "end",
-                "type",
-                "thumbnail",
-                "heatmap"
-            ]
-        },
-        "downloadLastMotionThumb": false,
-        "downloadLastMotionThumbWidth": 640,
-        "takeSnapshotForLastMotion": false,
-        "takeSnapshotForLastMotionWidth": 640,
-        "takeSnapshotForLastMotionDelay": 0,
-        "takeSnapshotManualWidth": 640
+    "title": "UniFi Protect",
+    "titleLang": {
+      "en": "UniFi Protect",
+      "de": "UniFi Protect",
+      "ru": "UniFi Protect",
+      "pt": "UniFi Protect",
+      "nl": "UniFi Protect",
+      "fr": "UniFi Protect",
+      "it": "UniFi Protect",
+      "es": "Proteger unifi",
+      "pl": "UniFi Protect",
+      "zh-cn": "UniFi保护"
     },
-    "objects": [],
-    "instanceObjects": []
+    "desc": {
+      "en": "unifi-protect",
+      "de": "unifi-protect",
+      "ru": "UniFi защиты",
+      "pt": "proteger uniformemente",
+      "nl": "UNIFI-protect",
+      "fr": "unifi-protect",
+      "it": "UniFi-protect",
+      "es": "protección unifi",
+      "pl": "unifi-protect",
+      "zh-cn": "统一保护"
+    },
+    "authors": [
+      "Peter Baumert <ioBroker.unifi-protect@outlook.com>"
+    ],
+    "keywords": [
+      "ioBroker",
+      "Smart Home",
+      "home automation"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "unifi-protect.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/peterbaumert/ioBroker.unifi-protect/master/admin/unifi-protect.png",
+    "readme": "https://github.com/peterbaumert/ioBroker.unifi-protect/blob/master/README.md",
+    "loglevel": "info",
+    "messagebox": true,
+    "mode": "daemon",
+    "type": "alarm",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "materialize": true,
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
+    ],
+    "plugins": {
+      "sentry": {
+        "dsn": "https://f9c90a6b3ae0400eaa85e8e2bb198693@o508406.ingest.sentry.io/5606859"
+      }
+    }
+  },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
+  "native": {
+    "protectip": "127.0.0.1",
+    "protectport": 7443,
+    "username": "admin",
+    "password": "",
+    "getMotions": false,
+    "numMotions": 10,
+    "secMotions": 600,
+    "interval": 60,
+    "wsCheck": 15,
+    "motionTypes": {
+      "motion": true,
+      "smartDetectZone": false,
+      "ring": false
+    },
+    "statesFilter": {
+      "cameras": [
+        "channels.enabled",
+        "channels.name",
+        "channels.rtspAlias",
+        "channels.width",
+        "connectedSince",
+        "connectionHost",
+        "firmwareVersion",
+        "host",
+        "isConnected",
+        "isMotionDetected",
+        "name",
+        "state",
+        "lastMotion",
+        "lastMotion.start",
+        "lastMotion.end",
+        "lastMotion.type",
+        "lastMotion.thumbnail",
+        "lastMotion.heatmap"
+      ],
+      "motions": [
+        "start",
+        "end",
+        "type",
+        "thumbnail",
+        "heatmap"
+      ]
+    },
+    "downloadLastMotionThumb": false,
+    "downloadLastMotionThumbWidth": 640,
+    "takeSnapshotForLastMotion": false,
+    "takeSnapshotForLastMotionWidth": 640,
+    "takeSnapshotForLastMotionDelay": 0,
+    "takeSnapshotManualWidth": 640
+  },
+  "objects": [],
+  "instanceObjects": []
 }
