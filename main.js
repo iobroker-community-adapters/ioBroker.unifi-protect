@@ -259,10 +259,12 @@ class UnifiProtect extends utils.Adapter {
 	}
 
 	updateCookie(cookie) {
-		this.cookies = cookie;
-		this.csrfToken = JSON.parse(
-			new Buffer(cookie.split(".")[1], "base64").toString("ascii"),
-		).csrfToken;
+		if (cookie) {
+			this.cookies = cookie;
+			this.csrfToken = JSON.parse(
+				new Buffer(cookie.split(".")[1], "base64").toString("ascii"),
+			).csrfToken;
+		}
 	}
 
 	async updateData(onReady = false) {
@@ -292,19 +294,29 @@ class UnifiProtect extends utils.Adapter {
 				resolveWithFullResponse: true,
 				rejectUnauthorized: false,
 			};
-
 			const req = https.request(options, (res) => {
-				if (res.headers["x-csrf-token"]) {
-					resolve({
-						isUnifiOS: true,
-						csrfToken: res.headers["x-csrf-token"],
-					});
-				} else {
+				if (res.statusCode === 302 && res.headers['location'] === '/manage') {
 					resolve({
 						isUnifiOS: false,
 						csrfToken: null,
 						cookies: null,
 					});
+				} else if (res.statusCode === 200) {
+					if (res.headers['x-csrf-token']) {
+						resolve({
+							isUnifiOS: true,
+							csrfToken: res.headers["x-csrf-token"],
+						});
+
+					} else {
+						resolve({
+							isUnifiOS: true,
+							csrfToken: null,
+							cookies: null,
+						});
+					}
+				} else {
+					this.log.error('failed to detect UniFiOS status');
 				}
 			});
 
