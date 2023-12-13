@@ -39,7 +39,7 @@ class ProtectApi {
 		// and see ifing there's a CSRF token waiting for us.
 		const response = await this.fetch("https://" + this.config.protectip, { method: "GET" });
 
-		if (response != null && response.ok) {
+		if (response != null) {
 			const csrfToken = response.headers.get("X-CSRF-Token");
 
 			// We found a token.
@@ -48,8 +48,9 @@ class ProtectApi {
 
 				// UniFi OS has support for keepalive. Let's take advantage of that and reduce the workload on controllers.
 				this.httpsAgent = new https.Agent({ keepAlive: true, maxFreeSockets: 5, maxSockets: 10, rejectUnauthorized: false, timeout: 60 * 1000 });
-				return true;
+				
 			}
+            return true;
 		}
 
 		// Couldn't deduce what type of NVR device we were connecting to.
@@ -96,7 +97,7 @@ class ProtectApi {
 		const csrfToken = response.headers.get("X-CSRF-Token");
 		const cookie = response.headers.get("Set-Cookie");
 
-		if (csrfToken && cookie && this.headers.has("X-CSRF-Token")) {
+		if (csrfToken && cookie) {
 
 			this.headers.set("Cookie", cookie);
 			this.headers.set("X-CSRF-Token", csrfToken);
