@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.unifi-protect.svg)](https://www.npmjs.com/package/iobroker.unifi-protect)
 ![Number of Installations (latest)](http://iobroker.live/badges/unifi-protect-installed.svg)
 ![Number of Installations (stable)](http://iobroker.live/badges/unifi-protect-stable.svg)
-[![Dependency Status](https://img.shields.io/david/peterbaumert/iobroker.unifi-protect.svg)](https://david-dm.org/peterbaumert/iobroker.unifi-protect)
+[![Dependency Status](https://img.shields.io/david/iobroker-community-adapters/iobroker.unifi-protect.svg)](https://david-dm.org/peterbaumert/iobroker.unifi-protect)
 [![Known Vulnerabilities](https://snyk.io/test/github/peterbaumert/ioBroker.unifi-protect/badge.svg)](https://snyk.io/test/github/peterbaumert/ioBroker.unifi-protect)
 
 [![NPM](https://nodei.co/npm/iobroker.unifi-protect.png?downloads=true)](https://nodei.co/npm/iobroker.unifi-protect/)
