@@ -9,7 +9,7 @@
   "contributors": [
     "Scrounger <scrounger@gmx.net>"
   ],
-  "homepage": "https://github.com/peterbaumert/ioBroker.unifi-protect",
+  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect",
   "license": "MIT",
   "keywords": [
     "ioBroker",
@@ -19,7 +19,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/peterbaumert/ioBroker.unifi-protect"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.8",
@@ -57,7 +57,7 @@
     "release": "release-script"
   },
   "bugs": {
-    "url": "https://github.com/peterbaumert/ioBroker.unifi-protect/issues"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect/issues"
   },
   "readmeFilename": "README.md"
 }
