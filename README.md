@@ -10,7 +10,6 @@
 
 [![NPM](https://nodei.co/npm/iobroker.unifi-protect.png?downloads=true)](https://nodei.co/npm/iobroker.unifi-protect/)
 
-**This adapter uses the service [Sentry.io](https://sentry.io) to automatically report exceptions and code errors and new device schemas to me as the developer.** More details see below!
 
 ## unifi-protect adapter for ioBroker
 
