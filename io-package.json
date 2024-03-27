@@ -89,7 +89,6 @@
         "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机"
       }
     },
-    "title": "UniFi Protect",
     "titleLang": {
       "en": "UniFi Protect",
       "de": "UniFi Protect",
@@ -115,16 +114,19 @@
       "zh-cn": "统一保护"
     },
     "authors": [
-      "Peter Baumert <ioBroker.unifi-protect@outlook.com>"
+      "Peter Baumert <ioBroker.unifi-protect@outlook.com>",
+      "mcm1957 <mcm57@gmx.at>"
     ],
     "keywords": [
       "ioBroker",
       "Smart Home",
       "home automation"
     ],
-    "license": "MIT",
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "platform": "Javascript/Node.js",
-    "main": "main.js",
     "icon": "unifi-protect.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.unifi-protect/master/admin/unifi-protect.png",
@@ -141,12 +143,7 @@
       {
         "js-controller": ">=3.0.0"
       }
-    ],
-    "plugins": {
-      "sentry": {
-        "dsn": "https://f9c90a6b3ae0400eaa85e8e2bb198693@o508406.ingest.sentry.io/5606859"
-      }
-    }
+    ]
   },
   "encryptedNative": [
     "password"
