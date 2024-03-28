@@ -68,7 +68,7 @@ This adapter would not have been possible without the great work of Peter Baumer
 -->
 
 ### **WORK IN PROGRESS**
-* (mcm1957) BREAKING: Adapter requires node 18 and js-controller >= 5 now
+* (mcm1957) BREAKING: Adapter requires node.js 18 and js-controller >= 5 now
 * (mcm1957) Adapter has been moved to iobroker-community-adapters organisation
 
 ### 0.0.13 (2023-01-23)
