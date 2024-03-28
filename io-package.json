@@ -140,6 +140,7 @@
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.unifi-protect/master/admin/unifi-protect.png",
     "readme": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect/blob/master/README.md",
     "loglevel": "info",
+    "tier":2,
     "messagebox": true,
     "mode": "daemon",
     "type": "alarm",
