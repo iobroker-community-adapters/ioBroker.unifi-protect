@@ -66,7 +66,7 @@ This adapter would not have been possible without the great work of Peter Baumer
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### 1.0.0-alpha.1 (2024-03-28)
+### **WORK IN PROGRESS**
 * (mcm1957) BREAKING: Adapter requires node.js 18 and js-controller >= 5 now
 * (mcm1957) Adapter has been moved to iobroker-community-adapters organisation
 * (mcm1957) Dependencies have been updated
