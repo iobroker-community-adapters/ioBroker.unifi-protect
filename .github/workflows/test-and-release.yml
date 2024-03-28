@@ -84,11 +84,11 @@ jobs:
                   # To enable create a API-Token in Sentry (User settings, API keys)
                   # Enter this token as a GitHub secret (with name SENTRY_AUTH_TOKEN) in the repository options
                   # Then uncomment and customize the following block:
-                  sentry: true
-                  sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-                  sentry-url: "https://sentry.io"
-                  sentry-org: "mcm4iob"
-                  sentry-project: "iobroker-pid"
-                  sentry-version-prefix: "iobroker.pid"
-                  # If your sentry project is linked to a GitHub repository, you can enable the following option
-                  sentry-github-integration: true
+                  #sentry: true
+                  #sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+                  #sentry-url: "https://sentry.io"
+                  #sentry-org: "mcm4iob"
+                  #sentry-project: "iobroker-unifi-protect"
+                  #sentry-version-prefix: "iobroker.unifi-protect"
+                  ## If your sentry project is linked to a GitHub repository, you can enable the following option
+                  #sentry-github-integration: true
