@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "unifi-protect",
-    "version": "1.0.0-alpha.2",
+    "version": "1.0.0",
     "news": {
-      "1.0.0-alpha.2": {
+      "1.0.0": {
         "en": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 now\nAdapter has been moved to iobroker-community-adapters organisation\nDependencies have been updated",
         "de": "BREAKING: Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAdapter wurde zu iobroker-community-adapters Organisation verschoben\nAbhängigkeiten wurden aktualisiert",
         "ru": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 сейчас\nАдаптер был перемещен в организацию iobroker-community-adapters\nЗависимость обновлена",
