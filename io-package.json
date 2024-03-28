@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "unifi-protect",
-    "version": "0.0.13",
+    "version": "1.0.0-alpha.0",
     "news": {
+      "1.0.0-alpha.0": {
+        "en": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 now\nAdapter has been moved to iobroker-community-adapters organisation\nDependencies have been updated",
+        "de": "BREAKING: Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAdapter wurde zu iobroker-community-adapters Organisation verschoben\nAbhängigkeiten wurden aktualisiert",
+        "ru": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 сейчас\nАдаптер был перемещен в организацию iobroker-community-adapters\nЗависимость обновлена",
+        "pt": "BREAKING: Adapter requer node.js 18 e js-controller >= 5 agora\nAdapter foi movido para iobroker-community-adapters organização\nAs dependências foram atualizadas",
+        "nl": "Breaking: adapter vereist node.js 18 en js-controller Nu 5\nAdapter is verplaatst naar iobroker-community-adapters organisatie\nAfhankelijkheden zijn bijgewerkt",
+        "fr": "L'adaptateur nécessite node.js 18 et js-controller >= 5 maintenant\nAdapter a été transféré à l'organisation iobroker-community-adapters\nLes dépendances ont été actualisées",
+        "it": "BREAKING: Adattatore richiede node.js 18 e js-controller >= 5 ora\nL'adattatore è stato spostato nell'organizzazione degli adattatori della comunità-iobroker\nLe dipendenze sono state aggiornate",
+        "es": "BREAKING: El adaptador requiere node.js 18 y js-controller 5 ahora\nAdaptador ha sido trasladado a la organización de ibroker-community-adapters\nSe han actualizado las dependencias",
+        "pl": "BREAKING: Adapter wymaga node.js 18 i sterownika js- > = 5 teraz\nAdapter został przeniesiony do organizacji adapterów społeczności iobrokerowej\nZaktualizowano zależności",
+        "uk": "BREAKING: Адаптер вимагає вузла.js 18 і js-controller >= 5 тепер\nПереміщено перехід на iobroker-community-adapters\nЗалежність було оновлено",
+        "zh-cn": "适配器需要节点.js 18和js控制器 QQ 现在5号\n适应者被转移到了职业经纪人-社区适应者组织\n依赖关系已更新"
+      },
       "0.0.13": {
         "en": "dependencies updates\nfirst implementation of realtime updates api\nlastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents\nButton to take manual snapshot added\nreal time events datapoints for every cam added\ntake snapshot and thumbnail for real time events added (base64 images)\nthumbnail image for list of motion events added (base64 images)\nsmall thumbnail image for list of motion events and real time events added (base64 images)\ncamera name for list of motion events added",
         "de": "aktualisierung der abhängigkeiten\nerste implementierung von echtzeit-updates api\nlastMotion, lastRing, lcd Nachricht und smart DetectZone in realTimeEvents\nKnopf zum manuellen Snapshot hinzufügen\nechtzeit-ereignisse datenpunkte für jede cam hinzugefügt\nschnappschüsse und vorschau für echtzeit-ereignisse hinzugefügt (base64 bilder)\nminiaturbild für die liste der bewegungsereignisse hinzugefügt (base64 bilder)\nkleines miniaturbild für die liste der bewegungsereignisse und echtzeitereignisse hinzugefügt (base64 bilder)\nkameraname für die liste der bewegungsereignisse hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "* wykonane zdarzenia ruchu opcjonalne (Last Motion jest zawsze zapisywany)\r\n* zmieniono interwał i „ostatnie x sekundy ruchów”\r\n* poprawnie usuwaj stare ruchy",
         "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案",
         "uk": "* зроблені події руху необов’язкові (останній рух завжди зберігається)\r\n* зроблено налаштування інтервалу та \"останніх х секунд рухів\".\r\n* правильно видалити старі рухи"
-      },
-      "0.0.7": {
-        "en": "* continuosly refresh motion events\r\n* changed data structur\r\n* added lastMotion Datapoint to each camera",
-        "de": "* Kontinuierliche Aktualisierung von Bewegungsereignissen\r\n* geänderte Datenstruktur\r\n* lastMotion Datenpunkt zu jeder Kamera hinzugefügt",
-        "ru": "* постоянно обновлять события движения\r\n* изменена структура данных\r\n* добавлено lastMotion Datapoint для каждой камеры",
-        "pt": "* atualizar continuamente eventos de movimento\r\n* estrutura de dados alterada\r\n* adicionou lastMotion Datapoint a cada câmera",
-        "nl": "* continu bewegingsgebeurtenissen vernieuwen\r\n* veranderde gegevensstructuur\r\n* lastMotion Datapoint toegevoegd aan elke camera",
-        "fr": "* Rafraîchissez continuellement les événements de mouvement\r\n* structure de données modifiée\r\n* ajout du point de données lastMotion à chaque caméra",
-        "it": "* aggiorna continuamente gli eventi di movimento\r\n* modifica della struttura dei dati\r\n* aggiunto lastMotion Datapoint a ciascuna telecamera",
-        "es": "* actualiza continuamente eventos de movimiento\r\n* estructura de datos modificada\r\n* agregado lastMotion Datapoint a cada cámara",
-        "pl": "* ciągłe odświeżanie zdarzeń ruchu\r\n* zmieniono strukturę danych\r\n* Dodano lastMotion Datapoint do każdej kamery",
-        "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机",
-        "uk": "* Безперервно оновлювати події руху\r\n* змінена структура даних\r\n* додано lastMotion Datapoint до кожної камери"
       }
     },
     "titleLang": {
@@ -141,7 +141,7 @@
     "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.unifi-protect/master/admin/unifi-protect.png",
     "readme": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect/blob/master/README.md",
     "loglevel": "info",
-    "tier":2,
+    "tier": 2,
     "messagebox": true,
     "mode": "daemon",
     "type": "alarm",
