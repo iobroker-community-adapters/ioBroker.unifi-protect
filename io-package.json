@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "unifi-protect",
-    "version": "1.0.0-alpha.0",
+    "version": "1.0.0-alpha.1",
     "news": {
-      "1.0.0-alpha.0": {
+      "1.0.0-alpha.1": {
         "en": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 now\nAdapter has been moved to iobroker-community-adapters organisation\nDependencies have been updated",
         "de": "BREAKING: Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAdapter wurde zu iobroker-community-adapters Organisation verschoben\nAbhängigkeiten wurden aktualisiert",
         "ru": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 сейчас\nАдаптер был перемещен в организацию iobroker-community-adapters\nЗависимость обновлена",
@@ -80,19 +80,6 @@
         "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
         "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用",
         "uk": "* LastMotion камери оновлюється лише за потреби\r\n* перша інтеграція UDM, зміна налаштувань ще НЕ працює"
-      },
-      "0.0.8": {
-        "en": "* made motion Events optional (Last Motion is always stored)\r\n* made interval and \"last x seconds of motions\" adjustable\r\n* properly delete old motions",
-        "de": "* Bewegungsereignisse optional gemacht (Letzte Bewegung wird immer gespeichert)\r\n* Intervall und \"letzte x Sekunden der Bewegungen\" einstellbar gemacht\r\n* Alte Bewegungen ordnungsgemäß löschen",
-        "ru": "* сделал события движения необязательными (последнее движение всегда сохраняется)\r\n* сделал интервал и \"последние x секунд движений\" регулируемыми\r\n* правильно удалить старые движения",
-        "pt": "* Eventos de movimento opcionais (o último movimento é sempre armazenado)\r\n* intervalo ajustável e \"últimos x segundos de movimentos\" ajustáveis\r\n* excluir corretamente movimentos antigos",
-        "nl": "* maakte motion Events optioneel (Last Motion wordt altijd opgeslagen)\r\n* interval en \"laatste x seconden van bewegingen\" instelbaar\r\n* verwijder oude bewegingen correct",
-        "fr": "* fait des événements de mouvement en option (le dernier mouvement est toujours stocké)\r\n* intervalle et \"dernières x secondes de mouvements\" réglables\r\n* supprimer correctement les anciennes motions",
-        "it": "* reso motion Eventi facoltativi (Last Motion è sempre memorizzato)\r\n* intervallo regolato e \"ultimi x secondi di movimenti\" regolabili\r\n* elimina correttamente i vecchi movimenti",
-        "es": "* hecho movimiento Eventos opcional (Last Motion siempre se almacena)\r\n* intervalo y \"últimos x segundos de movimientos\" ajustables\r\n* eliminar correctamente movimientos antiguos",
-        "pl": "* wykonane zdarzenia ruchu opcjonalne (Last Motion jest zawsze zapisywany)\r\n* zmieniono interwał i „ostatnie x sekundy ruchów”\r\n* poprawnie usuwaj stare ruchy",
-        "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案",
-        "uk": "* зроблені події руху необов’язкові (останній рух завжди зберігається)\r\n* зроблено налаштування інтервалу та \"останніх х секунд рухів\".\r\n* правильно видалити старі рухи"
       }
     },
     "titleLang": {
