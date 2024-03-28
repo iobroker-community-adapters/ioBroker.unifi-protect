@@ -26,7 +26,8 @@
         "it": "aggiunto rilevamenti intelligenti\nrisolto alcune cose lastMotion\naggiunto il supporto UnifiOs per CloudKey",
         "es": "agregadas detecciones inteligentes\narreglado algunas cosas de lastMotion\nSe agregó soporte UnifiOs para CloudKey",
         "pl": "dodano inteligentne wykrywanie\nnaprawiono kilka rzeczy w lastMotion\ndodano obsługę UnifiOs dla CloudKey",
-        "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持"
+        "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持",
+        "uk": "додані розумні виявлення\nвиправлено деякі речі lastMotion\nдодано підтримку UnifiOs для CloudKey"
       },
       "0.0.11": {
         "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
@@ -38,7 +39,8 @@
         "it": "* ha cambiato leggermente l'interfaccia di amministrazione\r\n* aggiunta descrizione per la porta\r\n* stati scrivibili fissi di UDM Pro",
         "es": "* Cambió un poco la interfaz de administrador\r\n* descripción agregada para el puerto\r\n* estados de escritura UDM Pro fijos",
         "pl": "* zmieniono nieco interfejs administratora\r\n* dodano opis portu\r\n* naprawiono stany zapisu UDM Pro",
-        "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态"
+        "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态",
+        "uk": "* трохи змінений інтерфейс адміністратора\r\n* додано опис порту\r\n* Виправлено стани запису UDM Pro"
       },
       "0.0.10": {
         "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
@@ -50,7 +52,8 @@
         "it": "* Travis ci per i test di integrazione corretti\r\n* utilizza effettivamente l'ultima impostazione di movimento x",
         "es": "* travis ci para pruebas de integración arregladas\r\n* realmente usa la última configuración de movimiento x",
         "pl": "* Naprawiono travis ci do testów integracyjnych\r\n* faktycznie używam ustawienia ostatniego x ruchu",
-        "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置"
+        "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置",
+        "uk": "* travis ci для інтеграційних тестів виправлено\r\n* фактично використовувати налаштування останнього руху x"
       },
       "0.0.9": {
         "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
@@ -62,7 +65,8 @@
         "it": "* lastMotion della telecamera si aggiorna solo se necessario\r\n* prime integrazioni UDM, la modifica delle impostazioni NON funziona ancora",
         "es": "* lastMotion de cámara solo se actualiza si es necesario\r\n* primeras integraciones UDM, la configuración cambiante NO funciona todavía",
         "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
-        "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用"
+        "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用",
+        "uk": "* LastMotion камери оновлюється лише за потреби\r\n* перша інтеграція UDM, зміна налаштувань ще НЕ працює"
       },
       "0.0.8": {
         "en": "* made motion Events optional (Last Motion is always stored)\r\n* made interval and \"last x seconds of motions\" adjustable\r\n* properly delete old motions",
@@ -74,7 +78,8 @@
         "it": "* reso motion Eventi facoltativi (Last Motion è sempre memorizzato)\r\n* intervallo regolato e \"ultimi x secondi di movimenti\" regolabili\r\n* elimina correttamente i vecchi movimenti",
         "es": "* hecho movimiento Eventos opcional (Last Motion siempre se almacena)\r\n* intervalo y \"últimos x segundos de movimientos\" ajustables\r\n* eliminar correctamente movimientos antiguos",
         "pl": "* wykonane zdarzenia ruchu opcjonalne (Last Motion jest zawsze zapisywany)\r\n* zmieniono interwał i „ostatnie x sekundy ruchów”\r\n* poprawnie usuwaj stare ruchy",
-        "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案"
+        "zh-cn": "*将动作事件设为可选（始终存储最后动作）\r\n*调整间隔和“最后x秒的动作”可调\r\n*正确删除旧议案",
+        "uk": "* зроблені події руху необов’язкові (останній рух завжди зберігається)\r\n* зроблено налаштування інтервалу та \"останніх х секунд рухів\".\r\n* правильно видалити старі рухи"
       },
       "0.0.7": {
         "en": "* continuosly refresh motion events\r\n* changed data structur\r\n* added lastMotion Datapoint to each camera",
@@ -86,7 +91,8 @@
         "it": "* aggiorna continuamente gli eventi di movimento\r\n* modifica della struttura dei dati\r\n* aggiunto lastMotion Datapoint a ciascuna telecamera",
         "es": "* actualiza continuamente eventos de movimiento\r\n* estructura de datos modificada\r\n* agregado lastMotion Datapoint a cada cámara",
         "pl": "* ciągłe odświeżanie zdarzeń ruchu\r\n* zmieniono strukturę danych\r\n* Dodano lastMotion Datapoint do każdej kamery",
-        "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机"
+        "zh-cn": "*持续刷新动作事件\r\n*更改了数据结构\r\n*将lastMotion数据点添加到每个摄像机",
+        "uk": "* Безперервно оновлювати події руху\r\n* змінена структура даних\r\n* додано lastMotion Datapoint до кожної камери"
       }
     },
     "titleLang": {
@@ -99,7 +105,8 @@
       "it": "UniFi Protect",
       "es": "Proteger unifi",
       "pl": "UniFi Protect",
-      "zh-cn": "UniFi保护"
+      "zh-cn": "UniFi保护",
+      "uk": "UniFi Protect"
     },
     "desc": {
       "en": "unifi-protect",
@@ -111,7 +118,8 @@
       "it": "UniFi-protect",
       "es": "protección unifi",
       "pl": "unifi-protect",
-      "zh-cn": "统一保护"
+      "zh-cn": "统一保护",
+      "uk": "unifi-захист"
     },
     "authors": [
       "Peter Baumert <ioBroker.unifi-protect@outlook.com>",
