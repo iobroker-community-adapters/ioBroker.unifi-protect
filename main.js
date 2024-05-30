@@ -224,7 +224,7 @@ class UnifiProtect extends utils.Adapter {
                         camId,
                         snapshotUrl,
                         function () {
-                            that.setStateAsync(id.replace(`.manualSnapshot`, `.manualSnapshotUrl`), snapshotUrl, true);
+                            that.setStateAsync(id.replace(`.manualSnapshot`, `.manualSnapshotUrl`), 'vis.0' + snapshotUrl, true);
                         },
                         this.config.takeSnapshotManualWidth || 640,
                         true,
