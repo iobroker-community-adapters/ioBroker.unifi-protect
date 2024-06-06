@@ -66,7 +66,7 @@ This adapter would not have been possible without the great work of Peter Baumer
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 1.0.1 (2024-06-06)
 * (Scrounger) A Problem accessing the 'manual snapshot' folder has been fixed.
 * (mcm1957) Dependencies have been updated
 

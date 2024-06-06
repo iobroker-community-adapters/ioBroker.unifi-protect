@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "unifi-protect",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "news": {
+      "1.0.1": {
+        "en": "A Problem accessing the 'manual snapshot' folder has been fixed.\nDependencies have been updated",
+        "de": "Ein Problem beim Zugriff auf den \"manuellen Snapshot\"-Ordner wurde behoben.\nAbhängigkeiten wurden aktualisiert",
+        "ru": "Проблема доступа к папке «ручного снимка» была исправлена.\nЗависимость обновлена",
+        "pt": "Um problema de acessar a pasta 'manual snapshot' foi corrigido.\nAs dependências foram atualizadas",
+        "nl": "Een probleem met de map 'handmatige snapshot' is opgelost.\nAfhankelijkheden zijn bijgewerkt",
+        "fr": "Un problème d'accès au dossier « instantané manuel » a été corrigé.\nLes dépendances ont été actualisées",
+        "it": "È stato risolto un problema di accesso alla cartella \"istantanea manuale\".\nLe dipendenze sono state aggiornate",
+        "es": "Se ha solucionado un problema para acceder a la carpeta de la instantánea manual.\nSe han actualizado las dependencias",
+        "pl": "Naprawiono problem dostępu do folderu 'handle migawki'.\nZaktualizowano zależności",
+        "uk": "Виправлено проблемний доступ до папки 'manual snapshot'.\nЗалежність було оновлено",
+        "zh-cn": "访问“ 手动快照” 文件夹的问题已经解决 .\n依赖关系已更新"
+      },
       "1.0.0": {
         "en": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 now\nAdapter has been moved to iobroker-community-adapters organisation\nDependencies have been updated",
         "de": "BREAKING: Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAdapter wurde zu iobroker-community-adapters Organisation verschoben\nAbhängigkeiten wurden aktualisiert",
