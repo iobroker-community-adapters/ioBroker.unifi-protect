@@ -134,6 +134,7 @@ class ProtectApi {
         } catch (error) {
             data = null;
             this.log.error(`${this.config.protectip}: Unable to parse response from UniFi Protect. Will retry again later.`);
+            return false;
         }
 
         // No camera information returned.
