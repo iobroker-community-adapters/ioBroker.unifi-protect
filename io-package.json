@@ -1,125 +1,20 @@
 {
   "common": {
-    "name": "unifi-protect",
-    "version": "1.0.1",
+    "name": "unifi-protect-tomatenforever",
+    "version": "0.0.2",
     "news": {
-      "1.0.1": {
-        "en": "A Problem accessing the 'manual snapshot' folder has been fixed.\nDependencies have been updated",
-        "de": "Ein Problem beim Zugriff auf den \"manuellen Snapshot\"-Ordner wurde behoben.\nAbhängigkeiten wurden aktualisiert",
-        "ru": "Проблема доступа к папке «ручного снимка» была исправлена.\nЗависимость обновлена",
-        "pt": "Um problema de acessar a pasta 'manual snapshot' foi corrigido.\nAs dependências foram atualizadas",
-        "nl": "Een probleem met de map 'handmatige snapshot' is opgelost.\nAfhankelijkheden zijn bijgewerkt",
-        "fr": "Un problème d'accès au dossier « instantané manuel » a été corrigé.\nLes dépendances ont été actualisées",
-        "it": "È stato risolto un problema di accesso alla cartella \"istantanea manuale\".\nLe dipendenze sono state aggiornate",
-        "es": "Se ha solucionado un problema para acceder a la carpeta de la instantánea manual.\nSe han actualizado las dependencias",
-        "pl": "Naprawiono problem dostępu do folderu 'handle migawki'.\nZaktualizowano zależności",
-        "uk": "Виправлено проблемний доступ до папки 'manual snapshot'.\nЗалежність було оновлено",
-        "zh-cn": "访问“ 手动快照” 文件夹的问题已经解决 .\n依赖关系已更新"
-      },
-      "1.0.0": {
-        "en": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 now\nAdapter has been moved to iobroker-community-adapters organisation\nDependencies have been updated",
-        "de": "BREAKING: Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAdapter wurde zu iobroker-community-adapters Organisation verschoben\nAbhängigkeiten wurden aktualisiert",
-        "ru": "BREAKING: Adapter requires node.js 18 and js-controller >= 5 сейчас\nАдаптер был перемещен в организацию iobroker-community-adapters\nЗависимость обновлена",
-        "pt": "BREAKING: Adapter requer node.js 18 e js-controller >= 5 agora\nAdapter foi movido para iobroker-community-adapters organização\nAs dependências foram atualizadas",
-        "nl": "Breaking: adapter vereist node.js 18 en js-controller Nu 5\nAdapter is verplaatst naar iobroker-community-adapters organisatie\nAfhankelijkheden zijn bijgewerkt",
-        "fr": "L'adaptateur nécessite node.js 18 et js-controller >= 5 maintenant\nAdapter a été transféré à l'organisation iobroker-community-adapters\nLes dépendances ont été actualisées",
-        "it": "BREAKING: Adattatore richiede node.js 18 e js-controller >= 5 ora\nL'adattatore è stato spostato nell'organizzazione degli adattatori della comunità-iobroker\nLe dipendenze sono state aggiornate",
-        "es": "BREAKING: El adaptador requiere node.js 18 y js-controller 5 ahora\nAdaptador ha sido trasladado a la organización de ibroker-community-adapters\nSe han actualizado las dependencias",
-        "pl": "BREAKING: Adapter wymaga node.js 18 i sterownika js- > = 5 teraz\nAdapter został przeniesiony do organizacji adapterów społeczności iobrokerowej\nZaktualizowano zależności",
-        "uk": "BREAKING: Адаптер вимагає вузла.js 18 і js-controller >= 5 тепер\nПереміщено перехід на iobroker-community-adapters\nЗалежність було оновлено",
-        "zh-cn": "适配器需要节点.js 18和js控制器 QQ 现在5号\n适应者被转移到了职业经纪人-社区适应者组织\n依赖关系已更新"
-      },
-      "0.0.13": {
-        "en": "dependencies updates\nfirst implementation of realtime updates api\nlastMotion, lastRing, lcdMessage and smartDetectZone in realTimeEvents\nButton to take manual snapshot added\nreal time events datapoints for every cam added\ntake snapshot and thumbnail for real time events added (base64 images)\nthumbnail image for list of motion events added (base64 images)\nsmall thumbnail image for list of motion events and real time events added (base64 images)\ncamera name for list of motion events added",
-        "de": "aktualisierung der abhängigkeiten\nerste implementierung von echtzeit-updates api\nlastMotion, lastRing, lcd Nachricht und smart DetectZone in realTimeEvents\nKnopf zum manuellen Snapshot hinzufügen\nechtzeit-ereignisse datenpunkte für jede cam hinzugefügt\nschnappschüsse und vorschau für echtzeit-ereignisse hinzugefügt (base64 bilder)\nminiaturbild für die liste der bewegungsereignisse hinzugefügt (base64 bilder)\nkleines miniaturbild für die liste der bewegungsereignisse und echtzeitereignisse hinzugefügt (base64 bilder)\nkameraname für die liste der bewegungsereignisse hinzugefügt",
-        "ru": "обновления зависимости\nпервая реализация api обновлений realtime\nlastMotion, lastRing, лкд Сообщение и умный DetectZone в realTimeEvents\nКнопка, чтобы принять ручной снимок добавлен\nдата-точки событий в реальном времени для каждого cam добавлены\nвзять снимок и миниатюру для событий в реальном времени (base64 изображения)\nизображение миниатюры для списка добавленных событий движения (base64 изображения)\nнебольшое изображение миниатюры для списка событий движения и событий в реальном времени (базов64 изображения)\nназвание камеры для списка мероприятий движения добавлено",
-        "pt": "atualizações de dependências\nprimeira implementação de atualizações em tempo real api\nlastMotion, lastRing, lcd Mensagem e inteligência DetectZone em tempo realEventos\nBotão para tirar instantâneo manual adicionado\ndatapoints de eventos em tempo real para cada câmera adicionada\ntirar instantâneo e miniatura para eventos em tempo real adicionado (base64 imagens)\nimagem miniatura para lista de eventos de movimento adicionado (base64 imagens)\npequena imagem miniatura para lista de eventos de movimento e eventos em tempo real adicionados (base64 imagens)\nnome da câmera para lista de eventos de movimento adicionado",
-        "nl": "afhankelijke updates\neerste implementatie van realtime updates\nlaatste beweging, laatste rij, Icdd Bericht en slim Vertaling:\nKnoop om handmatige foto's te nemen\nechte tijdsevenementen die datapoints voor elke camera toevoegen\nneem fotoshot en duimnail voor echte tijd evenementen toegevoegd (base64 beelden)\nduimafbeelding voor lijst van bewegingsevenementen toegevoegd (base64 beelden)\nkleine duimplaat voor lijst van bewegingsevenementen en echte tijdsevenementen voegde (base64 beelden)\ncameranaam voor lijst van bewegingsevenementen",
-        "fr": "mises à jour des dépendances\npremière mise en œuvre des mises à jour en temps réel api\nlastMotion, lastRing, lcd Message et smart DetectZone in realTimeEvents\nBouton pour prendre un instantané manuel ajouté\ntemps réel événements datapoints pour chaque came ajouté\nprendre un instantané et une miniature pour les événements en temps réel ajoutés (base64 images)\nimage miniature pour liste des événements de mouvement ajouté (base64 images)\npetite image pour liste d'événements de mouvement et d'événements en temps réel ajouté (images de base64)\nnom de la caméra pour liste d'événements de mouvement ajouté",
-        "it": "aggiornamenti sulle dipendenze\nprima implementazione di aggiornamenti in tempo reale api\nlastMotion, lastRing, lcd Messaggio e smart RilevaZone in tempo realeEventi\nPulsante per scattare l'istantanea manuale aggiunto\neventi in tempo reale datapoint per ogni cam aggiunto\nprendere snapshot e thumbnail per eventi in tempo reale aggiunto (fotografie base64)\nimmagine di anteprima per l'elenco degli eventi di movimento aggiunti (fotografie di base64)\npiccola immagine di miniatura per elenco di eventi di movimento e eventi in tempo reale aggiunto (fotografie base64)\nnome della fotocamera per elenco di eventi di movimento aggiunto",
-        "es": "actualizaciones de las dependencias\nprimera implementación de actualizaciones en tiempo real api\nlastMotion, lastRing, lcd Mensaje e inteligente DetectZone en tiempo realEventos\nBotón para tomar instantánea manual añadido\ntiempo real eventos datapoints para cada cámara añadido\ntomar instantáneas y miniaturas para eventos en tiempo real añadidos (imagenes de baño64)\nimagen de miniatura para lista de eventos de movimiento añadido (base64 imágenes)\nimagen miniatura pequeña para la lista de eventos de movimiento y eventos en tiempo real agregados (base64 imágenes)\nnombre de cámara para lista de eventos de movimiento añadido",
-        "pl": "aktualizacja\npierwsza implementacja aktualizacji api\nostatnia wersja, ostatnia, lcd. Pamięć i mądrość DetectZone w rzeczywistości\nButton dodał ręcznie dodać\ndane dotyczące każdej kamery są dodawane do rzeczywistego punktu czasowego\nposzukiwania i paznokci dla rzeczywistych wydarzeń (base64 obrazy)\nzdjęcie do listy zdarzeń ruchowych dodano (base64 obrazy)\nmały obraz kciukowy na listę zdarzeń ruchowych i rzeczywistych zdarzeń czasowych dodano (base64 obrazy)\nnazwę kamery dodano do listy wydarzeń",
-        "uk": "оновлення залежності\nперша реалізація оновлень в режимі реального часу\nlastMotion, lastRing, lcd Повідомлення та смарт DetectZone в режимі реального часуПодії\nКнопка, щоб взяти ручний знімок додано\nдані про події в режимі реального часу для кожного камери додано\nmake snapshot і thumbnail для реальних подій часу (base64 зображень)\nthumbnail зображення для списку доданих подій руху (base64 зображень)\nневеликий мініатюрний образ для списку подій руху і додано події реального часу (base64 зображень)\nдодано назву камери для списку заходів руху",
-        "zh-cn": "a. 依赖性更新\n首次执行实时更新版\n最后的推论,最后一点是: 导 言 实际制度中的障碍\n布托尔特加\n每个中心实时事件数据点增加\n实时事件增加(图64图像)\n举动事件清单的图象(图64图像)\n举动事件清单和实时事件的小声音(图64图像)\n动议名单的摄像"
-      },
-      "0.0.12": {
-        "en": "added smart detections\nfixed some lastMotion stuff\nadded UnifiOs Support for CloudKey",
-        "de": "intelligente Erkennungen hinzugefügt\nEinige lastMotion-Probleme wurden behoben\nUnifiOs-Unterstützung für CloudKey hinzugefügt",
-        "ru": "добавлены умные детекции\nисправлены некоторые вещи lastMotion\nдобавлена поддержка UnifiOs для CloudKey",
-        "pt": "adicionou detecções inteligentes\nconsertou algumas coisas do lastMotion\nadicionado Suporte UnifiOs para CloudKey",
-        "nl": "slimme detecties toegevoegd\nwat lastMotion-dingen opgelost\nUnifiOs-ondersteuning toegevoegd voor CloudKey",
-        "fr": "ajout de détections intelligentes\ncorrigé des trucs lastMotion\nAjout de la prise en charge UnifiOs pour CloudKey",
-        "it": "aggiunto rilevamenti intelligenti\nrisolto alcune cose lastMotion\naggiunto il supporto UnifiOs per CloudKey",
-        "es": "agregadas detecciones inteligentes\narreglado algunas cosas de lastMotion\nSe agregó soporte UnifiOs para CloudKey",
-        "pl": "dodano inteligentne wykrywanie\nnaprawiono kilka rzeczy w lastMotion\ndodano obsługę UnifiOs dla CloudKey",
-        "zh-cn": "增加了智能检测\n修复了一些lastMotion的内容\n增加了对CloudKey的UnifiOs支持",
-        "uk": "додані розумні виявлення\nвиправлено деякі речі lastMotion\nдодано підтримку UnifiOs для CloudKey"
-      },
-      "0.0.11": {
-        "en": "* changed Admin interface a little\r\n* added description for port\r\n* fixed UDM Pro writeable states",
-        "de": "* Admin-Oberfläche ein wenig geändert\r\n* Beschreibung für Port hinzugefügt\r\n* UDM Pro beschreibbare Zustände behoben",
-        "ru": "* немного изменил интерфейс администратора\r\n* добавлено описание порта\r\n* исправлены состояния записи UDM Pro",
-        "pt": "* mudou a interface do administrador um pouco\r\n* descrição adicionada para a porta\r\n* estados graváveis do UDM Pro corrigidos",
-        "nl": "* Heeft de beheerdersinterface een beetje gewijzigd\r\n* Toegevoegde beschrijving voor poort\r\n* vaste UDM Pro beschrijfbare statussen",
-        "fr": "* interface d'administration un peu modifiée\r\n* description ajoutée pour le port\r\n* états inscriptibles UDM Pro fixes",
-        "it": "* ha cambiato leggermente l'interfaccia di amministrazione\r\n* aggiunta descrizione per la porta\r\n* stati scrivibili fissi di UDM Pro",
-        "es": "* Cambió un poco la interfaz de administrador\r\n* descripción agregada para el puerto\r\n* estados de escritura UDM Pro fijos",
-        "pl": "* zmieniono nieco interfejs administratora\r\n* dodano opis portu\r\n* naprawiono stany zapisu UDM Pro",
-        "zh-cn": "*稍微更改了管理界面\r\n*添加了端口说明\r\n*固定的UDM Pro可写状态",
-        "uk": "* трохи змінений інтерфейс адміністратора\r\n* додано опис порту\r\n* Виправлено стани запису UDM Pro"
-      },
-      "0.0.10": {
-        "en": "* travis ci for integration tests fixed\r\n* actually use last x motion setting",
-        "de": "* Travis CI für Integrationstests behoben\r\n* Verwenden Sie tatsächlich die letzte x-Bewegungseinstellung",
-        "ru": "* travis ci для интеграционных тестов исправлен\r\n* на самом деле использовать последнюю настройку движения х",
-        "pt": "* travis ci para testes de integração corrigidos\r\n* use realmente a última configuração de movimento x",
-        "nl": "* travis ci voor integratietests vastgesteld\r\n* gebruik eigenlijk de laatste x beweging instelling",
-        "fr": "* travis ci pour les tests d'intégration corrigé\r\n* utilise réellement le dernier paramètre de mouvement x",
-        "it": "* Travis ci per i test di integrazione corretti\r\n* utilizza effettivamente l'ultima impostazione di movimento x",
-        "es": "* travis ci para pruebas de integración arregladas\r\n* realmente usa la última configuración de movimiento x",
-        "pl": "* Naprawiono travis ci do testów integracyjnych\r\n* faktycznie używam ustawienia ostatniego x ruchu",
-        "zh-cn": "* travis ci用于集成测试的问题已修复\r\n*实际使用最后一个x动作设置",
-        "uk": "* travis ci для інтеграційних тестів виправлено\r\n* фактично використовувати налаштування останнього руху x"
-      },
-      "0.0.9": {
-        "en": "* lastMotion of camera only updating if neccessary\r\n* first UDM integrations, changing settings NOT working yet",
-        "de": "* lastMotion der Kamera wird nur aktualisiert, wenn dies erforderlich ist\r\n* Erste UDM-Integrationen, Einstellungen ändern funktioniert noch NICHT",
-        "ru": "* lastMotion обновления камеры только при необходимости\r\n* первые UDM интеграции, изменение настроек еще не работает",
-        "pt": "* lastMotion da câmera atualizando apenas se necessário\r\n* primeiras integrações UDM, alterando configurações ainda não funcionando",
-        "nl": "* lastMotion van camera wordt alleen bijgewerkt indien nodig\r\n* eerste UDM-integraties, instellingen wijzigen werkt nog NIET",
-        "fr": "* lastMotion de la caméra uniquement mise à jour si nécessaire\r\n* premières intégrations UDM, la modification des paramètres ne fonctionne pas encore",
-        "it": "* lastMotion della telecamera si aggiorna solo se necessario\r\n* prime integrazioni UDM, la modifica delle impostazioni NON funziona ancora",
-        "es": "* lastMotion de cámara solo se actualiza si es necesario\r\n* primeras integraciones UDM, la configuración cambiante NO funciona todavía",
-        "pl": "* last Ruch kamery aktualizuje się tylko w razie potrzeby\r\n* pierwsze integracje UDM, zmiana ustawień jeszcze nie działa",
-        "zh-cn": "*相机的lastMotion仅在必要时更新\r\n*首次进行UDM集成，更改设置尚不可用",
-        "uk": "* LastMotion камери оновлюється лише за потреби\r\n* перша інтеграція UDM, зміна налаштувань ще НЕ працює"
+      "0.0.2": {
+        "en": "Initial release",
+        "de": "Initiales release"
       }
     },
     "titleLang": {
-      "en": "UniFi Protect",
-      "de": "UniFi Protect",
-      "ru": "UniFi Protect",
-      "pt": "UniFi Protect",
-      "nl": "UniFi Protect",
-      "fr": "UniFi Protect",
-      "it": "UniFi Protect",
-      "es": "Proteger unifi",
-      "pl": "UniFi Protect",
-      "zh-cn": "UniFi保护",
-      "uk": "UniFi Protect"
+      "en": "UniFi Protect Tomatenforever",
+      "de": "UniFi Protect Tomatenforever"
     },
     "desc": {
-      "en": "unifi-protect",
-      "de": "unifi-protect",
-      "ru": "UniFi защиты",
-      "pt": "proteger uniformemente",
-      "nl": "UNIFI-protect",
-      "fr": "unifi-protect",
-      "it": "UniFi-protect",
-      "es": "protección unifi",
-      "pl": "unifi-protect",
-      "zh-cn": "统一保护",
-      "uk": "unifi-захист"
+      "en": "unifi-protect-tomatenforever",
+      "de": "unifi-protect-tomatenforever"
     },
     "authors": [
       "Peter Baumert <ioBroker.unifi-protect@outlook.com>",
