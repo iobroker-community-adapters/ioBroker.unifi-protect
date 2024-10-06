@@ -389,7 +389,7 @@ class ProtectApi {
                         }
                 }
             } else {
-                this.log.error(`${this.config.protectip}: Controller API connection terminated because it was taking too long. This error can usually be safely ignored.`);
+                this.log.error(`${this.config.protectip}: Controller API connection terminated because it was taking too long. This error can usually be safely ignored. Error: ${error}`);
             }
 
             return null;
@@ -449,23 +449,23 @@ class ProtectApi {
     }
 
     clearLoginCredentials() {
-        this.log.debug(`${this.config.protectip}: Clearing Login Credentials!`);
-        this.isAdminUser = false;
-        this.loggedIn = false;
-        this.loginAge = 0;
+            this.log.debug(`${this.config.protectip}: Clearing Login Credentials!`);
+            this.isAdminUser = false;
+            this.loggedIn = false;
+            this.loginAge = 0;
 
-        // Shutdown any event listeners, if we have them.
-        this.disconnect();
+            // Shutdown any event listeners, if we have them.
+            this.disconnect();
 
-        // Initialize the headers we need.
-        this.headers = new fetch.Headers();
-        this.headers.set('Content-Type', 'application/json');
+            // Initialize the headers we need.
+            this.headers = new fetch.Headers();
+            this.headers.set('Content-Type', 'application/json');
 
-        // We want the initial agent to be connection-agnostic, except for certificate validate since Protect uses self-signed certificates.
-        // and we want to disable TLS validation, at a minimum. We want to take advantage of the fact that it supports keepalives to reduce
-        // workloads, but we deal with that elsewhere in acquireToken.
-        if (this.httpsAgent) this.httpsAgent.destroy();
-        this.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+            // We want the initial agent to be connection-agnostic, except for certificate validate since Protect uses self-signed certificates.
+            // and we want to disable TLS validation, at a minimum. We want to take advantage of the fact that it supports keepalives to reduce
+            // workloads, but we deal with that elsewhere in acquireToken.
+            if (this.httpsAgent) this.httpsAgent.destroy();
+            this.httpsAgent = new https.Agent({ rejectUnauthorized: false });
     }
 
     disconnect() {
