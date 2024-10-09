@@ -28,6 +28,9 @@ class ProtectApi {
 
     async acquireToken() {
 
+        //Log it
+        this.log.info(`${this.config.protectip}: Start to acquire token.`);
+
         // We only need to acquire a token if we aren't already logged in, or we don't already have a token,
         // or don't know which device type we're on.
         if (this.loggedIn || this.headers.has('X-CSRF-Token') || this.headers.has('Authorization')) {
@@ -40,6 +43,7 @@ class ProtectApi {
         const response = await this.fetch('https://' + this.config.protectip, { method: 'GET' });
 
         if (response != null) {
+            this.log.info(`${this.config.protectip}: Response is not null during acquireToken. Get token from headers.`);
             const csrfToken = response.headers.get('X-CSRF-Token');
 
             // We found a token.
@@ -333,6 +337,13 @@ class ProtectApi {
             }
 
             response = await fetch(url, options);
+
+            // In case of no response
+            if (response==null)
+            {
+                this.log.error('Response is empty. Return null.');
+                return null;
+            }
 
             // The caller will sort through responses instead of us.
             if (!decodeResponse) {

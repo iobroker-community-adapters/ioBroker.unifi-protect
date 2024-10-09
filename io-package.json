@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "unifi-protect-tomatenforever",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "news": {
+      "0.0.4": {
+        "en": "Some smaller correction",
+        "de": "Kleinere Verbesserungen"
+      },
       "0.0.3": {
         "en": "Added further logging",
         "de": "Erweitertes logging hinzugefügt"
