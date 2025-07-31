@@ -1736,25 +1736,23 @@ class UnifiProtect extends utils.Adapter {
         if (cookie !== '') {
             const cookie_bits = cookie.split('=');
             let jwt = '';
-            // next line look errounous
-            // eslint:  Invalid typeof comparison value  valid-typeof
-            // eslint-disable-next-line valid-typeof
-            if (typeof cookie_bits[1] !== undefined) {
-                jwt = cookie_bits[1];
-            } else {
+
+            const typeCookie_bits = typeof cookie_bits[1];
+
+            if (typCookie_bits == undefined) {
                 return false;
             }
 
+            jwt = cookie_bits[1];
+
             const jwt_components = jwt.split('.');
             let jwt_payload = '';
-            // next line look errounous
-            // eslint:  Invalid typeof comparison value  valid-typeof
-            // eslint-disable-next-line valid-typeof
-            if (typeof jwt_components[1] !== undefined) {
-                jwt_payload = jwt_components[1];
-            } else {
+
+            const typeJwt_components_bits = jwt_components[1]
+            if (typeJwt_components_bits == undefined) {
                 return false;
             }
+            jwt_payload = jwt_components[1];
 
             return JSON.parse(Buffer.from(jwt_payload, 'base64').toString())
                 .csrfToken;
