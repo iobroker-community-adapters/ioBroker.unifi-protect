@@ -2,13 +2,11 @@
   "name": "iobroker.unifi-protect",
   "version": "1.0.1",
   "description": "unifi-protect",
-  "author": {
-    "name": "Peter Baumert",
-    "email": "ioBroker.unifi-protect@outlook.com"
-  },
+  "author": "Peter Baumert <ioBroker.unifi-protect@outlook.com>",
   "contributors": [
     "Scrounger <scrounger@gmx.net>",
-    "mcm1957 <mcm57@gmx.at>"
+    "mcm1957 <mcm57@gmx.at>",
+    "iobroker-community-adapters <iobroker-community-adapters@gmx.de>"
   ],
   "homepage": "https://github.com/iobroker-community-adapters/ioBroker.unifi-protect",
   "license": "MIT",
