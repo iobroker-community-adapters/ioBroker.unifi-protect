@@ -1,0 +1,230 @@
+{
+  "type": "tabs",
+  "items": {
+    "general": {
+      "type": "panel",
+      "label": "general",
+      "items": {
+        "protectip": {
+          "type": "text",
+          "label": "IP Address / Hostname",
+          "attr": "protectip",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "protectport": {
+          "type": "number",
+          "label": "Port",
+          "help": "CloudKey Gen2 w/o UnifiOS: 7443 / UDM Pro/CloudKey Gen2 w UnifiOS: 443 / your custom port, if changed",
+          "attr": "protectport",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "username": {
+          "type": "text",
+          "label": "Username",
+          "attr": "username",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "password": {
+          "type": "password",
+          "label": "Password",
+          "attr": "password",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "interval": {
+          "type": "number",
+          "label": "Refresh Interval",
+          "attr": "interval",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "getMotions": {
+          "type": "checkbox",
+          "label": "Get Motions (last Motion is always included)",
+          "attr": "getMotions",
+          "newLine": true,
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "motionTypes": {
+          "type": "panel",
+          "label": "Types of Motion",
+          "items": {
+            "motion": {
+              "type": "checkbox",
+              "label": "motion",
+              "attr": "motionTypes.motion",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            },
+            "smartDetectZone": {
+              "type": "checkbox",
+              "label": "smartDetectZone",
+              "attr": "motionTypes.smartDetectZone",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            },
+            "ring": {
+              "type": "checkbox",
+              "label": "ring",
+              "attr": "motionTypes.ring",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            }
+          },
+          "newLine": true,
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "numMotions": {
+          "type": "number",
+          "label": "Number of Motions",
+          "attr": "numMotions",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "secMotions": {
+          "type": "number",
+          "label": "Last x Seconds of Motions",
+          "attr": "secMotions",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "downloadLastMotionThumb": {
+          "type": "checkbox",
+          "label": "download image of last motion",
+          "attr": "downloadLastMotionThumb",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "downloadLastMotionThumbWidth": {
+          "type": "number",
+          "label": "image width of last motion",
+          "attr": "downloadLastMotionThumbWidth",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotion": {
+          "type": "checkbox",
+          "label": "take snapshot for last motion",
+          "attr": "takeSnapshotForLastMotion",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotionWidth": {
+          "type": "number",
+          "label": "image width of snapshot of last motion",
+          "attr": "takeSnapshotForLastMotionWidth",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotionDelay": {
+          "type": "number",
+          "label": "delay for snapshot of last motion",
+          "attr": "takeSnapshotForLastMotionDelay",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotManualWidth": {
+          "type": "number",
+          "label": "image width of manual snapshot",
+          "attr": "takeSnapshotManualWidth",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        }
+      }
+    },
+    "cameras": {
+      "type": "panel",
+      "label": "cameras",
+      "items": {
+        "statesFilterCameras": {
+          "type": "chips",
+          "label": "root_cameras",
+          "attr": "statesFilter.cameras",
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        }
+      }
+    },
+    "motions": {
+      "type": "panel",
+      "label": "motions",
+      "items": {
+        "statesFilterMotions": {
+          "type": "chips",
+          "label": "root_motions",
+          "attr": "statesFilter.motions",
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        }
+      }
+    }
+  }
+}
