@@ -34,9 +34,9 @@
   "delay for snapshot of last motion": "最后动作快照的延迟",
   "image width of manual snapshot": "手册摘录图像",
   "Port": "端口",
-  "CloudKey Gen2 w/o UnifiOS: 7443 / UDM Pro/CloudKey Gen2 w UnifiOS: 443 / your custom port, if changed": "CloudKey Gen2 无 UnifiOS：7443 / 含 UnifiOS 的 UDM Pro/CloudKey Gen2：443 / 如果修改了请填写自定义端口",
   "Types of Motion": "运动类型",
-  "motion": "运动",
-  "smartDetectZone": "smartDetectZone",
-  "ring": "门铃"
+  "Motion": "运动",
+  "Smart detect zone": "智能检测区域",
+  "Ring": "门铃",
+  "Motion Types": "运动类型"
 }

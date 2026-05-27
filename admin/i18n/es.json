@@ -34,9 +34,9 @@
   "delay for snapshot of last motion": "retraso para la instantánea del último movimiento",
   "image width of manual snapshot": "ancho de imagen de instantánea manual",
   "Port": "Puerto",
-  "CloudKey Gen2 w/o UnifiOS: 7443 / UDM Pro/CloudKey Gen2 w UnifiOS: 443 / your custom port, if changed": "CloudKey Gen2 sin UnifiOS: 7443 / UDM Pro/CloudKey Gen2 con UnifiOS: 443 / su puerto personalizado, si se cambió",
   "Types of Motion": "Tipos de movimiento",
-  "motion": "movimiento",
-  "smartDetectZone": "smartDetectZone",
-  "ring": "timbre"
+  "Motion": "Movimiento",
+  "Smart detect zone": "Zona de detección inteligente",
+  "Ring": "Timbre",
+  "Motion Types": "Tipos de movimiento"
 }

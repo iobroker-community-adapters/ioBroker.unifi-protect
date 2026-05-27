@@ -34,9 +34,9 @@
   "delay for snapshot of last motion": "vertraging voor momentopname van laatste beweging",
   "image width of manual snapshot": "beeld width de handmatige foto",
   "Port": "Poort",
-  "CloudKey Gen2 w/o UnifiOS: 7443 / UDM Pro/CloudKey Gen2 w UnifiOS: 443 / your custom port, if changed": "CloudKey Gen2 zonder UnifiOS: 7443 / UDM Pro/CloudKey Gen2 met UnifiOS: 443 / aangepaste poort indien gewijzigd",
   "Types of Motion": "Typen bewegingen",
-  "motion": "beweging",
-  "smartDetectZone": "smartDetectZone",
-  "ring": "deurbel"
+  "Motion": "Beweging",
+  "Smart detect zone": "Slimme detectiezone",
+  "Ring": "Deurbel",
+  "Motion Types": "Soorten beweging"
 }
