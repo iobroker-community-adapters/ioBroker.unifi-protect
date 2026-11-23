@@ -1527,6 +1527,10 @@ class UnifiProtect extends utils.Adapter {
             const debounce = 300;
 
             motionEvents.forEach(async (motionEvent) => {
+                if (!that.config.getMotions) {
+                    return;
+                }
+
                 if (onReady)
                     that.createOwnChannel(
                         'motions.' + motionEvent.id,
