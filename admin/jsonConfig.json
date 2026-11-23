@@ -1,0 +1,1084 @@
+{
+  "type": "tabs",
+  "items": {
+    "general": {
+      "type": "panel",
+      "label": "general",
+      "items": {
+        "protectip": {
+          "type": "text",
+          "label": "IP Address / Hostname",
+          "attr": "protectip",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "protectport": {
+          "type": "number",
+          "label": "Port",
+          "help": "CloudKey Gen2 w/o UnifiOS: 7443 / UDM Pro/CloudKey Gen2 w UnifiOS: 443 / your custom port, if changed",
+          "attr": "protectport",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "username": {
+          "type": "text",
+          "label": "Username",
+          "attr": "username",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "password": {
+          "type": "password",
+          "label": "Password",
+          "attr": "password",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "interval": {
+          "type": "number",
+          "label": "Refresh Interval",
+          "attr": "interval",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "getMotions": {
+          "type": "checkbox",
+          "label": "Get Motions (last Motion is always included)",
+          "attr": "getMotions",
+          "newLine": true,
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "motionTypes": {
+          "type": "panel",
+          "label": "Motion Types",
+          "items": {
+            "motion": {
+              "type": "checkbox",
+              "label": "Motion",
+              "attr": "motionTypes.motion",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            },
+            "smartDetectZone": {
+              "type": "checkbox",
+              "label": "Smart detect zone",
+              "attr": "motionTypes.smartDetectZone",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            },
+            "ring": {
+              "type": "checkbox",
+              "label": "Ring",
+              "attr": "motionTypes.ring",
+              "xs": 12,
+              "sm": 4,
+              "md": 4,
+              "lg": 4,
+              "xl": 4
+            }
+          },
+          "newLine": true,
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "numMotions": {
+          "type": "number",
+          "label": "Number of Motions",
+          "attr": "numMotions",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "secMotions": {
+          "type": "number",
+          "label": "Last x Seconds of Motions",
+          "attr": "secMotions",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "downloadLastMotionThumb": {
+          "type": "checkbox",
+          "label": "download image of last motion",
+          "attr": "downloadLastMotionThumb",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "downloadLastMotionThumbWidth": {
+          "type": "number",
+          "label": "image width of last motion",
+          "attr": "downloadLastMotionThumbWidth",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotion": {
+          "type": "checkbox",
+          "label": "take snapshot for last motion",
+          "attr": "takeSnapshotForLastMotion",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotionWidth": {
+          "type": "number",
+          "label": "image width of snapshot of last motion",
+          "attr": "takeSnapshotForLastMotionWidth",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotForLastMotionDelay": {
+          "type": "number",
+          "label": "delay for snapshot of last motion",
+          "attr": "takeSnapshotForLastMotionDelay",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        },
+        "takeSnapshotManualWidth": {
+          "type": "number",
+          "label": "image width of manual snapshot",
+          "attr": "takeSnapshotManualWidth",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "lg": 4,
+          "xl": 4
+        }
+      }
+    },
+    "cameras": {
+      "type": "panel",
+      "label": "cameras",
+      "items": {
+        "statesFilterCameras": {
+          "type": "select",
+          "label": "root_cameras",
+          "attr": "statesFilter.cameras",
+          "multiple": true,
+          "options": [
+            {
+              "label": "channels.bitrate",
+              "value": "channels.bitrate"
+            },
+            {
+              "label": "channels.enabled",
+              "value": "channels.enabled"
+            },
+            {
+              "label": "channels.fps",
+              "value": "channels.fps"
+            },
+            {
+              "label": "channels.fpsValues",
+              "value": "channels.fpsValues"
+            },
+            {
+              "label": "channels.height",
+              "value": "channels.height"
+            },
+            {
+              "label": "channels.id",
+              "value": "channels.id"
+            },
+            {
+              "label": "channels.idrInterval",
+              "value": "channels.idrInterval"
+            },
+            {
+              "label": "channels.isRtspEnabled",
+              "value": "channels.isRtspEnabled"
+            },
+            {
+              "label": "channels.maxBitrate",
+              "value": "channels.maxBitrate"
+            },
+            {
+              "label": "channels.minBitrate",
+              "value": "channels.minBitrate"
+            },
+            {
+              "label": "channels.minClientAdaptiveBitRate",
+              "value": "channels.minClientAdaptiveBitRate"
+            },
+            {
+              "label": "channels.minMotionAdaptiveBitRate",
+              "value": "channels.minMotionAdaptiveBitRate"
+            },
+            {
+              "label": "channels.name",
+              "value": "channels.name"
+            },
+            {
+              "label": "channels.rtspAlias",
+              "value": "channels.rtspAlias"
+            },
+            {
+              "label": "channels.videoId",
+              "value": "channels.videoId"
+            },
+            {
+              "label": "channels.width",
+              "value": "channels.width"
+            },
+            {
+              "label": "featureFlags.canAdjustIrLedLevel",
+              "value": "featureFlags.canAdjustIrLedLevel"
+            },
+            {
+              "label": "featureFlags.canMagicZoom",
+              "value": "featureFlags.canMagicZoom"
+            },
+            {
+              "label": "featureFlags.canOpticalZoom",
+              "value": "featureFlags.canOpticalZoom"
+            },
+            {
+              "label": "featureFlags.canTouchFocus",
+              "value": "featureFlags.canTouchFocus"
+            },
+            {
+              "label": "featureFlags.hasAccelerometer",
+              "value": "featureFlags.hasAccelerometer"
+            },
+            {
+              "label": "featureFlags.hasAec",
+              "value": "featureFlags.hasAec"
+            },
+            {
+              "label": "featureFlags.hasAutoICROnly",
+              "value": "featureFlags.hasAutoICROnly"
+            },
+            {
+              "label": "featureFlags.hasBattery",
+              "value": "featureFlags.hasBattery"
+            },
+            {
+              "label": "featureFlags.hasBluetooth",
+              "value": "featureFlags.hasBluetooth"
+            },
+            {
+              "label": "featureFlags.hasChime",
+              "value": "featureFlags.hasChime"
+            },
+            {
+              "label": "featureFlags.hasExternalIr",
+              "value": "featureFlags.hasExternalIr"
+            },
+            {
+              "label": "featureFlags.hasHdr",
+              "value": "featureFlags.hasHdr"
+            },
+            {
+              "label": "featureFlags.hasIcrSensitivity",
+              "value": "featureFlags.hasIcrSensitivity"
+            },
+            {
+              "label": "featureFlags.hasLcdScreen",
+              "value": "featureFlags.hasLcdScreen"
+            },
+            {
+              "label": "featureFlags.hasLdc",
+              "value": "featureFlags.hasLdc"
+            },
+            {
+              "label": "featureFlags.hasLedIr",
+              "value": "featureFlags.hasLedIr"
+            },
+            {
+              "label": "featureFlags.hasLedStatus",
+              "value": "featureFlags.hasLedStatus"
+            },
+            {
+              "label": "featureFlags.hasLineIn",
+              "value": "featureFlags.hasLineIn"
+            },
+            {
+              "label": "featureFlags.hasMic",
+              "value": "featureFlags.hasMic"
+            },
+            {
+              "label": "featureFlags.hasMotionZones",
+              "value": "featureFlags.hasMotionZones"
+            },
+            {
+              "label": "featureFlags.hasNewMotionAlgorithm",
+              "value": "featureFlags.hasNewMotionAlgorithm"
+            },
+            {
+              "label": "featureFlags.hasPrivacyMask",
+              "value": "featureFlags.hasPrivacyMask"
+            },
+            {
+              "label": "featureFlags.hasRtc",
+              "value": "featureFlags.hasRtc"
+            },
+            {
+              "label": "featureFlags.hasSdCard",
+              "value": "featureFlags.hasSdCard"
+            },
+            {
+              "label": "featureFlags.hasSpeaker",
+              "value": "featureFlags.hasSpeaker"
+            },
+            {
+              "label": "featureFlags.hasWifi",
+              "value": "featureFlags.hasWifi"
+            },
+            {
+              "label": "ispSettings.aeMode",
+              "value": "ispSettings.aeMode"
+            },
+            {
+              "label": "ispSettings.brightness",
+              "value": "ispSettings.brightness"
+            },
+            {
+              "label": "ispSettings.contrast",
+              "value": "ispSettings.contrast"
+            },
+            {
+              "label": "ispSettings.dZoomCenterX",
+              "value": "ispSettings.dZoomCenterX"
+            },
+            {
+              "label": "ispSettings.dZoomCenterY",
+              "value": "ispSettings.dZoomCenterY"
+            },
+            {
+              "label": "ispSettings.dZoomScale",
+              "value": "ispSettings.dZoomScale"
+            },
+            {
+              "label": "ispSettings.dZoomStreamId",
+              "value": "ispSettings.dZoomStreamId"
+            },
+            {
+              "label": "ispSettings.denoise",
+              "value": "ispSettings.denoise"
+            },
+            {
+              "label": "ispSettings.focusMode",
+              "value": "ispSettings.focusMode"
+            },
+            {
+              "label": "ispSettings.focusPosition",
+              "value": "ispSettings.focusPosition"
+            },
+            {
+              "label": "ispSettings.hue",
+              "value": "ispSettings.hue"
+            },
+            {
+              "label": "ispSettings.icrSensitivity",
+              "value": "ispSettings.icrSensitivity"
+            },
+            {
+              "label": "ispSettings.irLedLevel",
+              "value": "ispSettings.irLedLevel"
+            },
+            {
+              "label": "ispSettings.irLedMode",
+              "value": "ispSettings.irLedMode"
+            },
+            {
+              "label": "ispSettings.is3dnrEnabled",
+              "value": "ispSettings.is3dnrEnabled"
+            },
+            {
+              "label": "ispSettings.isAggressiveAntiFlickerEnabled",
+              "value": "ispSettings.isAggressiveAntiFlickerEnabled"
+            },
+            {
+              "label": "ispSettings.isAutoRotateEnabled",
+              "value": "ispSettings.isAutoRotateEnabled"
+            },
+            {
+              "label": "ispSettings.isExternalIrEnabled",
+              "value": "ispSettings.isExternalIrEnabled"
+            },
+            {
+              "label": "ispSettings.isFlippedHorizontal",
+              "value": "ispSettings.isFlippedHorizontal"
+            },
+            {
+              "label": "ispSettings.isFlippedVertical",
+              "value": "ispSettings.isFlippedVertical"
+            },
+            {
+              "label": "ispSettings.isLdcEnabled",
+              "value": "ispSettings.isLdcEnabled"
+            },
+            {
+              "label": "ispSettings.isPauseMotionEnabled",
+              "value": "ispSettings.isPauseMotionEnabled"
+            },
+            {
+              "label": "ispSettings.saturation",
+              "value": "ispSettings.saturation"
+            },
+            {
+              "label": "ispSettings.sharpness",
+              "value": "ispSettings.sharpness"
+            },
+            {
+              "label": "ispSettings.touchFocusX",
+              "value": "ispSettings.touchFocusX"
+            },
+            {
+              "label": "ispSettings.touchFocusY",
+              "value": "ispSettings.touchFocusY"
+            },
+            {
+              "label": "ispSettings.wdr",
+              "value": "ispSettings.wdr"
+            },
+            {
+              "label": "ispSettings.zoomPosition",
+              "value": "ispSettings.zoomPosition"
+            },
+            {
+              "label": "lastMotionEvent.metadata.objectConfidence",
+              "value": "lastMotionEvent.metadata.objectConfidence"
+            },
+            {
+              "label": "lastMotionEvent.metadata.objectCoords",
+              "value": "lastMotionEvent.metadata.objectCoords"
+            },
+            {
+              "label": "lastMotionEvent.metadata.objectType",
+              "value": "lastMotionEvent.metadata.objectType"
+            },
+            {
+              "label": "lastMotionEvent.type",
+              "value": "lastMotionEvent.type"
+            },
+            {
+              "label": "lastMotionEvent.start",
+              "value": "lastMotionEvent.start"
+            },
+            {
+              "label": "lastMotionEvent.end",
+              "value": "lastMotionEvent.end"
+            },
+            {
+              "label": "lastMotionEvent.camera",
+              "value": "lastMotionEvent.camera"
+            },
+            {
+              "label": "lastMotionEvent.score",
+              "value": "lastMotionEvent.score"
+            },
+            {
+              "label": "lastMotionEvent.smartDetectEvents",
+              "value": "lastMotionEvent.smartDetectEvents"
+            },
+            {
+              "label": "lastMotionEvent.smartDetectTypes",
+              "value": "lastMotionEvent.smartDetectTypes"
+            },
+            {
+              "label": "lastMotionEvent.id",
+              "value": "lastMotionEvent.id"
+            },
+            {
+              "label": "lastMotionEvent.modelKey",
+              "value": "lastMotionEvent.modelKey"
+            },
+            {
+              "label": "lastMotionEvent.partition",
+              "value": "lastMotionEvent.partition"
+            },
+            {
+              "label": "lastMotionEvent.thumbnail",
+              "value": "lastMotionEvent.thumbnail"
+            },
+            {
+              "label": "lastMotionEvent.heatmap",
+              "value": "lastMotionEvent.heatmap"
+            },
+            {
+              "label": "ledSettings.blinkRate",
+              "value": "ledSettings.blinkRate"
+            },
+            {
+              "label": "ledSettings.isEnabled",
+              "value": "ledSettings.isEnabled"
+            },
+            {
+              "label": "motionZones.color",
+              "value": "motionZones.color"
+            },
+            {
+              "label": "motionZones.name",
+              "value": "motionZones.name"
+            },
+            {
+              "label": "motionZones.points",
+              "value": "motionZones.points"
+            },
+            {
+              "label": "motionZones.sensitivity",
+              "value": "motionZones.sensitivity"
+            },
+            {
+              "label": "osdSettings.isDateEnabled",
+              "value": "osdSettings.isDateEnabled"
+            },
+            {
+              "label": "osdSettings.isDebugEnabled",
+              "value": "osdSettings.isDebugEnabled"
+            },
+            {
+              "label": "osdSettings.isLogoEnabled",
+              "value": "osdSettings.isLogoEnabled"
+            },
+            {
+              "label": "osdSettings.isNameEnabled",
+              "value": "osdSettings.isNameEnabled"
+            },
+            {
+              "label": "pirSettings.pirMotionClipLength",
+              "value": "pirSettings.pirMotionClipLength"
+            },
+            {
+              "label": "pirSettings.pirSensitivity",
+              "value": "pirSettings.pirSensitivity"
+            },
+            {
+              "label": "pirSettings.timelapseFrameInterval",
+              "value": "pirSettings.timelapseFrameInterval"
+            },
+            {
+              "label": "pirSettings.timelapseTransferInterval",
+              "value": "pirSettings.timelapseTransferInterval"
+            },
+            {
+              "label": "recordingSettings.enablePirTimelapse",
+              "value": "recordingSettings.enablePirTimelapse"
+            },
+            {
+              "label": "recordingSettings.endMotionEventDelay",
+              "value": "recordingSettings.endMotionEventDelay"
+            },
+            {
+              "label": "recordingSettings.geofencing",
+              "value": "recordingSettings.geofencing"
+            },
+            {
+              "label": "recordingSettings.minMotionEventTrigger",
+              "value": "recordingSettings.minMotionEventTrigger"
+            },
+            {
+              "label": "recordingSettings.mode",
+              "value": "recordingSettings.mode"
+            },
+            {
+              "label": "recordingSettings.postPaddingSecs",
+              "value": "recordingSettings.postPaddingSecs"
+            },
+            {
+              "label": "recordingSettings.prePaddingSecs",
+              "value": "recordingSettings.prePaddingSecs"
+            },
+            {
+              "label": "recordingSettings.suppressIlluminationSurge",
+              "value": "recordingSettings.suppressIlluminationSurge"
+            },
+            {
+              "label": "recordingSettings.useNewMotionAlgorithm",
+              "value": "recordingSettings.useNewMotionAlgorithm"
+            },
+            {
+              "label": "speakerSettings.areSystemSoundsEnabled",
+              "value": "speakerSettings.areSystemSoundsEnabled"
+            },
+            {
+              "label": "speakerSettings.isEnabled",
+              "value": "speakerSettings.isEnabled"
+            },
+            {
+              "label": "speakerSettings.volume",
+              "value": "speakerSettings.volume"
+            },
+            {
+              "label": "stats.battery.isCharging",
+              "value": "stats.battery.isCharging"
+            },
+            {
+              "label": "stats.battery.percentage",
+              "value": "stats.battery.percentage"
+            },
+            {
+              "label": "stats.battery.sleepState",
+              "value": "stats.battery.sleepState"
+            },
+            {
+              "label": "stats.storage.rate",
+              "value": "stats.storage.rate"
+            },
+            {
+              "label": "stats.storage.used",
+              "value": "stats.storage.used"
+            },
+            {
+              "label": "stats.video.recordingEnd",
+              "value": "stats.video.recordingEnd"
+            },
+            {
+              "label": "stats.video.recordingEndLQ",
+              "value": "stats.video.recordingEndLQ"
+            },
+            {
+              "label": "stats.video.recordingStart",
+              "value": "stats.video.recordingStart"
+            },
+            {
+              "label": "stats.video.recordingStartLQ",
+              "value": "stats.video.recordingStartLQ"
+            },
+            {
+              "label": "stats.video.timelapseEnd",
+              "value": "stats.video.timelapseEnd"
+            },
+            {
+              "label": "stats.video.timelapseEndLQ",
+              "value": "stats.video.timelapseEndLQ"
+            },
+            {
+              "label": "stats.video.timelapseStart",
+              "value": "stats.video.timelapseStart"
+            },
+            {
+              "label": "stats.video.timelapseStartLQ",
+              "value": "stats.video.timelapseStartLQ"
+            },
+            {
+              "label": "stats.wifi.channel",
+              "value": "stats.wifi.channel"
+            },
+            {
+              "label": "stats.wifi.frequency",
+              "value": "stats.wifi.frequency"
+            },
+            {
+              "label": "stats.wifi.linkSpeedMbps",
+              "value": "stats.wifi.linkSpeedMbps"
+            },
+            {
+              "label": "stats.wifi.signalQuality",
+              "value": "stats.wifi.signalQuality"
+            },
+            {
+              "label": "stats.wifi.signalStrength",
+              "value": "stats.wifi.signalStrength"
+            },
+            {
+              "label": "stats.wifi.stats.wifiQuality",
+              "value": "stats.wifi.stats.wifiQuality"
+            },
+            {
+              "label": "stats.wifi.stats.wifiStrength",
+              "value": "stats.wifi.stats.wifiStrength"
+            },
+            {
+              "label": "stats.rxBytes",
+              "value": "stats.rxBytes"
+            },
+            {
+              "label": "stats.txBytes",
+              "value": "stats.txBytes"
+            },
+            {
+              "label": "stats.wifiQuality",
+              "value": "stats.wifiQuality"
+            },
+            {
+              "label": "stats.wifiStrength",
+              "value": "stats.wifiStrength"
+            },
+            {
+              "label": "talkbackSettings.bindAddr",
+              "value": "talkbackSettings.bindAddr"
+            },
+            {
+              "label": "talkbackSettings.bindPort",
+              "value": "talkbackSettings.bindPort"
+            },
+            {
+              "label": "talkbackSettings.bitsPerSample",
+              "value": "talkbackSettings.bitsPerSample"
+            },
+            {
+              "label": "talkbackSettings.channels",
+              "value": "talkbackSettings.channels"
+            },
+            {
+              "label": "talkbackSettings.filterAddr",
+              "value": "talkbackSettings.filterAddr"
+            },
+            {
+              "label": "talkbackSettings.filterPort",
+              "value": "talkbackSettings.filterPort"
+            },
+            {
+              "label": "talkbackSettings.quality",
+              "value": "talkbackSettings.quality"
+            },
+            {
+              "label": "talkbackSettings.samplingRate",
+              "value": "talkbackSettings.samplingRate"
+            },
+            {
+              "label": "talkbackSettings.typeFmt",
+              "value": "talkbackSettings.typeFmt"
+            },
+            {
+              "label": "talkbackSettings.typeIn",
+              "value": "talkbackSettings.typeIn"
+            },
+            {
+              "label": "wifiConnectionState.channel",
+              "value": "wifiConnectionState.channel"
+            },
+            {
+              "label": "wifiConnectionState.frequency",
+              "value": "wifiConnectionState.frequency"
+            },
+            {
+              "label": "wifiConnectionState.phyRate",
+              "value": "wifiConnectionState.phyRate"
+            },
+            {
+              "label": "wifiConnectionState.signalQuality",
+              "value": "wifiConnectionState.signalQuality"
+            },
+            {
+              "label": "wifiConnectionState.signalStrength",
+              "value": "wifiConnectionState.signalStrength"
+            },
+            {
+              "label": "wiredConnectionState.phyRate",
+              "value": "wiredConnectionState.phyRate"
+            },
+            {
+              "label": "apMac",
+              "value": "apMac"
+            },
+            {
+              "label": "apRssi",
+              "value": "apRssi"
+            },
+            {
+              "label": "audioBitrate",
+              "value": "audioBitrate"
+            },
+            {
+              "label": "canAdopt",
+              "value": "canAdopt"
+            },
+            {
+              "label": "canManage",
+              "value": "canManage"
+            },
+            {
+              "label": "chimeDuration",
+              "value": "chimeDuration"
+            },
+            {
+              "label": "connectedSince",
+              "value": "connectedSince"
+            },
+            {
+              "label": "connectionHost",
+              "value": "connectionHost"
+            },
+            {
+              "label": "elementInfo",
+              "value": "elementInfo"
+            },
+            {
+              "label": "firmwareBuild",
+              "value": "firmwareBuild"
+            },
+            {
+              "label": "firmwareVersion",
+              "value": "firmwareVersion"
+            },
+            {
+              "label": "hardwareRevision",
+              "value": "hardwareRevision"
+            },
+            {
+              "label": "hasSpeaker",
+              "value": "hasSpeaker"
+            },
+            {
+              "label": "hasWifi",
+              "value": "hasWifi"
+            },
+            {
+              "label": "hdrMode",
+              "value": "hdrMode"
+            },
+            {
+              "label": "host",
+              "value": "host"
+            },
+            {
+              "label": "id",
+              "value": "id"
+            },
+            {
+              "label": "isAdopted",
+              "value": "isAdopted"
+            },
+            {
+              "label": "isAdopting",
+              "value": "isAdopting"
+            },
+            {
+              "label": "isAttemptingToConnect",
+              "value": "isAttemptingToConnect"
+            },
+            {
+              "label": "isConnected",
+              "value": "isConnected"
+            },
+            {
+              "label": "isDark",
+              "value": "isDark"
+            },
+            {
+              "label": "isDeleting",
+              "value": "isDeleting"
+            },
+            {
+              "label": "isHidden",
+              "value": "isHidden"
+            },
+            {
+              "label": "isManaged",
+              "value": "isManaged"
+            },
+            {
+              "label": "isMicEnabled",
+              "value": "isMicEnabled"
+            },
+            {
+              "label": "isMotionDetected",
+              "value": "isMotionDetected"
+            },
+            {
+              "label": "isProbingForWifi",
+              "value": "isProbingForWifi"
+            },
+            {
+              "label": "isProvisioned",
+              "value": "isProvisioned"
+            },
+            {
+              "label": "isRebooting",
+              "value": "isRebooting"
+            },
+            {
+              "label": "isRecording",
+              "value": "isRecording"
+            },
+            {
+              "label": "isSshEnabled",
+              "value": "isSshEnabled"
+            },
+            {
+              "label": "isUpdating",
+              "value": "isUpdating"
+            },
+            {
+              "label": "lastMotion",
+              "value": "lastMotion"
+            },
+            {
+              "label": "lastRing",
+              "value": "lastRing"
+            },
+            {
+              "label": "lastSeen",
+              "value": "lastSeen"
+            },
+            {
+              "label": "mac",
+              "value": "mac"
+            },
+            {
+              "label": "micVolume",
+              "value": "micVolume"
+            },
+            {
+              "label": "modelKey",
+              "value": "modelKey"
+            },
+            {
+              "label": "name",
+              "value": "name"
+            },
+            {
+              "label": "phyRate",
+              "value": "phyRate"
+            },
+            {
+              "label": "platform",
+              "value": "platform"
+            },
+            {
+              "label": "recordingSchedule",
+              "value": "recordingSchedule"
+            },
+            {
+              "label": "state",
+              "value": "state"
+            },
+            {
+              "label": "type",
+              "value": "type"
+            },
+            {
+              "label": "upSince",
+              "value": "upSince"
+            }
+          ],
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        }
+      }
+    },
+    "motions": {
+      "type": "panel",
+      "label": "motions",
+      "items": {
+        "statesFilterMotions": {
+          "type": "select",
+          "label": "root_motions",
+          "attr": "statesFilter.motions",
+          "multiple": true,
+          "options": [
+            {
+              "label": "metadata.objectConfidence",
+              "value": "metadata.objectConfidence"
+            },
+            {
+              "label": "metadata.objectCoords",
+              "value": "metadata.objectCoords"
+            },
+            {
+              "label": "metadata.objectType",
+              "value": "metadata.objectType"
+            },
+            {
+              "label": "type",
+              "value": "type"
+            },
+            {
+              "label": "start",
+              "value": "start"
+            },
+            {
+              "label": "end",
+              "value": "end"
+            },
+            {
+              "label": "camera",
+              "value": "camera"
+            },
+            {
+              "label": "score",
+              "value": "score"
+            },
+            {
+              "label": "smartDetectEvents",
+              "value": "smartDetectEvents"
+            },
+            {
+              "label": "smartDetectTypes",
+              "value": "smartDetectTypes"
+            },
+            {
+              "label": "id",
+              "value": "id"
+            },
+            {
+              "label": "modelKey",
+              "value": "modelKey"
+            },
+            {
+              "label": "partition",
+              "value": "partition"
+            },
+            {
+              "label": "thumbnail",
+              "value": "thumbnail"
+            },
+            {
+              "label": "heatmap",
+              "value": "heatmap"
+            }
+          ],
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12
+        }
+      }
+    }
+  }
+}
